@@ -64,6 +64,7 @@ OAuth2 extra properties: `oauthTokenUrl`, `oauthGrant` (`client_credentials` def
 Screenshots in the repo:
 
 * `docs/images/hop-source-model-jdbc-dbeaver-database-driver-manager.png`
+* `docs/images/hop-source-model-jdbc-dbeaver-database-driver-manager-list.png`
 * `docs/images/hop-source-model-jdbc-dbeaver-database-connection.png`
 * `docs/images/hop-source-model-jdbc-dbeaver-query-editor.png`
 * `docs/images/hop-source-model-service-editor.png` (Hop side)

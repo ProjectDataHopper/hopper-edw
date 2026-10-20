@@ -100,10 +100,40 @@ The Advisor uses tailored system prompt templates to optimize responses for diff
 You can control what metadata is sent to the LLM to balance response accuracy and prompt token limits:
 
 * **Include model check results**: Automatically validates your open model (using **Check model**) and appends validation results (errors, warnings, checks) to the prompt.
-* **Include catalog sources**: Includes metadata schemas (Record Definitions) from your catalog. Click **Change catalog sources** to select specific sources (remembered throughout the conversation).
+* **Include catalog sources**: Sends the selected catalog record definitions (field names, Hop types, lengths, and keys). Click **Select…** beside the option. Sources from the model **Coach** panel are listed first, labeled `(Coach)`. With nothing selected, the Coach list is used, then record sources already bound on the model. The selection is remembered for the conversation.
 * **Source-model classification** (always, when sibling `.hsm` files sit next to the open `.hdv`): compact JSON from the same Generate Data Vault classifier (tables, queries, JSON, pipelines, reference tables, hierarchy aliases). Use it with **Source Analysis** or **Data Vault Modeling**.
 * **Include full model XML**: Sends the entire `.hdv` model XML. This is larger but allows the AI to perform comprehensive reviews. *Note: Full XML is sent on the first turn only to conserve tokens.*
 * **Include load-run metrics and insights** (DV/DM/BV modelers): Appends recent `load_run` data, per-transform metrics, and rule-based insights from the OPS catalog when asking performance or tuning questions. Auto-enables when you select the **Performance tuning** scenario.
+
+### Example: suggest a Data Vault model from catalog sources
+
+`retail-example/test/ai-modeling-test.hdv` is an empty model with Data Vault configuration `data-vault` and the retail E2E feeds on the **Coach** panel. Open it, click **AI Help**, choose **Data Vault modeling**, check **Include catalog sources**, and **Select…** those feeds (the shot below has 13 selected). **Include full model XML** tells the advisor the canvas is still empty. Ask it to suggest a model for the included sources.
+
+![AI advisor — question sent with 13 catalog sources selected, while the answer is still running](images/ai-advisor-suggest-dv-model-using-sources-1-prompt-thinking.png)
+
+The answer names hubs, links, and satellites from the source keys. `load_date` and `record_source` stay off the satellites. Descriptive fields that have no lookup source in the selection stay out of the raw vault.
+
+![AI advisor — modeling advice for the selected E2E sources](images/ai-advisor-suggest-dv-model-using-sources-2-modeling-advice.png)
+
+When the reply includes proposals, the transcript shows **Review N proposed change(s)**.
+
+![AI advisor — Review 20 proposed change(s)](images/ai-advisor-suggest-dv-model-using-sources-3-review-proposed-changes.png)
+
+Links and satellites that name a hub are blocked until that hub is on the model. Apply the hubs that are checked. Leave the blocked rows alone. **Apply** writes them onto the open canvas and registers an undo point.
+
+![AI advisor — first review, hubs checked and dependent links and satellites blocked](images/ai-advisor-suggest-dv-model-using-sources-4-proposals-list.png)
+
+Open **Review** again. The hubs are now blocked because they already exist. The links and satellites that needed them can be applied. A satellite on a link stays blocked until that link exists.
+
+![AI advisor — second review, links and satellites ready after the hubs exist](images/ai-advisor-suggest-dv-model-using-sources-5-next-list-of-proposals.png)
+
+A later pass applies what is still new, such as the order-line satellite and a canvas note that records the modeling assumptions. Rows for tables already on the model stay blocked.
+
+![AI advisor — last review, remaining satellite and model note checked](images/ai-advisor-suggest-dv-model-using-sources-6-final-actions-to-apply.png)
+
+The canvas is the raw vault for those sources: customer, order, and product hubs, the order links, and the satellites that passed review.
+
+![AI advisor — Data Vault canvas after applying the source-modeling proposals](images/ai-advisor-suggest-dv-model-using-sources-7-result.png)
 
 ### Example: explaining link satellites
 

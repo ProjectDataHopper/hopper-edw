@@ -4,6 +4,28 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+## [0.15.0] — 2026-10-20
+
+Requires **Apache Hop 2.20.0-SNAPSHOT** and **Java 21**.
+
+**Downloads:** [GitHub release zip](https://github.com/ProjectDataHopper/hopper-edw/releases/download/v0.15.0/hopper-edw-0.15.0.zip) · [Data Hopper Nexus](https://repository.data-hopper.com/repository/hop-community-plugins/org/hopper/hopper-edw/0.15.0/hopper-edw-0.15.0.zip) (`org.hopper:hopper-edw:0.15.0`)
+
+### Search in models
+
+- Search finds table names, record sources, columns, and other nested text in Data Vault, source, Business Vault, and dimensional models. Matching the model file name still works.
+
+### Data Vault AI advisor
+
+- A question on the model open in the modeler no longer fails because the advisor and the modeler load the plugin separately. Source model and Business Vault questions use the same path.
+- **Include catalog sources** and **Select…** list the project's `DV_SOURCE` records. Sources on the **Coach** panel are listed first. The question includes each selected source's fields, Hop types, lengths, and key positions. With nothing selected, the Coach list is used.
+- **Review proposed changes** opens on an empty model that has a Data Vault configuration. Apply hubs first. Links and satellites that name a hub stay blocked until that hub is on the model. A later review can apply them. Accept writes the changes back onto the open model.
+
+### Documentation screenshots (issue #213)
+
+- Guides, training modules, and the component explorer use refreshed Hop GUI screenshots, including the Data Vault configuration editor tabs and the Business Vault SCD2 dialog tabs.
+- `docs/ai-advisory.md` and training module 8 show suggesting a Data Vault from catalog sources on `retail-example/test/ai-modeling-test.hdv`, from the question through review to the canvas.
+- The DBeaver driver list for **Apache Hop Source Model** is in the source modeler JDBC section.
+
 ## [0.14.0] — 2026-10-20
 
 Requires **Apache Hop 2.20.0-SNAPSHOT** and **Java 21**.

@@ -141,6 +141,42 @@ image::../images/ai-advisor-explaining-link-tables.png[The AI advisor explaining
 +
 image::../images/data-vault-ai-help-dialog.png[The Data Vault AI Help workbench,align="center"]
 
+=== Suggest a model from catalog sources
+
+`test/ai-modeling-test.hdv` in `retail-example` is empty and already lists the E2E catalog sources on the **Coach** panel.
+
+. Open that model and click **AI Help**.
+. Choose **Data Vault modeling**. Check **Include catalog sources**, click **Select…**, and include the E2E feeds. Check **Include full model XML** so the advisor can see that the canvas has no tables yet.
+. Ask it to suggest a Data Vault model for the included sources.
++
+image::../images/ai-advisor-suggest-dv-model-using-sources-1-prompt-thinking.png[The question running with 13 catalog sources selected,align="center"]
+
+. Read the hubs, links, and satellites in the answer. `load_date` and `record_source` are load metadata, not business attributes.
++
+image::../images/ai-advisor-suggest-dv-model-using-sources-2-modeling-advice.png[Modeling advice for the selected E2E sources,align="center"]
+
+. Press **Review N proposed change(s)**.
++
+image::../images/ai-advisor-suggest-dv-model-using-sources-3-review-proposed-changes.png[Review 20 proposed changes in the transcript,align="center"]
+
+. Apply only the checked hubs. Links and satellites that name a missing hub stay blocked.
++
+image::../images/ai-advisor-suggest-dv-model-using-sources-4-proposals-list.png[First proposal review — hubs checked, dependent tables blocked,align="center"]
+
+. Open **Review** again. The hubs are blocked because they now exist. Apply the links and satellites that are checked. A satellite on a link stays blocked until that link is on the model.
++
+image::../images/ai-advisor-suggest-dv-model-using-sources-5-next-list-of-proposals.png[Second proposal review — links and satellites ready,align="center"]
+
+. One more pass applies what is still new, including the order-line satellite and a note on the canvas.
++
+image::../images/ai-advisor-suggest-dv-model-using-sources-6-final-actions-to-apply.png[Last proposal review — remaining satellite and model note,align="center"]
+
+. The canvas shows the raw vault. Undo is on the modeler toolbar if you want the empty model back.
++
+image::../images/ai-advisor-suggest-dv-model-using-sources-7-result.png[Data Vault canvas after the proposals were applied,align="center"]
+
+The same sequence is written up in link:../ai-advisory.md#example-suggest-a-data-vault-model-from-catalog-sources[AI advisory].
+
 === Review a proposal before you apply it
 
 . Ask for a change — for example, in the **Data Vault Modeling** scenario, review one satellite and

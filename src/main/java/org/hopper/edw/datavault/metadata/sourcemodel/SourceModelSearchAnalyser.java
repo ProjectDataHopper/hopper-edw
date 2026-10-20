@@ -25,6 +25,7 @@ import org.apache.hop.core.search.ISearchableAnalyser;
 import org.apache.hop.core.search.SearchableAnalyserPlugin;
 import org.apache.hop.core.util.Utils;
 import org.hopper.edw.datavault.metadata.DvNote;
+import org.hopper.edw.datavault.search.EdwSearchSupport;
 
 @SearchableAnalyserPlugin(
     id = "SourceModelSearchAnalyser",
@@ -50,7 +51,7 @@ public class SourceModelSearchAnalyser extends BaseSearchableAnalyser<SourceMode
         searchable, results, searchQuery, "source model description", model.getDescription(), null);
 
     if (model.getConfiguration() != null) {
-      matchObjectFields(
+      EdwSearchSupport.matchObjectFields(
           searchable,
           results,
           searchQuery,
@@ -80,7 +81,7 @@ public class SourceModelSearchAnalyser extends BaseSearchableAnalyser<SourceMode
           "source table physical name",
           table.getTableName(),
           componentName);
-      matchObjectFields(
+      EdwSearchSupport.matchObjectFields(
           searchable, results, searchQuery, table, "source table property", componentName);
     }
 
@@ -95,7 +96,7 @@ public class SourceModelSearchAnalyser extends BaseSearchableAnalyser<SourceMode
           "source relationship name",
           relationship.getName(),
           relationship.getName());
-      matchObjectFields(
+      EdwSearchSupport.matchObjectFields(
           searchable,
           results,
           searchQuery,
@@ -158,7 +159,7 @@ public class SourceModelSearchAnalyser extends BaseSearchableAnalyser<SourceMode
             column.getColumnName(),
             componentName);
       }
-      matchObjectFields(
+      EdwSearchSupport.matchObjectFields(
           searchable, results, searchQuery, query, "source query property", componentName);
     }
 
@@ -223,7 +224,7 @@ public class SourceModelSearchAnalyser extends BaseSearchableAnalyser<SourceMode
             field.getParentFieldName(),
             componentName);
       }
-      matchObjectFields(
+      EdwSearchSupport.matchObjectFields(
           searchable, results, searchQuery, jsonSource, "source json property", componentName);
     }
 

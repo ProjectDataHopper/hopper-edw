@@ -90,6 +90,12 @@ Satellite `sat_customer_address` shows parent hub `hub_customer`, feed `E2E-cust
 
 image::images/data-vault-satellite-dialog-lineage-tab.png[Data Vault satellite dialog Lineage tab for sat_customer_address,align="center"]
 
+=== Business Vault example
+
+SCD2 table `customer_360_bv` lists the parent hub and the four satellite inputs, then one field row per `cust_*` mapping (`BV_SCD2_FIELD_MAP`):
+
+image::images/business-vault-scd2-table-dialog-lineage.png[SCD2 table dialog Lineage tab for customer_360_bv,align="center"]
+
 === Dimensional example
 
 Fact `f_orders` shows staging SQL as the record source, dimension-role foreign keys, measures, and degenerates:

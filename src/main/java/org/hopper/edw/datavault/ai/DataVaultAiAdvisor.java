@@ -16,6 +16,7 @@
 package org.hopper.edw.datavault.ai;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import org.apache.hop.ai.advisor.AiAdvisorInclusion;
 import org.apache.hop.ai.advisor.AiAdvisorInclusionChoice;
@@ -28,11 +29,16 @@ import org.apache.hop.ai.advisor.AiProposal;
 import org.apache.hop.ai.advisor.AiProposalValidation;
 import org.apache.hop.ai.advisor.IAiAdvisor;
 import org.apache.hop.core.exception.HopException;
+import org.apache.hop.core.logging.HopLogStore;
+import org.apache.hop.core.logging.LogChannel;
+import org.apache.hop.core.util.Utils;
 import org.apache.hop.i18n.BaseMessages;
 import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
 import org.hopper.edw.datavault.hopgui.ai.EdwAiAdvisorGraphSupport;
 import org.hopper.edw.datavault.hopgui.ai.EdwAiBoundModel;
+import org.hopper.edw.datavault.hopgui.ai.EdwAiBoundModel.CatalogCoachSource;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
+import org.hopper.edw.datavault.metadata.ModelConfigurationResolver;
 
 @AiAdvisorPlugin(
     id = DataVaultAiAdvisor.ID,
@@ -91,26 +97,73 @@ public class DataVaultAiAdvisor implements IAiAdvisor {
   @Override
   public List<AiAdvisorInclusionChoice> listInclusionChoices(
       String inclusionId, AiAdvisorRequest request) {
-    DataVaultModel model = EdwAiBoundModel.bind(request, DataVaultModel.class);
-    if (!EdwAiInclusions.CATALOG.equals(inclusionId) || model == null) {
+    if (!EdwAiInclusions.CATALOG.equals(inclusionId) || request == null) {
       return List.of();
     }
+    DataVaultModel bound = EdwAiBoundModel.bind(request, DataVaultModel.class);
+    Object model = bound != null ? bound : request.getArtifact();
+    if (bound == null && !EdwAiBoundModel.isForeignModel(model, DataVaultModel.class)) {
+      return List.of();
+    }
+    List<String> coachNames = new ArrayList<>();
+    for (CatalogCoachSource source : EdwAiBoundModel.coachCatalogSources(model)) {
+      if (source != null && !Utils.isEmpty(source.recordName())) {
+        coachNames.add(source.recordName());
+      }
+    }
+    List<String> catalogNames = List.of();
     try {
-      List<String> names =
+      String connection =
+          EdwAiBoundModel.catalogConnectionName(
+              model, DvSourceCatalogService.DEFAULT_SOURCE_CATALOG_CONNECTION);
+      catalogNames =
           DvSourceCatalogService.listSourceNames(
-              model, request.getVariables(), request.getMetadataProvider());
-      List<AiAdvisorInclusionChoice> choices = new ArrayList<>();
-      for (String name : names) {
+              connection, request.getVariables(), request.getMetadataProvider());
+    } catch (Exception e) {
+      if (HopLogStore.isInitialized()) {
+        LogChannel.GENERAL.logError("Could not list catalog sources for the AI advisor", e);
+      }
+    }
+    return catalogChoices(coachNames, catalogNames);
+  }
+
+  /**
+   * Coach record names first, labeled so the Select dialog shows where they came from, then the
+   * other catalog sources. Duplicate names are listed once.
+   */
+  static List<AiAdvisorInclusionChoice> catalogChoices(
+      List<String> coachNames, List<String> catalogNames) {
+    LinkedHashSet<String> seen = new LinkedHashSet<>();
+    List<AiAdvisorInclusionChoice> choices = new ArrayList<>();
+    if (coachNames != null) {
+      for (String name : coachNames) {
+        if (Utils.isEmpty(name) || !seen.add(name)) {
+          continue;
+        }
+        choices.add(
+            new AiAdvisorInclusionChoice(
+                name,
+                BaseMessages.getString(
+                    PKG, "DataVaultAiAdvisor.Inclusion.Catalog.CoachLabel", name)));
+      }
+    }
+    if (catalogNames != null) {
+      for (String name : catalogNames) {
+        if (Utils.isEmpty(name) || !seen.add(name)) {
+          continue;
+        }
         choices.add(new AiAdvisorInclusionChoice(name, name));
       }
-      return choices;
-    } catch (Exception e) {
-      return List.of();
     }
+    return choices;
   }
 
   @Override
   public AiAdvisorPrompt buildPrompt(AiAdvisorRequest request) throws HopException {
+    Object artifact = request == null ? null : request.getArtifact();
+    if (EdwAiBoundModel.isForeignModel(artifact, DataVaultModel.class)) {
+      return promptFromStructure(request, EdwAiBoundModel.structureOf(artifact));
+    }
     DataVaultModel model = modelFrom(request);
     DvAiContextBundle context =
         DvAiContextBuilder.build(
@@ -135,19 +188,36 @@ public class DataVaultAiAdvisor implements IAiAdvisor {
   @Override
   public List<AiProposalValidation> validateProposals(
       AiAdvisorRequest request, List<AiProposal> proposals) {
-    DataVaultModel model = EdwAiBoundModel.bind(request, DataVaultModel.class);
-    return EdwAiProposalSupport.toDvValidations(
-        DvAiProposalValidator.validate(
-            model,
-            EdwAiProposalSupport.fromAi(proposals),
-            request != null ? request.getMetadataProvider() : null,
-            request != null ? request.getVariables() : null));
+    List<DvAiProposal> parsed = EdwAiProposalSupport.fromAi(proposals);
+    try {
+      return EdwAiProposalSupport.toDvValidations(
+          DvAiProposalValidator.validate(
+              modelFor(request),
+              parsed,
+              request != null ? request.getMetadataProvider() : null,
+              request != null ? request.getVariables() : null));
+    } catch (Exception e) {
+      String message = e.getMessage();
+      if (Utils.isEmpty(message)) {
+        message = "Could not validate proposals";
+      }
+      List<DvAiProposalValidator.ValidationResult> blocked = new ArrayList<>();
+      for (DvAiProposal proposal : parsed) {
+        blocked.add(
+            new DvAiProposalValidator.ValidationResult(
+                proposal, DvAiProposalValidator.Status.BLOCKED, message));
+      }
+      return EdwAiProposalSupport.toDvValidations(blocked);
+    }
   }
 
   @Override
   public void applyProposals(AiAdvisorRequest request, List<AiProposal> selected)
       throws HopException {
-    DataVaultModel model = modelFrom(request);
+    DataVaultModel model = modelFor(request);
+    if (model == null) {
+      throw new HopException(EdwAiBoundModel.unbound("Data Vault model", request));
+    }
     EdwAiAdvisorGraphSupport.markUndoPoint(request);
     DvAiProposalApplier.apply(
         model,
@@ -162,10 +232,63 @@ public class DataVaultAiAdvisor implements IAiAdvisor {
     EdwAiAdvisorGraphSupport.afterApply(request);
   }
 
+  private static AiAdvisorPrompt promptFromStructure(AiAdvisorRequest request, String structure)
+      throws HopException {
+    DvAiRequest dvRequest = toDvRequest(request);
+    DvAiScenario scenario =
+        dvRequest.getScenario() != null ? dvRequest.getScenario() : DvAiScenario.GENERAL;
+    String recordDefinitionsJson = "";
+    if (dvRequest.isIncludeCatalogSources()) {
+      recordDefinitionsJson =
+          DvAiContextBuilder.serializeCatalogSources(
+              request.getArtifact(),
+              request.getMetadataProvider(),
+              request.getVariables(),
+              dvRequest);
+    }
+    DvAiContextBundle context =
+        DvAiContextBundle.builder()
+            .scenario(scenario)
+            .userPrompt(dvRequest.getUserPrompt())
+            .modelStructureJson(structure)
+            .modelSummaryJson("{}")
+            .recordDefinitionsJson(recordDefinitionsJson)
+            .followUp(dvRequest.isFollowUp())
+            .appliedChangeSummaries(
+                dvRequest.getAppliedChangeSummaries() != null
+                    ? dvRequest.getAppliedChangeSummaries()
+                    : List.of())
+            .build();
+    String userPrompt =
+        request.isFollowUp()
+            ? DvAiAdvisorService.buildFollowUpUserPrompt(context)
+            : DvAiAdvisorService.buildInitialUserPrompt(context);
+    return new AiAdvisorPrompt(DvAiAdvisorService.buildSystemPrompt(context), userPrompt);
+  }
+
   private static DataVaultModel modelFrom(AiAdvisorRequest request) throws HopException {
-    DataVaultModel model = EdwAiBoundModel.bind(request, DataVaultModel.class);
+    DataVaultModel model = modelFor(request);
     if (model == null) {
       throw new HopException(EdwAiBoundModel.unbound("Data Vault model", request));
+    }
+    return model;
+  }
+
+  /**
+   * The open model, including a same-loader copy when the modeler loaded it. An empty model is
+   * still the model: its named Data Vault configuration stays attached so catalog checks use that
+   * connection.
+   */
+  private static DataVaultModel modelFor(AiAdvisorRequest request) throws HopException {
+    DataVaultModel model = EdwAiBoundModel.bind(request, DataVaultModel.class);
+    if (model == null) {
+      Object artifact = request == null ? null : request.getArtifact();
+      if (EdwAiBoundModel.isForeignModel(artifact, DataVaultModel.class)) {
+        model = EdwAiBoundModel.copy(artifact, DataVaultModel.class, request.getMetadataProvider());
+      }
+    }
+    if (model != null && request != null) {
+      ModelConfigurationResolver.attach(model, request.getMetadataProvider());
     }
     return model;
   }

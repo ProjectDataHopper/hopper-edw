@@ -696,6 +696,7 @@ const COMPONENTS = {
     [IMG+"hop-source-model-jdbc-dbeaver-query-editor.png","DBeaver SQL editor querying crm.order_header through the Hop source model driver"],
     [IMG+"hop-source-model-jdbc-dbeaver-database-connection.png","DBeaver connection settings for the source model (host, port, schema crm)"],
     [IMG+"hop-source-model-jdbc-dbeaver-database-driver-manager.png","DBeaver Driver Manager - registering the thin Hop source model driver"],
+    [IMG+"hop-source-model-jdbc-dbeaver-database-driver-manager-list.png","DBeaver Driver Manager - Apache Hop Source Model in the driver list"],
     [IMG+"hop-source-model-service-editor.png","Source model service metadata editor pointing at source-tables-crm.hsm"],
     [IMG+"source-model-sql-transform-dialog.png","Source model SQL transform - model queries used from inside a pipeline"],
     [IMG+"source-model-sql-explain-plan-dialog.png","EXPLAIN plan dialog - inspect the query before it runs"]
@@ -825,16 +826,23 @@ const COMPONENTS = {
   gallery:[
     [IMG+"data-vault-model-retail-360.png","Retail 360 raw vault - hubs, links and satellites on the Hop canvas"],
     [IMG+"data-vault-model-retail-example.png","Retail example Data Vault model - customer, order, product and warehouse entities"],
-    [IMG+"data-vault-model-dialog-generated-pipelines-tab.png","Model dialog - generated pipelines tab: the artifacts this model will produce"],
-    [IMG+"data-vault-model-dialog-target-loading-tab.png","Target loading tab - how the vault tables get loaded"],
-    [IMG+"data-vault-model-dialog-standard-columns-tab.png","Standard columns tab - the column pack every vault table gets"],
-    [IMG+"data-vault-model-dialog-invalid-records-tab.png","Invalid records - what happens to rows that break the contract"],
-    [IMG+"data-vault-model-dialog-unknown-records-tab.png","Unknown records - the zero key and its target handling"],
+    [IMG+"data-vault-model-configuration-editor-generated-artifacts-tab.png","Data Vault configuration - Generated artifacts tab"],
+    [IMG+"data-vault-model-configuration-editor-target-loading-tab.png","Data Vault configuration - Target loading tab"],
+    [IMG+"data-vault-model-configuration-editor-standard-columns-tab.png","Data Vault configuration - Standard columns tab"],
+    [IMG+"data-vault-model-configuration-editor-invalid-records-tab.png","Data Vault configuration - Invalid records tab"],
+    [IMG+"data-vault-model-configuration-editor-unknown-records-tab.png","Data Vault configuration - Unknown records tab"],
     [IMG+"data-vault-link-table-with-dependent-child-keys.png","Link editor - dependent child keys tab on lnk_order_line (line_number), model canvas behind"],
     [IMG+"data-vault-link-table-hub-alias.png","A link with natural hub participation plus a hub alias for a second role of the same hub"],
     [IMG+"data-vault-ddl-validation-report-pass.png","Explainable DDL validation report - PASS on a clean wave"],
     [IMG+"data-vault-ai-help-dialog.png","AI help on the model - questions answered next to the object, not in another product"],
-    [IMG+"ai-advisor-explaining-link-tables.png","AI advisor explaining a link table and its participants"]
+    [IMG+"ai-advisor-explaining-link-tables.png","AI advisor explaining a link table and its participants"],
+    [IMG+"ai-advisor-suggest-dv-model-using-sources-1-prompt-thinking.png","AI advisor - ask for a Data Vault model with catalog sources selected"],
+    [IMG+"ai-advisor-suggest-dv-model-using-sources-2-modeling-advice.png","AI advisor - hubs, links and satellites suggested from the E2E sources"],
+    [IMG+"ai-advisor-suggest-dv-model-using-sources-3-review-proposed-changes.png","AI advisor - Review proposed changes in the transcript"],
+    [IMG+"ai-advisor-suggest-dv-model-using-sources-4-proposals-list.png","AI advisor - first review, hubs checked and dependent tables blocked"],
+    [IMG+"ai-advisor-suggest-dv-model-using-sources-5-next-list-of-proposals.png","AI advisor - second review, links and satellites after the hubs exist"],
+    [IMG+"ai-advisor-suggest-dv-model-using-sources-6-final-actions-to-apply.png","AI advisor - last review, remaining satellite and model note"],
+    [IMG+"ai-advisor-suggest-dv-model-using-sources-7-result.png","Data Vault canvas after applying the source-modeling proposals"]
   ],
   links:[["Data Vault plugin","datavault-plugin.adoc"],["Hub","dv-hub.adoc"],["Link","dv-link.adoc"],["Satellite","dv-satellite.adoc"],["Integration modes","dv-integration-modes.adoc"],["Data Vault Update action","datavault-update-action.adoc"]],
   related:["dv-db","source-models","coach","gates"]
@@ -865,8 +873,12 @@ const COMPONENTS = {
   chips:["SCD2","PIT","SQL view / table","Bridge","Identity map","Source calendar","dbt import","Calculation unit tests","Canvas aliases"],
   gallery:[
     [IMG+"business-vault-model-customer-360.png","Customer 360 Business Vault model - the SCD2 table on the canvas"],
+    [IMG+"business-vault-scd2-table-dialog-derivatives.png","SCD2 table dialog - Derivatives tab, the satellites that feed the timeline"],
     [IMG+"business-vault-scd2-table-dialog-field-mappings.png","SCD2 table dialog - field mappings from the DV satellites into the functional timeline"],
     [IMG+"business-vault-scd2-table-dialog-satellite-settings.png","SCD2 satellite settings - which satellites feed the timeline, and the cutover calendar"],
+    [IMG+"business-vault-scd2-table-dialog-calculations.png","SCD2 table dialog - Calculations tab, SQL scalars after collapse"],
+    [IMG+"business-vault-scd2-table-dialog-tests.png","SCD2 table dialog - Tests tab, calculation unit test and capture pipeline"],
+    [IMG+"business-vault-scd2-table-dialog-lineage.png","SCD2 table dialog - Lineage tab, satellite fields into the functional timeline"],
     [IMG+"business-vault-sql-table-dbt-reference-style.png","Business table in dbt reference style - ref()/source() dependencies as SQL"],
     [IMG+"business-vault-dbt-import-models-dialog.png","Import dbt models - project folder, model list, destination and macro library"],
     [IMG+"business-vault-import-dbt-models-context-action.png","Import dbt models from the BV canvas context menu"],
@@ -938,7 +950,7 @@ const COMPONENTS = {
     [IMG+"target-type-mapping-editor-rules-tab.png","Target type mapping editor - rules with match criteria and the target SQL type"],
     [IMG+"target-type-mapping-editor-preview-tab.png","Preview tab - what each rule resolves to before you apply it"],
     [IMG+"data-vault-ddl-validation-report-pass.png","DDL validation report - WORKING_VS_VERSION, status PASS"],
-    [IMG+"data-vault-model-dialog-target-loading-tab.png","Target loading - insert-only vs update, and the orchestration settings behind them"],
+    [IMG+"data-vault-model-configuration-editor-target-loading-tab.png","Data Vault configuration - Target loading tab, including load mode and bulk staging"],
     [IMG+"data-type-mapping-rules.png","Data type mapping metadata editor - the project-wide rules behind the DDL"]
   ],
   links:[["Target type mappings","target-type-mappings.adoc"],["Data type mappings","data-type-mappings.adoc"],["Data Vault Update action","datavault-update-action.adoc"],["Satellite target layout","dv-satellite.adoc"]],
@@ -1100,6 +1112,7 @@ const COMPONENTS = {
     [IMG+"lineage-view-model-context-action.png","Show lineage from a dimensional fact - one context action from the model to the graph"],
     [IMG+"ai-advisor-offering-performance-tuning-advice.png","AI advisor - performance tuning recommendations on a vault model"],
     [IMG+"ai-advisor-proposal-review-increase-parallelism.png","Reviewing an AI proposal (increase parallelism) before it is applied"],
+    [IMG+"ai-advisor-suggest-dv-model-using-sources-7-result.png","Raw vault drawn from catalog sources - hubs, links and satellites after review"],
     [IMG+"data-vault-ai-help-dialog.png","AI help - explanations next to the object you are looking at"]
   ],
   links:[["Generate Data Vault","generating-data-vault-from-source-model.adoc"],["Cross-model references","dv-cross-model-references.adoc"],["Import dbt models","dbt-import.adoc"],["Feature overview","feature-overview.adoc"]],

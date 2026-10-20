@@ -16,11 +16,16 @@
 package org.hopper.edw.datavault.ai;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import org.hopper.edw.catalog.model.CatalogSourceField;
+import org.hopper.edw.catalog.model.DvSourceRecord;
+import org.hopper.edw.catalog.model.RecordDefinition;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DvHub;
+import org.hopper.edw.datavault.metadata.coaching.CoachingSourceRef;
 import org.junit.jupiter.api.Test;
 
 class DvAiContextBuilderTest {
@@ -70,6 +75,41 @@ class DvAiContextBuilderTest {
         List.of("customer"),
         DvAiContextBuilder.resolveSelectedCatalogSourceNames(
             model, DvAiRequest.builder().userPrompt("test").build()));
+    assertEquals(
+        List.of("customer"),
+        DvAiContextBuilder.resolveSelectedCatalogSourceNames(
+            model, DvAiRequest.builder().userPrompt("test").build(), List.of()));
+  }
+
+  @Test
+  void resolveSelectedCatalogSourceNamesPrefersExplicitSelectionOverCoach() {
+    DataVaultModel model = new DataVaultModel();
+    DvHub hub = new DvHub();
+    hub.setRecordSources(List.of("customer"));
+    model.setTables(List.of(hub));
+
+    DvAiRequest request =
+        DvAiRequest.builder().catalogSourceName("orders").catalogSourceName("product").build();
+
+    assertEquals(
+        List.of("orders", "product"),
+        DvAiContextBuilder.resolveSelectedCatalogSourceNames(
+            model, request, List.of("E2E-customer-address")));
+  }
+
+  @Test
+  void resolveSelectedCatalogSourceNamesUsesCoachBeforeTableSources() {
+    DataVaultModel model = new DataVaultModel();
+    DvHub hub = new DvHub();
+    hub.setRecordSources(List.of("customer"));
+    model.setTables(List.of(hub));
+
+    assertEquals(
+        List.of("E2E-customer-address"),
+        DvAiContextBuilder.resolveSelectedCatalogSourceNames(
+            model,
+            DvAiRequest.builder().userPrompt("test").build(),
+            List.of("E2E-customer-address")));
   }
 
   @Test
@@ -96,6 +136,67 @@ class DvAiContextBuilderTest {
     assertTrue(catalogJson.contains("\"selected\":2"), catalogJson);
     assertTrue(catalogJson.contains("\"name\":\"customer\""), catalogJson);
     assertTrue(catalogJson.contains("\"name\":\"orders\""), catalogJson);
+    assertFalse(catalogJson.contains("E2E-customer-address"), catalogJson);
+  }
+
+  @Test
+  void buildUsesCoachSourcesWhenNothingIsSelected() throws Exception {
+    DataVaultModel model = new DataVaultModel();
+    model.setName("demo");
+    model.getConfigurationOrDefault().setDataCatalogConnection("local-catalog");
+    model
+        .getCoachingOrDefault()
+        .addCoachingSource(
+            CoachingSourceRef.forRecordDefinition(
+                "local-catalog", "hop/retail-example/sources", "E2E-customer-address"));
+    DvHub hub = new DvHub();
+    hub.setRecordSources(List.of("customer"));
+    model.setTables(List.of(hub));
+
+    DvAiContextBundle bundle =
+        DvAiContextBuilder.build(
+            model,
+            null,
+            null,
+            DvAiRequest.builder()
+                .userPrompt("Which hub should this address feed load?")
+                .includeCatalogSources(true)
+                .build());
+
+    String catalogJson = bundle.getRecordDefinitionsJson();
+    assertTrue(catalogJson.contains("\"selected\":1"), catalogJson);
+    assertTrue(catalogJson.contains("\"name\":\"E2E-customer-address\""), catalogJson);
+    assertFalse(catalogJson.contains("\"name\":\"customer\""), catalogJson);
+  }
+
+  @Test
+  void serializeRecordDefinitionIncludesKeysAndDescriptiveFields() {
+    CatalogSourceField customerId = new CatalogSourceField();
+    customerId.setName("customer_id");
+    customerId.setHopType(5);
+    customerId.setLength("9");
+    customerId.setPrimaryKeyPosition(1);
+    customerId.setSourceDataType("Integer");
+    CatalogSourceField addressLine = new CatalogSourceField();
+    addressLine.setName("address_line1");
+    addressLine.setHopType(2);
+    addressLine.setLength("50");
+    addressLine.setSourceDataType("String");
+    DvSourceRecord dvSource = new DvSourceRecord();
+    dvSource.setFields(List.of(customerId, addressLine));
+    RecordDefinition definition = new RecordDefinition();
+    definition.setDescription("Retail customer address satellite database source");
+    definition.setDvSource(dvSource);
+
+    String json = DvAiContextBuilder.serializeRecordDefinitionEntry("E2E-customer-address", definition);
+
+    assertTrue(json.contains("\"name\":\"E2E-customer-address\""), json);
+    assertTrue(json.contains("\"name\":\"customer_id\""), json);
+    assertTrue(json.contains("\"keyPosition\":1"), json);
+    assertTrue(json.contains("\"length\":\"9\""), json);
+    assertTrue(json.contains("\"name\":\"address_line1\""), json);
+    assertTrue(json.contains("\"length\":\"50\""), json);
+    assertTrue(json.contains("Retail customer address satellite database source"), json);
   }
 
   @Test

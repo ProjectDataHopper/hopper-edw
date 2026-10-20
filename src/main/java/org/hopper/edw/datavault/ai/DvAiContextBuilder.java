@@ -16,21 +16,28 @@
 package org.hopper.edw.datavault.ai;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IValueMeta;
+import org.apache.hop.core.row.value.ValueMetaFactory;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
+import org.hopper.edw.catalog.model.CatalogSourceField;
+import org.hopper.edw.catalog.model.DvSourceRecord;
 import org.hopper.edw.catalog.model.RecordDefinition;
 import org.hopper.edw.catalog.model.RecordDefinitionKey;
 import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
 import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
+import org.hopper.edw.datavault.hopgui.ai.EdwAiBoundModel;
+import org.hopper.edw.datavault.hopgui.ai.EdwAiBoundModel.CatalogCoachSource;
 import org.hopper.edw.datavault.metadata.BusinessKey;
 import org.hopper.edw.datavault.metadata.DataVaultConfiguration;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
@@ -49,6 +56,9 @@ public final class DvAiContextBuilder {
 
   private static final int MAX_MODEL_XML_CHARS = 120_000;
   private static final int MAX_LOG_CHARS = 20_000;
+
+  /** Coach-sized bound so a full catalog does not land in one question. */
+  static final int MAX_CATALOG_SOURCES_IN_PROMPT = 20;
 
   private DvAiContextBuilder() {}
 
@@ -283,31 +293,57 @@ public final class DvAiContextBuilder {
       IHopMetadataProvider metadataProvider,
       IVariables variables,
       DvAiRequest request) {
-    String catalogConnection = "";
-    try {
-      catalogConnection =
-          DvSourceCatalogService.resolveCatalogConnection(model, variables, metadataProvider);
-    } catch (HopException ignored) {
-      // Leave catalog connection empty when unresolved
+    return serializeCatalogSources(model, metadataProvider, variables, request);
+  }
+
+  /**
+   * Record-definition JSON for a same-loader or foreign Data Vault model. Explicit picker ids win,
+   * then Coach records, then sources already bound on tables. At most {@link
+   * #MAX_CATALOG_SOURCES_IN_PROMPT} sources are attached.
+   */
+  static String serializeCatalogSources(
+      Object model,
+      IHopMetadataProvider metadataProvider,
+      IVariables variables,
+      DvAiRequest request) {
+    Map<String, CatalogCoachSource> coachByName = new LinkedHashMap<>();
+    for (CatalogCoachSource source : EdwAiBoundModel.coachCatalogSources(model)) {
+      if (source != null && !Utils.isEmpty(source.recordName())) {
+        coachByName.putIfAbsent(source.recordName(), source);
+      }
     }
+    String catalogConnection =
+        EdwAiBoundModel.catalogConnectionName(
+            model, DvSourceCatalogService.DEFAULT_SOURCE_CATALOG_CONNECTION);
+    if (variables != null && !Utils.isEmpty(catalogConnection)) {
+      catalogConnection = variables.resolve(catalogConnection);
+    }
+    String namespace = DvSourceCatalogService.projectSourcesNamespace(variables);
 
     int totalAvailable = 0;
-    if (metadataProvider != null) {
+    if (metadataProvider != null && !Utils.isEmpty(catalogConnection)) {
       try {
         // Session-cached name list (registry); avoid ad-hoc full ref copies per AI turn.
         totalAvailable =
-            DvSourceCatalogService.listSourceNames(model, variables, metadataProvider).size();
+            DvSourceCatalogService.listSourceNames(catalogConnection, variables, metadataProvider)
+                .size();
       } catch (Exception ignored) {
         // Ignore listing errors for metadata envelope
       }
     }
 
-    List<String> sourceNames = resolveSelectedCatalogSourceNames(model, request);
+    List<String> boundNames =
+        model instanceof DataVaultModel dataVaultModel
+            ? collectSourceNamesFromModel(dataVaultModel).stream().toList()
+            : reflectBoundSourceNames(model);
+    List<String> sourceNames =
+        capCatalogSources(
+            resolveSelectedCatalogSourceNames(
+                boundNames, request, new ArrayList<>(coachByName.keySet())));
 
     StringBuilder json = new StringBuilder();
     json.append("{\"catalogConnection\":").append(jsonString(catalogConnection));
-    json.append(",\"namespace\":")
-        .append(jsonString(DvSourceCatalogService.projectSourcesNamespace(variables)));
+    json.append(",\"namespace\":").append(jsonString(namespace));
     json.append(",\"totalAvailable\":").append(totalAvailable);
     json.append(",\"selected\":").append(sourceNames.size());
     json.append(",\"sources\":[");
@@ -316,9 +352,26 @@ public final class DvAiContextBuilder {
       if (index++ > 0) {
         json.append(',');
       }
+      CatalogCoachSource coach = coachByName.get(sourceName);
+      String entryConnection = catalogConnection;
+      String entryNamespace = namespace;
+      if (coach != null && !Utils.isEmpty(coach.catalogConnection())) {
+        entryConnection = coach.catalogConnection();
+      }
+      if (coach != null && !Utils.isEmpty(coach.recordNamespace())) {
+        entryNamespace = coach.recordNamespace();
+      }
+      if (variables != null) {
+        if (!Utils.isEmpty(entryConnection)) {
+          entryConnection = variables.resolve(entryConnection);
+        }
+        if (!Utils.isEmpty(entryNamespace)) {
+          entryNamespace = variables.resolve(entryNamespace);
+        }
+      }
       json.append(
           serializeRecordDefinitionEntry(
-              sourceName, catalogConnection, model, variables, metadataProvider));
+              sourceName, entryConnection, entryNamespace, variables, metadataProvider));
     }
     json.append("]}");
     return json.toString();
@@ -327,64 +380,215 @@ public final class DvAiContextBuilder {
   private static String serializeRecordDefinitionEntry(
       String sourceName,
       String catalogConnection,
-      DataVaultModel model,
+      String namespace,
       IVariables variables,
       IHopMetadataProvider metadataProvider) {
-    StringBuilder entry = new StringBuilder();
-    entry.append("{\"name\":").append(jsonString(sourceName));
     try {
-      RecordDefinition definition =
-          loadRecordDefinition(sourceName, catalogConnection, model, variables, metadataProvider);
-      if (definition == null) {
-        entry.append(",\"loaded\":false,\"fields\":[]}");
-        return entry.toString();
-      }
-      entry.append(",\"loaded\":true");
-      entry.append(",\"description\":").append(jsonString(definition.getDescription()));
-      entry.append(",\"fields\":[");
-      if (definition.getFields() != null) {
-        List<IValueMeta> fields = definition.getFields().getValueMetaList();
-        for (int f = 0; f < fields.size(); f++) {
-          if (f > 0) {
-            entry.append(',');
-          }
-          IValueMeta vm = fields.get(f);
-          entry.append("{\"name\":").append(jsonString(vm.getName()));
-          entry.append(",\"type\":").append(jsonString(vm.getTypeDesc()));
-          entry.append('}');
-        }
-      }
-      entry.append("]}");
+      return serializeRecordDefinitionEntry(
+          sourceName,
+          loadRecordDefinition(
+              sourceName, catalogConnection, namespace, variables, metadataProvider));
     } catch (Exception e) {
+      StringBuilder entry = new StringBuilder();
+      entry.append("{\"name\":").append(jsonString(sourceName));
       entry.append(",\"loaded\":false");
       entry.append(",\"error\":").append(jsonString(e.getMessage()));
       entry.append(",\"fields\":[]}");
+      return entry.toString();
     }
+  }
+
+  /** One catalog record, including field length and key position when the layout has them. */
+  static String serializeRecordDefinitionEntry(String sourceName, RecordDefinition definition) {
+    StringBuilder entry = new StringBuilder();
+    entry.append("{\"name\":").append(jsonString(sourceName));
+    if (definition == null) {
+      entry.append(",\"loaded\":false,\"fields\":[]}");
+      return entry.toString();
+    }
+    entry.append(",\"loaded\":true");
+    entry.append(",\"description\":").append(jsonString(definition.getDescription()));
+    entry.append(",\"fields\":[");
+    appendFieldJson(entry, definition);
+    entry.append("]}");
     return entry.toString();
   }
 
-  static List<String> resolveSelectedCatalogSourceNames(DataVaultModel model, DvAiRequest request) {
-    if (request.getCatalogSourceNames() != null && !request.getCatalogSourceNames().isEmpty()) {
-      return request.getCatalogSourceNames().stream().filter(s -> !Utils.isEmpty(s)).toList();
+  private static void appendFieldJson(StringBuilder entry, RecordDefinition definition) {
+    List<CatalogSourceField> catalogFields = catalogFields(definition);
+    if (!catalogFields.isEmpty()) {
+      for (int f = 0; f < catalogFields.size(); f++) {
+        if (f > 0) {
+          entry.append(',');
+        }
+        CatalogSourceField field = catalogFields.get(f);
+        entry.append("{\"name\":").append(jsonString(field.getName()));
+        entry.append(",\"type\":").append(jsonString(hopTypeName(field)));
+        if (!Utils.isEmpty(field.getLength())) {
+          entry.append(",\"length\":").append(jsonString(field.getLength()));
+        }
+        if (field.getPrimaryKeyPosition() > 0) {
+          entry.append(",\"keyPosition\":").append(field.getPrimaryKeyPosition());
+        }
+        entry.append('}');
+      }
+      return;
     }
-    return collectSourceNamesFromModel(model).stream().toList();
+    if (definition.getFields() == null) {
+      return;
+    }
+    List<IValueMeta> fields = definition.getFields().getValueMetaList();
+    for (int f = 0; f < fields.size(); f++) {
+      if (f > 0) {
+        entry.append(',');
+      }
+      IValueMeta valueMeta = fields.get(f);
+      entry.append("{\"name\":").append(jsonString(valueMeta.getName()));
+      entry.append(",\"type\":").append(jsonString(valueMeta.getTypeDesc()));
+      entry.append('}');
+    }
+  }
+
+  private static List<CatalogSourceField> catalogFields(RecordDefinition definition) {
+    DvSourceRecord dvSource = definition == null ? null : definition.getDvSource();
+    if (dvSource == null || dvSource.getFields() == null) {
+      return List.of();
+    }
+    List<CatalogSourceField> fields = new ArrayList<>();
+    for (CatalogSourceField field : dvSource.getFields()) {
+      if (field != null && !Utils.isEmpty(field.getName())) {
+        fields.add(field);
+      }
+    }
+    return fields;
+  }
+
+  private static String hopTypeName(CatalogSourceField field) {
+    String name = null;
+    try {
+      name = ValueMetaFactory.getValueMetaName(field.getHopType());
+    } catch (RuntimeException ignored) {
+      // Plugin registry may be unavailable; fall back to the catalog source type.
+    }
+    if (name != null && !"-".equals(name)) {
+      return name;
+    }
+    if (!Utils.isEmpty(field.getSourceDataType())) {
+      return field.getSourceDataType();
+    }
+    return name == null ? "" : name;
+  }
+
+  static List<String> resolveSelectedCatalogSourceNames(DataVaultModel model, DvAiRequest request) {
+    return resolveSelectedCatalogSourceNames(
+        model == null ? List.of() : collectSourceNamesFromModel(model).stream().toList(),
+        request,
+        null);
+  }
+
+  /**
+   * Explicit picker ids, otherwise Coach record names, otherwise sources already on the model. An
+   * explicit list that is present but filters down to nothing stays empty.
+   */
+  static List<String> resolveSelectedCatalogSourceNames(
+      DataVaultModel model, DvAiRequest request, List<String> coachNames) {
+    return resolveSelectedCatalogSourceNames(
+        model == null ? List.of() : collectSourceNamesFromModel(model).stream().toList(),
+        request,
+        coachNames);
+  }
+
+  private static List<String> resolveSelectedCatalogSourceNames(
+      List<String> modelSourceNames, DvAiRequest request, List<String> coachNames) {
+    if (request != null
+        && request.getCatalogSourceNames() != null
+        && !request.getCatalogSourceNames().isEmpty()) {
+      return filterNames(request.getCatalogSourceNames());
+    }
+    List<String> coach = filterNames(coachNames);
+    if (!coach.isEmpty()) {
+      return coach;
+    }
+    return filterNames(modelSourceNames);
+  }
+
+  private static List<String> filterNames(List<String> names) {
+    if (names == null || names.isEmpty()) {
+      return List.of();
+    }
+    return names.stream().filter(name -> !Utils.isEmpty(name)).toList();
+  }
+
+  private static List<String> capCatalogSources(List<String> names) {
+    if (names.size() <= MAX_CATALOG_SOURCES_IN_PROMPT) {
+      return names;
+    }
+    return List.copyOf(names.subList(0, MAX_CATALOG_SOURCES_IN_PROMPT));
   }
 
   private static RecordDefinition loadRecordDefinition(
       String sourceName,
       String catalogConnection,
-      DataVaultModel model,
+      String namespace,
       IVariables variables,
       IHopMetadataProvider metadataProvider)
       throws HopException {
     String resolvedName = variables != null ? variables.resolve(sourceName) : sourceName;
+    String resolvedNamespace =
+        !Utils.isEmpty(namespace)
+            ? namespace
+            : DvSourceCatalogService.projectSourcesNamespace(variables);
     return RecordDefinitionRegistry.getInstance()
         .read(
             catalogConnection,
-            new RecordDefinitionKey(
-                DvSourceCatalogService.projectSourcesNamespace(variables), resolvedName),
+            new RecordDefinitionKey(resolvedNamespace, resolvedName),
             variables,
             metadataProvider);
+  }
+
+  private static List<String> reflectBoundSourceNames(Object model) {
+    Set<String> names = new LinkedHashSet<>();
+    Object tables = invokeGetter(model, "getTables");
+    if (!(tables instanceof Iterable<?> iterable)) {
+      return List.of();
+    }
+    for (Object table : iterable) {
+      addReflectedNames(names, invokeGetter(table, "getRecordSources"));
+      addReflectedName(names, invokeGetter(table, "getRecordSource"));
+      Object linkSources = invokeGetter(table, "getLinkHubSources");
+      if (linkSources instanceof Iterable<?> links) {
+        for (Object link : links) {
+          addReflectedName(names, invokeGetter(link, "getSourceName"));
+        }
+      }
+    }
+    names.removeIf(Utils::isEmpty);
+    return List.copyOf(names);
+  }
+
+  private static void addReflectedNames(Set<String> names, Object values) {
+    if (values instanceof Iterable<?> iterable) {
+      for (Object value : iterable) {
+        addReflectedName(names, value);
+      }
+    }
+  }
+
+  private static void addReflectedName(Set<String> names, Object value) {
+    if (value instanceof String text) {
+      names.add(text);
+    }
+  }
+
+  private static Object invokeGetter(Object target, String method) {
+    if (target == null) {
+      return null;
+    }
+    try {
+      return target.getClass().getMethod(method).invoke(target);
+    } catch (ReflectiveOperationException e) {
+      return null;
+    }
   }
 
   public static Set<String> collectSourceNamesFromModel(DataVaultModel model) {

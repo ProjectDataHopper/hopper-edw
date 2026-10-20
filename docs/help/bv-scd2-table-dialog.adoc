@@ -22,6 +22,8 @@ Raw vault satellites remain insert-only (technical load history). SCD2 rewrites 
 
 == General
 
+image::../images/business-vault-scd2-table-dialog.png[SCD2 table dialog — General tab for customer_360_bv,align="center"]
+
 [cols="1,1", options="header"]
 |===
 
@@ -35,7 +37,7 @@ Raw vault satellites remain insert-only (technical load history). SCD2 rewrites 
 |Target table in the Business Vault database.
 
 |**Derivatives**
-|DV satellite references and/or source queries. At least one satellite or source query is required.
+|On the **Derivatives** tab: linked DV satellites and source queries. At least one satellite or source query is required.
 
 |**Include hash key**
 |When enabled, the parent hub hash key is written to the BV table.
@@ -95,7 +97,15 @@ The functional timestamp drives interval boundaries — not the technical load d
 
 Use **Debug** or **Show build pipeline** on the canvas to inspect the generated Hop pipeline (and the partition workflow when enabled) before workflow runs.
 
+== Derivatives
+
+Linked Data Vault satellites and source queries that feed this table. Customer 360 lists `sat_customer_demo`, `sat_customer_contact`, `sat_customer_address`, and `sat_customer_prefs`. Each source-query row has **Calendar system**, **Operation**, **Null policy**, **Priority override**, and **Operation field**.
+
+image::../images/business-vault-scd2-table-dialog-derivatives.png[SCD2 table dialog — Derivatives tab, four customer satellites,align="center"]
+
 == Field mappings
+
+image::../images/business-vault-scd2-table-dialog-field-mappings.png[SCD2 table dialog — Field mappings for customer_360_bv,align="center"]
 
 Required when **two or more** satellites or source queries feed the table. Map each `(source, source field)` to a BV target column name. **Validate** / Check model checks parent hub existence, source field existence on the satellite or source query, unique source and target names, that targets do not collide with hash key / validity / record-source columns, and that every persisted column **name** fits the target database identifier limit (PostgreSQL 63 characters, MySQL/SingleStore 64). Hash key, functional timestamp, and load date cannot be mapped as attributes.
 
@@ -113,6 +123,8 @@ Single-satellite tables can pass attributes through under DV names unless you ad
 
 [#_satellite_settings]
 == Satellite settings
+
+image::../images/business-vault-scd2-table-dialog-satellite-settings.png[SCD2 table dialog — Satellite settings, source indicators DEMO, CONTACT, ADDRESS, and PREFS,align="center"]
 
 This tab is on the **SCD2 table**, not on the Data Vault satellite and not on the satellite alias. Open the SCD2 table, then this tab.
 
@@ -143,6 +155,8 @@ If a derivative satellite has **Store record source indicator** unchecked, gener
 
 == Calculations
 
+image::../images/business-vault-scd2-table-dialog-calculations.png[SCD2 table dialog — Calculations tab,align="center"]
+
 Optional SQL scalars applied **after** collapse. **Add** / **Edit** / double-click opens the SQL expression editor: result field name, type, length, precision, and description as widgets; a large SQL box; Fields and Patterns (`CASE WHEN`, `COALESCE`, `CAST`, …) insert at the caret.
 
 Target names must be new columns. Expressions do not drive new SCD2 versions.
@@ -151,6 +165,8 @@ See link:../business-vault-scd2.adoc[Business Vault SCD2] and link:sql-expressio
 
 == Tests
 
+image::../images/business-vault-scd2-table-dialog-tests.png[SCD2 table dialog — Tests tab, unit test and capture pipeline for customer_360_bv,align="center"]
+
 When calculations are ready, **Generate unit test...** (or the table context action **Generate calculation unit test**) creates a Hop pipeline unit test: input data set of collapsed rows, golden calculated rows, and a slim pipeline whose SQL Expression transform is linked to this table. Optionally sample 100 warehouse rows into those data sets. Production SCD2 loads are not sampled.
 
 image::../images/generate-calculations-unit-test-scd2-context-action.png[SCD2 table context menu — Generate calculation unit test,align="center"]
@@ -158,6 +174,12 @@ image::../images/generate-calculations-unit-test-scd2-context-action.png[SCD2 ta
 image::../images/generate-calculations-unit-test-scd2-confirmation-dialog.png[Sample warehouse rows confirmation — 100 reservoir-sampled collapsed rows,align="center"]
 
 image::../images/generate-calculations-unit-test-scd2-completion-report.png[Calculation unit test completion report with pipeline and data set names,align="center"]
+
+== Lineage
+
+Read-only. **Table lineage** names the SCD2 table and its inputs (parent hub and each satellite or source query). **Field lineage** has one row per loaded column, with reason code `BV_SCD2_FIELD_MAP` for a mapped attribute.
+
+image::../images/business-vault-scd2-table-dialog-lineage.png[SCD2 table dialog — Lineage tab for customer_360_bv,align="center"]
 
 == Type 1 vs Type 2 (important)
 

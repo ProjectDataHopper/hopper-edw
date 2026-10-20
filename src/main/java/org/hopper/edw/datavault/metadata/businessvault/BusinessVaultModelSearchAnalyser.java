@@ -25,6 +25,7 @@ import org.apache.hop.core.search.ISearchableAnalyser;
 import org.apache.hop.core.search.SearchableAnalyserPlugin;
 import org.apache.hop.core.util.Utils;
 import org.hopper.edw.datavault.metadata.DvNote;
+import org.hopper.edw.datavault.search.EdwSearchSupport;
 
 @SearchableAnalyserPlugin(
     id = "BusinessVaultModelSearchAnalyser",
@@ -64,7 +65,7 @@ public class BusinessVaultModelSearchAnalyser extends BaseSearchableAnalyser<Bus
         null);
 
     if (model.getConfiguration() != null) {
-      matchObjectFields(
+      EdwSearchSupport.matchObjectFields(
           searchable,
           results,
           searchQuery,
@@ -102,7 +103,7 @@ public class BusinessVaultModelSearchAnalyser extends BaseSearchableAnalyser<Bus
           "business vault table description",
           table.getDescription(),
           componentName);
-      matchObjectFields(
+      EdwSearchSupport.matchObjectFields(
           searchable, results, searchQuery, table, "business vault table property", componentName);
     }
 

@@ -25,6 +25,7 @@ import org.apache.hop.core.search.ISearchableAnalyser;
 import org.apache.hop.core.search.SearchableAnalyserPlugin;
 import org.apache.hop.core.util.Utils;
 import org.hopper.edw.datavault.metadata.DvNote;
+import org.hopper.edw.datavault.search.EdwSearchSupport;
 
 @SearchableAnalyserPlugin(
     id = "DimensionalModelSearchAnalyser",
@@ -57,7 +58,7 @@ public class DimensionalModelSearchAnalyser extends BaseSearchableAnalyser<Dimen
         null);
 
     if (model.getConfiguration() != null) {
-      matchObjectFields(
+      EdwSearchSupport.matchObjectFields(
           searchable,
           results,
           searchQuery,
@@ -133,7 +134,7 @@ public class DimensionalModelSearchAnalyser extends BaseSearchableAnalyser<Dimen
             componentName);
       }
       matchDocumentedFields(searchable, results, searchQuery, table, componentName);
-      matchObjectFields(
+      EdwSearchSupport.matchObjectFields(
           searchable, results, searchQuery, table, "dimensional table property", componentName);
     }
 

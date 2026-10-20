@@ -39,7 +39,7 @@ Replace `<user>` with your Ubuntu username. Both prefixes point at the same file
 . Install *Apache Hop 2.20.0-SNAPSHOT*. This plugin requires that line. Hop 2.19 does not load it. Install steps and the version pin are in link:../README.md[the repository README].
 . Install the plugin. Unzip a release assembly into the Hop installation root so both `plugins/misc/hopper-edw/` and `lib/core/` are updated. Copying only the plugin jar leaves Jinja SQL unresolved.
 +
-Release *0.14.0*: https://github.com/ProjectDataHopper/hopper-edw/releases/tag/v0.14.0[v0.14.0] includes `hopper-edw-0.14.0.zip`. The same README section describes the Hop Marketplace install on Hop 2.20.0-SNAPSHOT.
+Release *0.15.0*: https://github.com/ProjectDataHopper/hopper-edw/releases/tag/v0.15.0[v0.15.0] includes `hopper-edw-0.15.0.zip`. The same README section describes the Hop Marketplace install on Hop 2.20.0-SNAPSHOT.
 . Restart Hop. *Metadata → EDW* lists the EDW metadata types when the plugin has loaded.
 
 == Install Ubuntu, Git, and Docker Compose

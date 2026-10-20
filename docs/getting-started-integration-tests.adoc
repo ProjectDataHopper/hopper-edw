@@ -86,11 +86,14 @@ image::images/data-vault-model-customer-360.png[Customer 360 Data Vault model �
 image::images/business-vault-model-customer-360.png[Customer 360 Business Vault model — customer_360_bv SCD2 table,align="center"]
 
 . Open SCD2 table `customer_360_bv`:
+** **General** — parent hub `hub_customer`, build mode Full rebuild
 ** **Derivatives** — four satellites
 ** **Field mappings** — rename attributes to `cust_*` columns
-** **Satellite configs** — per-satellite functional timestamp / source indicator
+** **Satellite settings** — per-satellite source indicator
 
-image::images/business-vault-scd2-table-dialog.png[SCD2 table dialog — General tab with derivatives,align="center"]
+image::images/business-vault-scd2-table-dialog.png[SCD2 table dialog — General tab, parent hub hub_customer,align="center"]
+
+image::images/business-vault-scd2-table-dialog-derivatives.png[SCD2 table dialog — Derivatives tab with sat_customer_demo, sat_customer_contact, sat_customer_address, and sat_customer_prefs,align="center"]
 
 image::images/business-vault-scd2-table-dialog-field-mappings.png[SCD2 table dialog — Field mappings tab,align="center"]
 

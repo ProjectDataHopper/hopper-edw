@@ -65,6 +65,10 @@ final class DvAiStructuralProposalSupport {
       DvAiProposal proposal,
       IHopMetadataProvider metadataProvider,
       IVariables variables) {
+    if (model == null) {
+      return new DvAiProposalValidator.ValidationResult(
+          proposal, DvAiProposalValidator.Status.BLOCKED, "No model is open");
+    }
     try {
       return switch (proposal.getType()) {
         case ADD_HUB -> validateAddHub(model, proposal, metadataProvider, variables);
@@ -82,6 +86,13 @@ final class DvAiStructuralProposalSupport {
     } catch (HopException e) {
       return new DvAiProposalValidator.ValidationResult(
           proposal, DvAiProposalValidator.Status.BLOCKED, e.getMessage());
+    } catch (RuntimeException e) {
+      String message = e.getMessage();
+      if (Utils.isEmpty(message)) {
+        message = e.getClass().getSimpleName();
+      }
+      return new DvAiProposalValidator.ValidationResult(
+          proposal, DvAiProposalValidator.Status.BLOCKED, message);
     }
   }
 

@@ -437,13 +437,21 @@ See [docs/business-vault-scd2.adoc](../docs/business-vault-scd2.adoc) and [docs/
 
 ![Customer 360 Business Vault model](../docs/images/business-vault-model-customer-360.png)
 
-The SCD2 table dialog (General, Field mappings, Satellite settings):
+The SCD2 table dialog (General, Derivatives, Field mappings, Satellite settings, Calculations, Tests, Lineage):
 
 ![SCD2 table dialog — General](../docs/images/business-vault-scd2-table-dialog.png)
+
+![SCD2 table dialog — Derivatives](../docs/images/business-vault-scd2-table-dialog-derivatives.png)
 
 ![SCD2 table dialog — Field mappings](../docs/images/business-vault-scd2-table-dialog-field-mappings.png)
 
 ![SCD2 table dialog — Satellite settings](../docs/images/business-vault-scd2-table-dialog-satellite-settings.png)
+
+![SCD2 table dialog — Calculations](../docs/images/business-vault-scd2-table-dialog-calculations.png)
+
+![SCD2 table dialog — Tests](../docs/images/business-vault-scd2-table-dialog-tests.png)
+
+![SCD2 table dialog — Lineage](../docs/images/business-vault-scd2-table-dialog-lineage.png)
 
 - **External variant:** `customer-360-external.hdv` / `customer-360-external.hbv` — same BV layout; all satellites use **External read-only** integration mode (Hop skips DV DDL/pipelines; BV reads warehouse history from metadata)
 

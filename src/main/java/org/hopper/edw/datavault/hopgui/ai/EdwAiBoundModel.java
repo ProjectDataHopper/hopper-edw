@@ -20,6 +20,7 @@ import java.util.List;
 import org.apache.hop.ai.advisor.AiAdvisorRequest;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.file.IHasFilename;
+import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.xml.XmlHandler;
 import org.apache.hop.metadata.api.IHopMetadataProvider;
 import org.apache.hop.metadata.serializer.xml.XmlMetadataUtil;
@@ -126,6 +127,29 @@ public final class EdwAiBoundModel {
   }
 
   /**
+   * A same-loader copy of a model owned by another loader. Reads the in-memory metadata only, so
+   * the advisor can validate and apply without opening the model file.
+   */
+  public static <T> T copy(Object foreign, Class<T> type, IHopMetadataProvider metadataProvider)
+      throws HopException {
+    if (!isForeignModel(foreign, type)) {
+      return null;
+    }
+    try {
+      String inner = XmlMetadataUtil.serializeObjectToXml(foreign);
+      Document document = XmlHandler.loadXmlString("<model>" + inner + "</model>");
+      T copy = type.getDeclaredConstructor().newInstance();
+      XmlMetadataUtil.deSerializeFromXml(
+          document.getDocumentElement(), type, copy, metadataProvider);
+      return copy;
+    } catch (HopException e) {
+      throw e;
+    } catch (ReflectiveOperationException e) {
+      throw new HopException("Could not copy the open " + type.getSimpleName(), e);
+    }
+  }
+
+  /**
    * Writes a copied model back onto the live instance the modeler is showing. No-op when the
    * advisor and the modeler already share one instance.
    */
@@ -210,6 +234,69 @@ public final class EdwAiBoundModel {
         && modelType != null
         && !modelType.isInstance(artifact)
         && modelType.getName().equals(artifact.getClass().getName());
+  }
+
+  /**
+   * Catalog records curated on the Coach panel. Works when {@code model} was loaded by this class
+   * loader and when it was loaded by the modeler's loader.
+   */
+  public static List<CatalogCoachSource> coachCatalogSources(Object model) {
+    List<CatalogCoachSource> sources = new ArrayList<>();
+    Object refs = invoke(invoke(model, "getCoachingOrDefault"), "getCoachingSourcesOrEmpty");
+    if (!(refs instanceof Iterable<?> iterable)) {
+      return sources;
+    }
+    for (Object ref : iterable) {
+      if (!isRecordDefinition(invoke(ref, "getSourceType"))) {
+        continue;
+      }
+      String recordName = stringValue(invoke(ref, "getRecordName"));
+      if (Utils.isEmpty(recordName)) {
+        continue;
+      }
+      sources.add(
+          new CatalogCoachSource(
+              recordName,
+              stringValue(invoke(ref, "getCatalogConnection")),
+              stringValue(invoke(ref, "getRecordNamespace"))));
+    }
+    return sources;
+  }
+
+  /**
+   * Catalog connection to list and load sources from. The model configuration wins, then the first
+   * Coach record connection, then {@code fallback} (typically {@code local-catalog}).
+   */
+  public static String catalogConnectionName(Object model, String fallback) {
+    String configured =
+        stringValue(invoke(invoke(model, "getConfigurationOrDefault"), "getDataCatalogConnection"));
+    if (!Utils.isEmpty(configured)) {
+      return configured;
+    }
+    for (CatalogCoachSource source : coachCatalogSources(model)) {
+      if (source != null && !Utils.isEmpty(source.catalogConnection())) {
+        return source.catalogConnection();
+      }
+    }
+    return fallback;
+  }
+
+  /** One catalog record the Coach panel asked the advisor to learn about. */
+  public record CatalogCoachSource(
+      String recordName, String catalogConnection, String recordNamespace) {}
+
+  private static boolean isRecordDefinition(Object sourceType) {
+    if (sourceType == null) {
+      return true;
+    }
+    if (sourceType instanceof Enum<?> enumType) {
+      return "RECORD_DEFINITION".equals(enumType.name());
+    }
+    return "RECORD_DEFINITION".equals(String.valueOf(sourceType));
+  }
+
+  private static String stringValue(Object value) {
+    return value == null ? null : String.valueOf(value);
   }
 
   private static HopGui hopGui() {

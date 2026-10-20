@@ -24,6 +24,7 @@ import org.apache.hop.core.search.ISearchable;
 import org.apache.hop.core.search.ISearchableAnalyser;
 import org.apache.hop.core.search.SearchableAnalyserPlugin;
 import org.apache.hop.core.util.Utils;
+import org.hopper.edw.datavault.search.EdwSearchSupport;
 
 @SearchableAnalyserPlugin(
     id = "DataVaultModelSearchAnalyser",
@@ -55,7 +56,7 @@ public class DataVaultModelSearchAnalyser extends BaseSearchableAnalyser<DataVau
     // The embedded Data Vault configuration and its properties
     //
     DataVaultConfiguration configuration = model.getConfigurationOrDefault();
-    matchObjectFields(
+    EdwSearchSupport.matchObjectFields(
         searchable,
         results,
         searchQuery,
@@ -108,7 +109,7 @@ public class DataVaultModelSearchAnalyser extends BaseSearchableAnalyser<DataVau
             componentName);
       }
 
-      matchObjectFields(
+      EdwSearchSupport.matchObjectFields(
           searchable, results, searchQuery, table, "data vault table property", componentName);
     }
 

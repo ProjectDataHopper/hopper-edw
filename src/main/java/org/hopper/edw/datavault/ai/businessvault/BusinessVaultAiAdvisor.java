@@ -89,6 +89,10 @@ public class BusinessVaultAiAdvisor implements IAiAdvisor {
 
   @Override
   public AiAdvisorPrompt buildPrompt(AiAdvisorRequest request) throws HopException {
+    Object artifact = request == null ? null : request.getArtifact();
+    if (EdwAiBoundModel.isForeignModel(artifact, BusinessVaultModel.class)) {
+      return promptFromStructure(request, EdwAiBoundModel.structureOf(artifact));
+    }
     BusinessVaultModel model = modelFrom(request);
     BvAiContextBundle context =
         BvAiContextBuilder.build(
@@ -138,6 +142,29 @@ public class BusinessVaultAiAdvisor implements IAiAdvisor {
   @Override
   public void afterApply(AiAdvisorRequest request, List<AiProposal> applied) {
     EdwAiAdvisorGraphSupport.afterApply(request);
+  }
+
+  private static AiAdvisorPrompt promptFromStructure(AiAdvisorRequest request, String structure)
+      throws HopException {
+    BvAiRequest bvRequest = toBvRequest(request);
+    BvAiScenario scenario =
+        bvRequest.getScenario() != null ? bvRequest.getScenario() : BvAiScenario.GENERAL;
+    BvAiContextBundle context =
+        BvAiContextBundle.builder()
+            .scenario(scenario)
+            .userPrompt(bvRequest.getUserPrompt())
+            .modelStructureJson(structure)
+            .followUp(bvRequest.isFollowUp())
+            .appliedChangeSummaries(
+                bvRequest.getAppliedChangeSummaries() != null
+                    ? bvRequest.getAppliedChangeSummaries()
+                    : List.of())
+            .build();
+    String userPrompt =
+        request.isFollowUp()
+            ? BvAiAdvisorService.buildFollowUpUserPrompt(context)
+            : BvAiAdvisorService.buildInitialUserPrompt(context);
+    return new AiAdvisorPrompt(BvAiAdvisorService.buildSystemPrompt(context), userPrompt);
   }
 
   private static BusinessVaultModel modelFrom(AiAdvisorRequest request) throws HopException {

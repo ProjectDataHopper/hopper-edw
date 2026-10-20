@@ -123,9 +123,9 @@ image::images/hopgui-data-vault-model-toolbar.png[The data vault model toolbar i
 
 === Edit model and configuration
 
-Click **Edit model** on the toolbar to open the model dialog. The **General** tab holds the model name and description; the remaining tabs edit the embedded configuration (target database, hashing, sentinel records, standard columns, target loading, and generated pipeline options).
+Click **Edit model** on the toolbar. The dialog holds the model name, description, and a **Configuration** picker. When a project configuration is selected, hashing, sentinels, standard columns, target loading, and generated artifacts are edited on that configuration. When the picker is empty, those tabs edit the copy embedded in the `.hdv`.
 
-image::images/data-vault-model-dialog.png[Edit Data Vault Model dialog — General tab,align="center"]
+image::images/data-vault-model-dialog.png[Edit Data Vault Model — configuration picker for vault1,align="center"]
 
 See link:datavault-configuration.adoc[Data Vault Configuration] for a full description of every setting and tab screenshot.
 

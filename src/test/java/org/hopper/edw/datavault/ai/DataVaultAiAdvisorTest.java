@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import org.apache.hop.ai.advisor.AiAdvisorInclusion;
+import org.apache.hop.ai.advisor.AiAdvisorInclusionChoice;
 import org.apache.hop.ai.advisor.AiAdvisorPrompt;
 import org.apache.hop.ai.advisor.AiAdvisorRequest;
 import org.apache.hop.ai.advisor.AiAdvisorScenario;
@@ -59,6 +60,21 @@ class DataVaultAiAdvisorTest {
     request.setArtifact(new DataVaultModel());
     assertTrue(advisor.listInclusionChoices(EdwAiInclusions.CATALOG, request).isEmpty());
     assertTrue(advisor.listInclusionChoices("other", request).isEmpty());
+  }
+
+  @Test
+  void catalogChoicesListCoachSourcesBeforeOtherCatalogSources() {
+    List<AiAdvisorInclusionChoice> choices =
+        DataVaultAiAdvisor.catalogChoices(
+            List.of("E2E-customer-address", "E2E-customer-address"),
+            List.of("orders", "E2E-customer-address", "E2E-customer-contact"));
+
+    assertEquals(3, choices.size());
+    assertEquals("E2E-customer-address", choices.get(0).getId());
+    assertEquals("E2E-customer-address (Coach)", choices.get(0).getLabel());
+    assertEquals("orders", choices.get(1).getId());
+    assertEquals("orders", choices.get(1).getLabel());
+    assertEquals("E2E-customer-contact", choices.get(2).getId());
   }
 
   @Test

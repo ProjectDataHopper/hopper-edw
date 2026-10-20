@@ -178,6 +178,8 @@ Linked Satellite** for each satellite that feeds the table.
 fill; keep, rename or drop the proposed target columns.
 +
 image::../images/business-vault-scd2-table-dialog.png[SCD2 table dialog — General tab,align="center"]
++
+image::../images/business-vault-scd2-table-dialog-derivatives.png[SCD2 table dialog — Derivatives tab, the linked satellites,align="center"]
 
 . Read the **Field mappings** list: each row maps one satellite attribute to one Business Vault column,
 and every mapped attribute is history (Type 2). Pick one attribute you would *want* to be always

@@ -8,4 +8,4 @@ Related guide: link:../ai-advisory.md[ai-advisory.md].
 
 Opens the Hop **AI Assistant** workbench bound to the open `.hdv` model: hubs, links, satellites, record sources, and generated pipelines.
 
-Requires an **AI Provider** in Hop metadata and AI enabled under **Configuration → Plugins → AI Assistant**. Review proposed edits before applying. See link:../ai-advisory.md[AI advisory].
+Requires an **AI Provider** in Hop metadata and AI enabled under **Configuration → Plugins → AI Assistant**. Review proposed edits before applying. An empty model can still be modeled from **Include catalog sources**: check the option, **Select…** the feeds (Coach sources are listed first), and apply hubs before the links and satellites that depend on them. See link:../ai-advisory.md#example-suggest-a-data-vault-model-from-catalog-sources[Suggest a Data Vault model from catalog sources].

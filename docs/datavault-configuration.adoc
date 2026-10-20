@@ -28,11 +28,15 @@ image::images/configure-edw-dialog.png[Configure EDW setup — standard catalog 
 
 Open the configuration from the visual model editor with the **Edit model** toolbar button. The dialog has a name, description, and a **Configuration** picker at the top. When the picker is empty (legacy embedded model), the same tabs edit the copy stored in the `.hdv` file. When a project configuration is selected, edit the shared object from the Metadata perspective (or the picker's New / Edit buttons).
 
-image::images/data-vault-model-dialog.png[Edit Data Vault Model — General tab (target database and hashing),align="center"]
+image::images/data-vault-model-dialog.png[Edit Data Vault Model — vault1 uses configuration data-vault-vault1,align="center"]
+
+When a project configuration is selected, the hashing and load tabs below are edited on that configuration (Metadata perspective → **EDW** → **Data Vault configuration**, or the picker buttons). The screenshots use configuration `data-vault-vault1`.
 
 === General tab
 
 Target database and hashing strategy.
+
+image::images/data-vault-model-configuration-editor-general-tab.png[Data Vault configuration data-vault-vault1 — General tab,align="center"]
 
 [cols="1,3", options="header"]
 |===
@@ -43,6 +47,9 @@ Target database and hashing strategy.
 
 |Read-only existing vault
 |When enabled, every `.hdv` that uses this configuration **documents** an already-built raw vault. Hop refuses Data Vault Update, Generate DDL, and Debug. Model check keeps referential integrity only (hash keys, parent hubs/links, names, attributes). Use a **dedicated** configuration object — do not share it with Hop-managed models. Mixed tables in one file still use per-table link:dv-integration-modes.adoc[External read-only].
+
+|Data catalog
+|Optional catalog connection used when resolving `DV_SOURCE` feeds for models that use this configuration.
 
 |Hash algorithm
 |Algorithm for surrogate hash keys (MD5, SHA-256, SHA-1, SHA-512). Affects computation and maximum key length.
@@ -73,7 +80,7 @@ Target database and hashing strategy.
 
 Controls generation of the classic Data Vault "unknown" / ghost sentinel row in hubs and links.
 
-image::images/data-vault-model-dialog-unknown-records-tab.png[Unknown records tab,align="center"]
+image::images/data-vault-model-configuration-editor-unknown-records-tab.png[Data Vault configuration data-vault-vault1 — Unknown records tab,align="center"]
 
 [cols="1,3", options="header"]
 |===
@@ -99,7 +106,7 @@ image::images/data-vault-model-dialog-unknown-records-tab.png[Unknown records ta
 
 Controls generation of an "invalid" / error sentinel row for malformed or rejected keys.
 
-image::images/data-vault-model-dialog-invalid-records-tab.png[Invalid records tab,align="center"]
+image::images/data-vault-model-configuration-editor-invalid-records-tab.png[Data Vault configuration data-vault-vault1 — Invalid records tab,align="center"]
 
 [cols="1,3", options="header"]
 |===
@@ -126,6 +133,8 @@ image::images/data-vault-model-dialog-invalid-records-tab.png[Invalid records ta
 Optional policy when a *child* feed (link or satellite) arrives before its parent hub, or with a null business key. Default is **PASS** (same as previous releases): generated loads hash the key and insert the child even if the hub row does not exist yet.
 
 This is **not** a new warehouse layer. It is a model policy plus generated pipeline fragments. Late-arriving *dimensions* (facts before dim members) are a separate dimensional feature (issue #109).
+
+image::images/data-vault-model-configuration-editor-orphan-handling-tab.png[Data Vault configuration data-vault-vault1 — Orphan handling tab,align="center"]
 
 [cols="1,3", options="header"]
 |===
@@ -155,7 +164,7 @@ The cheapest fix for valid child-before-parent keys is still to **also load the 
 
 Names and patterns for columns present on every Data Vault table.
 
-image::images/data-vault-model-dialog-standard-columns-tab.png[Standard columns tab,align="center"]
+image::images/data-vault-model-configuration-editor-standard-columns-tab.png[Data Vault configuration data-vault-vault1 — Standard columns tab,align="center"]
 
 [cols="1,3", options="header"]
 |===
@@ -199,7 +208,7 @@ image::images/data-vault-model-dialog-standard-columns-tab.png[Standard columns 
 
 Options for how generated pipelines write rows to target tables.
 
-image::images/data-vault-model-dialog-target-loading-tab.png[Target loading tab,align="center"]
+image::images/data-vault-model-configuration-editor-target-loading-tab.png[Data Vault configuration data-vault-vault1 — Target loading tab,align="center"]
 
 [cols="1,3", options="header"]
 |===
@@ -208,8 +217,32 @@ image::images/data-vault-model-dialog-target-loading-tab.png[Target loading tab,
 |Target table batch size
 |Commit size for Table Output transforms in generated pipelines (default 1000). Supports variables.
 
+|Target table parallel copies
+|Parallel copies of Table Output (default 1). A variable such as `${OUTPUT_COPIES}` is stored on the transform and resolved when the pipeline runs. In staging-file bulk mode, copies write separate shard files.
+
+|Target load mode
+|Table Output, native bulk, or staging file. The choices depend on the target engine.
+
+|Bulk load staging folder
+|Folder for staging-file mode. The default is `${java.io.tmpdir}/dv2/bulk/`.
+
+|Bulk load delimiter / enclosure / encoding
+|CSV settings for that staging file. Defaults are comma, double quote, and UTF-8.
+
+|Bulk load requires local file
+|Staging files must be on the local filesystem. MySQL `LOAD DATA LOCAL INFILE` needs this.
+
 |Sort rows in memory
 |Number of rows Sort Rows keeps in memory before spilling to disk in generated update pipelines (default 1000000). Used where a merge key is computed in Hop (for example satellite/link hash sort). Hub updates rely on SQL `ORDER BY` only (no Sort Rows). Supports variables.
+
+|Execution logging level
+|Log level for the generated load pipelines.
+
+|Create shard key on hash key (SingleStore)
+|When the target is SingleStore, CREATE TABLE can append `SHARD KEY` on the hash key.
+
+|Include driving keys in shard key (SingleStore)
+|For a multi-active satellite, include the driving key with the parent hash in the shard key.
 |===
 
 On **SQL Server** (and **PostgreSQL** with ICU/locale collations), generated hub (and satellite target) SQL automatically inspects live source/target column collations and types. When a sort risk is detected (for example `NVARCHAR` vs `VARCHAR`, or different collations) **and both legs use the same database engine**, the same bridge `COLLATE` is applied on both source and target `ORDER BY` expressions so Merge Rows streams stay aligned without manual configuration. Collation names are **not** portable across engines: a SQL Server source with a PostgreSQL vault does **not** inject `French_CI_AS` (or similar) into Postgres `ORDER BY` (issue #108). Vault `VARCHAR` columns are created with the UTF-8 collation `Latin1_General_100_CI_AS_SC_UTF8` (SQL Server 2019+) so Unicode values store without requiring `NVARCHAR`. Because SQL Server measures UTF-8 `VARCHAR(n)` in *bytes* while source/`NVARCHAR` lengths are character-oriented, generated DDL multiplies string lengths by three (and promotes to `VARCHAR(MAX)` when that exceeds 8000) so multi-byte values such as accented text cannot truncate on insert.
@@ -228,18 +261,18 @@ On MySQL, MariaDB, and SingleStore, the historical charset name **`utf8` is not 
 
 If the vault database is unreachable during check, a **warning** is raised so offline design can continue; when connectivity is available and the encoding is wrong, an **error** blocks the update **when enforcement is enabled** (see plugin-wide options below).
 
-=== Generated pipelines tab
+=== Generated artifacts tab
 
-Where and how update pipelines are named when the plugin generates them at runtime.
+Where generated update pipelines and bulk-load workflows are named and saved.
 
-image::images/data-vault-model-dialog-generated-pipelines-tab.png[Generated pipelines tab,align="center"]
+image::images/data-vault-model-configuration-editor-generated-artifacts-tab.png[Data Vault configuration data-vault-vault1 — Generated artifacts tab,align="center"]
 
 [cols="1,3", options="header"]
 |===
 |Option |Description
 
-|Generated pipeline folder
-|When set, each generated update pipeline is saved as a `.hpl` file in this folder before execution. Supports variables (for example `${PROJECT_HOME}/generated-pipelines`). Leave empty to run in memory only.
+|Generated artifact folder
+|When set, each generated update pipeline (`.hpl`) and bulk-load workflow (`.hwf`) is saved in this folder before execution. Supports variables (for example `${PROJECT_HOME}/generated-pipelines`). Leave empty to run in memory only.
 
 |Hub pipeline name prefix
 |Prefix for hub pipeline names (default `hub-`). Full name: prefix + target table name + `-` + source name.
@@ -249,6 +282,9 @@ image::images/data-vault-model-dialog-generated-pipelines-tab.png[Generated pipe
 
 |Satellite pipeline name prefix
 |Prefix for satellite pipelines (default `sat-`).
+
+|Bulk workflow name prefix
+|Name prefix of the master workflow when target load mode is staging file (default `DV Bulk Update - ` plus the model name).
 |===
 
 == Plugin-wide GUI options

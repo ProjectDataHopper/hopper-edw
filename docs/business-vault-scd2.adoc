@@ -117,6 +117,8 @@ After collapse, each SCD2 table can compute extra target columns with determinis
 
 Configure them on the SCD2 table **Calculations** tab. **Add** / **Edit** opens the SQL expression editor (fields + `CASE` / `COALESCE` / `CAST` patterns, large SQL widget, type and description). Generated **production** pipelines insert an **SQL Expression** transform (`calculate_<table>`) after `collapse_*` with a copy of the expressions.
 
+image::images/business-vault-scd2-table-dialog-calculations.png[SCD2 table dialog — Calculations tab on customer_360_bv,align="center"]
+
 image::images/sql-expression-dialog.png[SQL Expression transform dialog — Keep input fields, optional Business Vault model and SCD2 table, expression list,align="center"]
 
 The SQL Expression transform can also **link a Business Vault model file and SCD2 table**. When both are set, it loads calculations from that table at runtime (inline expressions are ignored). Production generate still copies expressions so load pipelines do not depend on opening the `.hbv` at run time. Help for the transform: link:help/sql-expression-dialog.adoc[SQL Expression].
@@ -125,7 +127,11 @@ Integration fixture: `integration-tests/tests/scd2-calculations/update-scd2-calc
 
 === Tests
 
-When the table is ready, use **Generate calculation unit test** on the SCD2 table (canvas context menu or the **Tests** tab). That creates:
+When the table is ready, use **Generate calculation unit test** on the SCD2 table (canvas context menu or the **Tests** tab).
+
+image::images/business-vault-scd2-table-dialog-tests.png[SCD2 table dialog — Tests tab for customer_360_bv, with the unit-test and capture pipeline names,align="center"]
+
+That creates:
 
 image::images/generate-calculations-unit-test-scd2-context-action.png[SCD2 table context menu — Generate calculation unit test on customer_360_bv,align="center"]
 
@@ -157,6 +163,10 @@ Keep using link:dbt-import.adoc[Import dbt models] for arbitrary SQL business ta
 == Source queries (other tables, views, or SQL)
 
 When a satellite-shaped input is **not** on the Data Vault target — for example a corrective view on another database — add a **Source query** on the BV canvas and hop it to the SCD2 table. The Data Vault model still has one target database; the source query is the BV-side exception.
+
+Linked satellites and source queries are listed on the SCD2 **Derivatives** tab. Customer 360 links `sat_customer_demo`, `sat_customer_contact`, `sat_customer_address`, and `sat_customer_prefs`.
+
+image::images/business-vault-scd2-table-dialog-derivatives.png[SCD2 table dialog — Derivatives tab with the four customer satellites,align="center"]
 
 Each generated `TableInput` uses that source's Hop connection. Table/view names are read directly. Authored SQL has `--` line comments and `/* */` block comments stripped, then is wrapped as a subquery so the plugin can add partition `WHERE` and hash-key/date `ORDER BY` outside the inner statement.
 
@@ -345,13 +355,21 @@ Open intervals use sentinels from configuration (default `1900-01-01 00:00:00` a
 |Optional name of a `BvSourceCalendar` on this canvas. Empty means every leg is eligible. See <<Source calendars>>.
 |===
 
-The Customer 360 sample uses all three SCD2 dialog areas:
+The Customer 360 sample (`customer_360_bv` on `integration-tests/tests/multi-satellite-bv/customer-360.hbv`) uses these tabs:
 
-image::images/business-vault-scd2-table-dialog.png[SCD2 table dialog — General tab,align="center"]
+image::images/business-vault-scd2-table-dialog.png[SCD2 table dialog — General tab, parent hub hub_customer, build mode Full rebuild,align="center"]
 
-image::images/business-vault-scd2-table-dialog-field-mappings.png[SCD2 table dialog — Field mappings,align="center"]
+image::images/business-vault-scd2-table-dialog-derivatives.png[SCD2 table dialog — Derivatives tab, four linked satellites,align="center"]
 
-image::images/business-vault-scd2-table-dialog-satellite-settings.png[SCD2 table dialog — Satellite settings,align="center"]
+image::images/business-vault-scd2-table-dialog-field-mappings.png[SCD2 table dialog — Field mappings, cust_* columns from the four satellites,align="center"]
+
+image::images/business-vault-scd2-table-dialog-satellite-settings.png[SCD2 table dialog — Satellite settings, source indicators DEMO, CONTACT, ADDRESS, and PREFS,align="center"]
+
+image::images/business-vault-scd2-table-dialog-calculations.png[SCD2 table dialog — Calculations tab,align="center"]
+
+image::images/business-vault-scd2-table-dialog-tests.png[SCD2 table dialog — Tests tab,align="center"]
+
+image::images/business-vault-scd2-table-dialog-lineage.png[SCD2 table dialog — Lineage tab, field mappings from the four satellites into customer_360_bv,align="center"]
 
 == Target databases
 

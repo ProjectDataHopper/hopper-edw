@@ -277,6 +277,10 @@ On the **Libraries** tab, add only `hop-hsm-jdbc-*.jar` (no Hop or Calcite jars)
 
 image::images/hop-source-model-jdbc-dbeaver-database-driver-manager.png[DBeaver Driver Manager settings for Apache Hop Source Model JDBC driver,align="center"]
 
+After you save the driver, **Apache Hop Source Model** is listed with the other drivers.
+
+image::images/hop-source-model-jdbc-dbeaver-database-driver-manager-list.png[DBeaver Driver Manager listing Apache Hop Source Model,align="center"]
+
 In the URL template, `{database}` is the default **schema** (Source model service name), not a relational database name.
 
 ===== 3. Create a connection

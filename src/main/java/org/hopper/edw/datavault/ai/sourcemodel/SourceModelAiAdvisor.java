@@ -87,6 +87,10 @@ public class SourceModelAiAdvisor implements IAiAdvisor {
 
   @Override
   public AiAdvisorPrompt buildPrompt(AiAdvisorRequest request) throws HopException {
+    Object artifact = request == null ? null : request.getArtifact();
+    if (EdwAiBoundModel.isForeignModel(artifact, SourceModel.class)) {
+      return promptFromStructure(request, EdwAiBoundModel.structureOf(artifact));
+    }
     SourceModel model = modelFrom(request);
     SourceModelAiScenario scenario = SourceModelAiScenario.resolve(request.getScenarioId());
     String system =
@@ -106,6 +110,18 @@ public class SourceModelAiAdvisor implements IAiAdvisor {
   @Override
   public AiAdvisorResponse parseResponse(String raw) {
     return EdwChatOnlyAdvisorSupport.parseAdviceOnly(raw);
+  }
+
+  private static AiAdvisorPrompt promptFromStructure(AiAdvisorRequest request, String structure)
+      throws HopException {
+    SourceModelAiScenario scenario = SourceModelAiScenario.resolve(request.getScenarioId());
+    String system =
+        HopAiPromptLoader.loadResource(PROMPT_ROOT, "preamble.txt")
+            + "\n\n"
+            + HopAiPromptLoader.loadResource(PROMPT_ROOT, scenario.getPromptResource() + ".txt");
+    String user =
+        SourceModelAiContextBuilder.userPrompt(request, structure, "{}", "");
+    return new AiAdvisorPrompt(system, user);
   }
 
   private static SourceModel modelFrom(AiAdvisorRequest request) throws HopException {

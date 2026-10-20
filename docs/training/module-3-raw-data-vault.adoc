@@ -105,7 +105,7 @@ image::../images/source-modeler-generated-data-vault-result.png[The generated ca
 `RECORD_SOURCE`. These names and the hashing rules are edited once here, for every model that shares
 the configuration.
 +
-image::../images/data-vault-model-dialog.png[The Edit Data Vault Model dialog — General tab,align="center"]
+image::../images/data-vault-model-dialog.png[The Edit Data Vault Model dialog — Configuration picker,align="center"]
 
 . Run **Check model** until it reports no errors. It validates the structure — missing business keys,
 unattached satellites, links with fewer than two hubs, duplicate names, references that do not
