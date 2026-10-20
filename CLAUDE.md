@@ -76,9 +76,9 @@ This plugin is built **against** Hop; it does not vendor Hop sources.
 | `org.apache.hop:hop-ui` (`${hop.version}`) | Hop GUI, dialogs, file types, canvas |
 | `org.hopper:hopper-presentation-core` / `hopper-presentation-swt` (`${hopper.presentation.version}`) | Generated dashboards, Performance/Gantt charts (`HPresentationViewer`) |
 
-Hopper presentation artifacts (`hopper-presentation-core`, `hopper-presentation-swt`, parent `hopper-presentation-engine`) resolve from **https://repository.data-hopper.com/repository/hopper/** (Maven repo id `hopper` in `pom.xml`). Do not require a local `mvn install` of the presentation engine unless you are changing that engine in the same session.
+Hopper presentation artifacts (`hopper-presentation-core`, `hopper-presentation-swt`, parent `hopper-presentation-engine`) resolve from **https://repository.data-hopper.com/repository/hop-community-plugins/** first, then **https://repository.data-hopper.com/repository/hopper/**. Do not require a local `mvn install` of the presentation engine unless you are changing that engine in the same session.
 
-**Jenkins:** pushes (and PRs) to GitHub `main` trigger https://jenkins.data-hopper.com/ via [`.github/workflows/trigger-jenkins.yml`](.github/workflows/trigger-jenkins.yml). A successful hopper-edw job publishes the SNAPSHOT plugin zip to **hop-community-plugins**. The presentation engine uses the same pattern and deploys SNAPSHOTs to the **hopper** Maven repo. After a GitHub change, `mvn -U` picks up those SNAPSHOTs; wait for Jenkins to finish before expecting new artifacts.
+**Jenkins:** pushes (and PRs) to GitHub `main` trigger https://jenkins.data-hopper.com/ via [`.github/workflows/trigger-jenkins.yml`](.github/workflows/trigger-jenkins.yml). A successful hopper-edw job publishes the SNAPSHOT plugin zip to **hop-community-plugins**. The presentation engine deploys SNAPSHOTs to that same repo with the existing Jenkins credential `nexus-hop-community`. After a GitHub change, `mvn -U` picks up those SNAPSHOTs; wait for Jenkins to finish before expecting new artifacts.
 
 Many `hop-transform-*` / `hop-action-*` modules are also on the compile classpath so generated pipelines can reference Meta classes. They are **not** all packaged into this plugin jar (Hop loads plugins dynamically). See `src/main/resources/dependencies.xml` and `src/assembly/assembly.xml`.
 

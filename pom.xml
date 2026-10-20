@@ -572,6 +572,18 @@
         <enabled>true</enabled>
         <updatePolicy>always</updatePolicy>
       </snapshots>
+      <id>hop-community-plugins</id>
+      <name>Data Hopper community plugins</name>
+      <url>https://repository.data-hopper.com/repository/hop-community-plugins/</url>
+    </repository>
+    <repository>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>always</updatePolicy>
+      </snapshots>
       <id>hopper</id>
       <name>Data Hopper (presentation engine)</name>
       <url>https://repository.data-hopper.com/repository/hopper/</url>
