@@ -8,6 +8,10 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 - Asking a question or choosing **Show what is sent** no longer freezes Hop. The prompt records a dimension alias and the file it points at, and does not open that file. Metrics and execution info cannot block the window.
 
+### Row previews
+
+- Row previews use Apache Hop's Show rows dialog. A long or multi-line cell stays complete for copy and find, the column header can filter rows, and hovering a cell shows its name, type, length, precision, and origin. The header includes the row count. Hash-key columns stay hexadecimal unless `HOP_BINARY_FIELDS_AVOID_HEX_PREVIEW` is set.
+
 ### EDW Journey architecture poster (issue #209)
 
 - Opening the EDW Journey, or selecting the resource definition group, shows the architecture poster with a status mark on each block that has a project or OPS signal. Clicking a block opens a Hopper presentation: trends when history exists, and tables whose rows open the source, Data Vault, Business Vault, dimensional model, catalog record, or the existing harvest, validate, lineage, and operational-analytics dialogs.

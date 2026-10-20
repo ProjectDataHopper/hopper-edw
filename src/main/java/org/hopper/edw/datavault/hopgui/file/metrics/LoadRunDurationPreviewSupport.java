@@ -27,8 +27,8 @@ import org.apache.hop.core.row.value.ValueMetaNumber;
 import org.apache.hop.core.row.value.ValueMetaString;
 import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.ui.core.dialog.ShowRowsDialog;
 import org.eclipse.swt.widgets.Shell;
-import org.hopper.edw.datavault.hopgui.dialog.ShowRowsDialog;
 import org.hopper.edw.datavault.metrics.LoadRunDurationRun;
 import org.hopper.edw.datavault.metrics.LoadRunDurationSnapshot;
 
