@@ -1,0 +1,252 @@
+= Getting started — retail example on Windows 11
+:toc: macro
+:toclevels: 2
+
+toc::[]
+
+Hop GUI runs on Windows 11. PostgreSQL and Marquez run in Docker Compose inside Ubuntu on WSL2. You open `retail-example/` from Windows and point a Hop environment at the Ubuntu address, then run the retail workflows in Hop GUI.
+
+The tour of the sample (catalog, models, schema gate, lineage) stays in link:getting-started-retail.adoc[Getting started — retail example]. This page is only the Windows setup. Issue https://github.com/ProjectDataHopper/hopper-edw/issues/210[#210].
+
+== What runs where
+
+[cols="1,2", options="header"]
+|===
+|Where |What
+
+|Windows 11
+|Java 21, Apache Hop *2.20.0-SNAPSHOT*, the Data Hopper EDW plugin, and Hop GUI
+
+|Ubuntu on WSL2
+|This git repository, Docker Compose, PostgreSQL on port *54320*, and Marquez (API *5001*, UI *3001*)
+|===
+
+The plugin zip does not include `retail-example/`. The sample is this repository. Clone it on the Ubuntu filesystem (for example `~/git/hopper-edw`), so the shell scripts and Compose files stay on a Linux path.
+
+From Windows, open that folder through the WSL share and stop at `retail-example`:
+
+[source,text]
+----
+\\wsl$\Ubuntu\home\<user>\git\hopper-edw\retail-example
+\\wsl.localhost\Ubuntu\home\<user>\git\hopper-edw\retail-example
+----
+
+Replace `<user>` with your Ubuntu username. Both prefixes point at the same files. On current Windows 11, open the folder with `\\wsl.localhost\Ubuntu`.
+
+== Install Hop and the plugin on Windows
+
+. Install *Java 21*.
+. Install *Apache Hop 2.20.0-SNAPSHOT*. This plugin requires that line. Hop 2.19 does not load it. Install steps and the version pin are in link:../README.md[the repository README].
+. Install the plugin. Unzip a release assembly into the Hop installation root so both `plugins/misc/hopper-edw/` and `lib/core/` are updated. Copying only the plugin jar leaves Jinja SQL unresolved.
++
+Release *0.13.0*: https://github.com/ProjectDataHopper/hopper-edw/releases/tag/v0.13.0[v0.13.0] includes `hopper-edw-0.13.0.zip`. The same README section describes the Hop Marketplace install on Hop 2.20.0-SNAPSHOT.
+. Restart Hop. *Metadata → EDW* lists the EDW metadata types when the plugin has loaded.
+
+== Install Ubuntu, Git, and Docker Compose
+
+From an elevated PowerShell:
+
+[source,powershell]
+----
+wsl --install -d Ubuntu
+wsl -l -v
+----
+
+The Ubuntu row shows version *2*.
+
+Inside Ubuntu, install Git, then Docker Engine and the Compose v2 plugin. Follow https://docs.docker.com/engine/install/ubuntu/[Install Docker Engine on Ubuntu], including the post-install step that adds your user to the `docker` group, and open a new shell afterwards. The command you will use is `docker compose` (Compose v2). Check it:
+
+[source,sh]
+----
+docker compose version
+docker info
+----
+
+`docker info` prints server information when the daemon is running. If it reports that it cannot connect, start the daemon and retry:
+
+[source,sh]
+----
+sudo systemctl start docker
+----
+
+When Ubuntu has no systemd, use `sudo service docker start` instead.
+
+Clone the repository on the Ubuntu filesystem and move to its root. The scripts below are run from that root:
+
+[source,sh]
+----
+mkdir -p ~/git
+cd ~/git
+git clone https://github.com/ProjectDataHopper/hopper-edw.git
+cd hopper-edw
+----
+
+`retail-example/` is the Hop project folder inside that clone.
+
+== Start PostgreSQL and Marquez
+
+From the repository root in Ubuntu:
+
+[source,sh]
+----
+./scripts/run-postgres.sh up
+./scripts/run-marquez.sh up
+----
+
+PostgreSQL is ready when the script prints a line of this form:
+
+[source,text]
+----
+PostgreSQL is ready (test@localhost:54320/test; also test_source, test_edw, test_ops, test_ops_analytics for retail-example; ...).
+----
+
+Container name `hop-data-vault-postgres-local`. User and password are `test` / `test`. Port *54320* is published by `scripts/docker/compose.postgres-local.yml`.
+
+[cols="1,2", options="header"]
+|===
+|Database |Hop connection
+
+|`test_source`
+|CRM
+
+|`test_edw`
+|Vault
+
+|`test_ops`
+|OPS
+
+|`test_ops_analytics`
+|OpsAnalytics
+|===
+
+Marquez is ready when the script prints `Marquez is ready.` and these URLs:
+
+* API: `http://localhost:5001/api/v1/lineage`
+* UI: `http://localhost:3001`
+
+Those ports come from `scripts/docker/compose.marquez.yml`. The `localhost` URLs are the addresses *inside Ubuntu*. Windows uses the Ubuntu address from the next section.
+
+The retail load reads PostgreSQL. Marquez is the lineage backend used later in the tour, and its UI is an easy check that Windows can reach the Ubuntu instance.
+
+== Read the Ubuntu address
+
+Inside Ubuntu, take the first address printed by:
+
+[source,sh]
+----
+hostname -I
+----
+
+From Windows PowerShell the same value is:
+
+[source,powershell]
+----
+wsl hostname -I
+----
+
+Call that address `<wsl-ip>` below. It changes when WSL restarts. When Hop can no longer connect, read it again and update the environment.
+
+Before you open Hop, load `http://<wsl-ip>:3001` in a Windows browser. The Marquez UI confirms that Windows reaches the published ports. PostgreSQL answers on `<wsl-ip>` port *54320*.
+
+== Configure the Hop environment
+
+On Windows, start Hop and choose *File → Open project*. Select the `retail-example` folder on the WSL share from the first section. The status bar shows the project name.
+
+CRM, Vault, OPS, and OpsAnalytics already read `${DB_HOST}` from the active environment. The lineage backend *Marquez-Localhost* reads `${MARQUEZ_API}`. The default workflow run configuration `local` writes execution info to connection *OPS*, so the database host is the value the load uses.
+
+Leave `environments/local-docker-postgres.json` set to `localhost`. `./scripts/run-hop.sh` inside Ubuntu reads that file. Put the Ubuntu address in a second file, created from Hop GUI:
+
+. In the status bar, click the cube next to the project name and choose *Add environment...*. If Hop already offered to create an environment when the project opened, use that dialog.
+. On *General*, set the name to `retail-wsl`, the purpose to Development, and the project to `retail-example`.
+. On *Configuration files*, choose *New...* and create `environments/windows-wsl.json` under the project. Leave `local-docker-postgres.json` out of this environment.
+. Choose *Edit...* and enter the variables below. `<wsl-ip>` is the address from the previous section.
+
+[cols="1,2", options="header"]
+|===
+|Variable |Value
+
+|`DB_HOST`
+|`<wsl-ip>`
+
+|`DB_PORT`
+|`54320`
+
+|`DB_USER`
+|`test`
+
+|`DB_PASSWORD`
+|`test`
+
+|`DB_SOURCE_NAME`
+|`test_source`
+
+|`DB_TARGET_NAME`
+|`test_edw`
+
+|`DB_OPS_NAME`
+|`test_ops`
+
+|`DB_OPS_ANALYTICS_NAME`
+|`test_ops_analytics`
+
+|`OUTPUT_COPIES`
+|`2`
+
+|`MARQUEZ_API`
+|`http://<wsl-ip>:5001/api/v1/lineage`
+
+|`MARQUEZ_BASE_URL`
+|`http://<wsl-ip>:5001`
+
+|`MARQUEZ_NAMESPACE_DATASET`
+|`retail-dataset`
+
+|`MARQUEZ_NAMESPACE_JOB`
+|`retail-job`
+
+|`EXECUTIONS_FOLDER`
+|`${java.io.tmpdir}/executions`
+|===
+
+`EXECUTIONS_FOLDER` is unused by the `local` run configuration. The value above resolves to a folder on the Windows Hop process. The file location `tmp-executions` reads it; the committed Linux file uses `/tmp/executions`, which is the wrong disk when Hop GUI is on Windows.
+
+Hop switches to `retail-wsl` when you close the dialog. The cube shows that name while it is active.
+
+`environments/windows-wsl.json` holds this machine's address. It is listed in `.gitignore`. Do not commit it.
+
+Check the path from Windows:
+
+. Open the *Database* perspective.
+. Select *Vault* and press *Connect*. Schemas and tables load (the warehouse is empty until the initial workflow finishes).
+. Select *CRM* and press *Connect*.
+
+Source-model connections `hsm-crm` and `hsm-crm-web`, and the server metadata `local-8888`, keep hostname `localhost`. They are separate from CRM, Vault, OPS, and OpsAnalytics.
+
+== Run the retail workflows
+
+With `retail-wsl` active:
+
+. Open `workflows/run-retail-initial.hwf`.
+. Run it with workflow run configuration `local`.
+. Open `workflows/run-retail-update.hwf` and run it the same way. Run it again for another month.
+
+Then follow link:getting-started-retail.adoc[Getting started — retail example] for the catalog, the models, the schema gate, and lineage. On that page, `./scripts/run-hop.sh` is the way to run the same workflows from a shell inside Ubuntu. On Windows, run them from Hop GUI as above.
+
+== If the connection fails
+
+[cols="1,2", options="header"]
+|===
+|What you see |What to do
+
+|Hop cannot connect after a reboot
+|In Ubuntu, run `hostname -I` again. Edit `retail-wsl` and set `DB_HOST`, `MARQUEZ_API`, and `MARQUEZ_BASE_URL` to the new address. Confirm `./scripts/run-postgres.sh status`.
+
+|`docker info` cannot reach the daemon
+|`sudo systemctl start docker`, or `sudo service docker start` when systemd is off. Then run `./scripts/run-postgres.sh up` and `./scripts/run-marquez.sh up` again.
+
+|*Metadata → EDW* is missing
+|Restart Hop after the plugin unzip. The zip must update `plugins/misc/hopper-edw/` and `lib/core/`.
+
+|Marquez UI does not open at `http://<wsl-ip>:3001`
+|`./scripts/run-marquez.sh status` inside Ubuntu. Use the first address from `hostname -I`, not `localhost`, in the Windows browser.
+|===

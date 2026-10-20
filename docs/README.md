@@ -32,6 +32,7 @@ Architecture pictures are **committed SVGs** (`docs/images/diagrams/`) generated
 | [edw-journey.adoc](edw-journey.adoc) | **EDW Journey** perspective: sources → controls → DV/BV/DM → workflows → reports |
 | [getting-started-edw.adoc](getting-started-edw.adoc) | **Build an EDW:** source model → catalog → Data Vault → resource definition group → load → BV/DM |
 | [getting-started-retail.adoc](getting-started-retail.adoc) | **Tour** the finished retail-example (run the sample workflows) |
+| [getting-started-retail-windows.adoc](getting-started-retail-windows.adoc) | **Windows 11:** Hop GUI on Windows, PostgreSQL and Marquez in Ubuntu on WSL2 |
 | [getting-started-adventureworks.adoc](getting-started-adventureworks.adoc) | **Tour** AdventureWorks (SQL Server → Postgres DV/BV/DM, bus matrix) |
 | [feature-overview.adoc](feature-overview.adoc) | Major plugin capabilities, maturity, and links to deep dives |
 | [naming-schemes.adoc](naming-schemes.adoc) | Hop 2.20 naming schemes for EDW models, tables, physical names, record definitions |

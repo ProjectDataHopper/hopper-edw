@@ -67,6 +67,7 @@ Full index: **[docs/README.md](docs/README.md)**
 | Guided training | [`docs/training/index.adoc`](docs/training/index.adoc) — walkthrough plus questionnaire, module 0 first |
 | Feature list | [`docs/feature-overview.adoc`](docs/feature-overview.adoc) |
 | Tour the sample | [`docs/getting-started-retail.adoc`](docs/getting-started-retail.adoc) |
+| Windows 11 + WSL2 | [`docs/getting-started-retail-windows.adoc`](docs/getting-started-retail-windows.adoc) |
 | AdventureWorks demo (SQL Server → Postgres) | [`docs/getting-started-adventureworks.adoc`](docs/getting-started-adventureworks.adoc) |
 | Advanced fixtures | [`docs/getting-started-integration-tests.adoc`](docs/getting-started-integration-tests.adoc) |
 | Managers / architects | [`docs/presentations/hop-data-vault-overview.md`](docs/presentations/hop-data-vault-overview.md) |
@@ -118,6 +119,8 @@ Or from `integration-tests/`: `./run-tests.sh`
 ![Retail 360 Data Vault model](docs/images/data-vault-model-retail-example.png)
 
 Register `retail-example/` as Hop project **`retail-example`**, then:
+
+On Windows 11, Hop GUI runs on Windows and PostgreSQL and Marquez run in Ubuntu on WSL2: [docs/getting-started-retail-windows.adoc](docs/getting-started-retail-windows.adoc).
 
 ```bash
 ./scripts/run-postgres.sh up

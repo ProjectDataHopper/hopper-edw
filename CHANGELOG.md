@@ -4,6 +4,10 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Retail example on Windows 11 (issue #210)
+
+- `docs/getting-started-retail-windows.adoc` explains Hop GUI on Windows 11 with PostgreSQL and Marquez in Ubuntu on WSL2. A Hop environment named `retail-wsl` points `DB_HOST` and the Marquez URLs at the Ubuntu address. From that environment, run `workflows/run-retail-initial.hwf` and `workflows/run-retail-update.hwf`.
+
 ### Dimensional model AI advisor
 
 - Asking a question or choosing **Show what is sent** no longer freezes Hop. The prompt records a dimension alias and the file it points at, and does not open that file. Metrics and execution info cannot block the window.

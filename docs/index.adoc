@@ -26,6 +26,9 @@ Sources are the AsciiDoc files in the repository `docs/` folder. Architecture pi
 |link:getting-started-retail.adoc[getting-started-retail]
 |Tour the finished retail-example
 
+|link:getting-started-retail-windows.adoc[getting-started-retail-windows]
+|Windows 11: Hop GUI on Windows, PostgreSQL and Marquez in Ubuntu on WSL2
+
 |link:getting-started-adventureworks.adoc[getting-started-adventureworks]
 |Tour AdventureWorks (SQL Server → Postgres, bus matrix)
 

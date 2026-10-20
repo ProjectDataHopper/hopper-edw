@@ -113,7 +113,8 @@ Prerequisites: **Apache Hop 2.20** (development `2.20.0-SNAPSHOT`) and **Java 21
 Compose v2 for the commands above. Marquez is only needed for module 7; `./scripts/run-marquez.sh
 status` reports whether its API answers, `down` stops the stack and `reset` wipes its database too.
 See link:../getting-started-retail.adoc[getting-started-retail]
-for what the sample contains.
+for what the sample contains. On Windows 11, with Hop GUI on Windows and Docker in WSL, start from
+link:../getting-started-retail-windows.adoc[Getting started — retail example on Windows 11].
 
 What you should see (verified on 2026-10-16):
 
@@ -148,4 +149,5 @@ fails if either is missing.
 * link:../architecture.adoc[Architecture] — catalog, resource definition group, build vs run
 * link:../getting-started-edw.adoc[Getting started — building an EDW]
 * link:../getting-started-retail.adoc[Getting started — retail example tour]
+* link:../getting-started-retail-windows.adoc[Getting started — retail example on Windows 11]
 * link:../feature-overview.adoc[Feature overview]

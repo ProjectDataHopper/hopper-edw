@@ -25,6 +25,7 @@ End-to-end retail data vault example demonstrating initial and incremental loads
 - [docs/getting-started-edw.adoc](../docs/getting-started-edw.adoc) — build an EDW from scratch
 - [docs/architecture.adoc](../docs/architecture.adoc) — catalog, resource definition group, build vs run
 - [docs/getting-started-retail.adoc](../docs/getting-started-retail.adoc) — tour this finished sample
+- [docs/getting-started-retail-windows.adoc](../docs/getting-started-retail-windows.adoc) — Windows 11: Hop GUI on Windows, PostgreSQL and Marquez in Ubuntu on WSL2
 - [docs/source-modeler-overview.adoc](../docs/source-modeler-overview.adoc) — source modeler (`.hsm`) and composite feeds
 - [docs/data-type-mappings.adoc](../docs/data-type-mappings.adoc) — pre-modeling data type mapping profiles
 - [docs/target-type-mappings.adoc](../docs/target-type-mappings.adoc) — Hop type → native SQL type preferences for generated DDL

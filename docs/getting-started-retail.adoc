@@ -20,6 +20,8 @@ Estimated time: 2–3 hours with Hop GUI, or follow command-line steps only in u
 . Configure database connections **`CRM`** and **`Vault`** from project metadata.
 . Start PostgreSQL: from repo root, `./scripts/run-postgres.sh up`.
 
+On Windows 11, run Hop GUI on Windows and the databases in Ubuntu on WSL2. Follow link:getting-started-retail-windows.adoc[Getting started — retail example on Windows 11], then return here for the tour.
+
 If you previously used an older single-database layout, reset once:
 
 [source,bash]
