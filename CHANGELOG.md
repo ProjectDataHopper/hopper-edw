@@ -4,6 +4,10 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Target type mapping editor (issue #215)
+
+- The Rules table packs each column to its header and cell text when the editor opens.
+
 ### Source model save (issue #214)
 
 - Saving an open source model writes the current file. Undo keeps the file path on source, dimensional, execution map, and lineage documents, so Save does not ask for a filename again.

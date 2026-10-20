@@ -202,17 +202,17 @@ public class TargetTypeMappingMetaEditor extends MetadataEditor<TargetTypeMappin
         BaseMessages.getString(PKG, "TargetTypeMappingMetaEditor.TargetSqlType.ToolTip");
     ColumnInfo[] columns =
         new ColumnInfo[] {
-          col("Id", ColumnInfo.COLUMN_TYPE_TEXT, 80, null),
-          col("Name", ColumnInfo.COLUMN_TYPE_TEXT, 100, null),
-          colCcombo("Match hop type", hopTypes, 110),
-          col("Min length", ColumnInfo.COLUMN_TYPE_TEXT, 80, null),
-          col("Max length", ColumnInfo.COLUMN_TYPE_TEXT, 80, null),
-          col("Min precision", ColumnInfo.COLUMN_TYPE_TEXT, 80, null),
-          col("Max precision", ColumnInfo.COLUMN_TYPE_TEXT, 80, null),
-          colCcombo("Length absent", new String[] {"Y", "N"}, 80),
-          col("Match field name", ColumnInfo.COLUMN_TYPE_TEXT, 120, rulePatternTip),
-          col("Target SQL type", ColumnInfo.COLUMN_TYPE_TEXT, 220, sqlTip),
-          colCcombo("Enabled", new String[] {"Y", "N"}, 60)
+          col("Id", ColumnInfo.COLUMN_TYPE_TEXT, null),
+          col("Name", ColumnInfo.COLUMN_TYPE_TEXT, null),
+          colCcombo("Match hop type", hopTypes),
+          col("Min length", ColumnInfo.COLUMN_TYPE_TEXT, null),
+          col("Max length", ColumnInfo.COLUMN_TYPE_TEXT, null),
+          col("Min precision", ColumnInfo.COLUMN_TYPE_TEXT, null),
+          col("Max precision", ColumnInfo.COLUMN_TYPE_TEXT, null),
+          colCcombo("Length absent", new String[] {"Y", "N"}),
+          col("Match field name", ColumnInfo.COLUMN_TYPE_TEXT, rulePatternTip),
+          col("Target SQL type", ColumnInfo.COLUMN_TYPE_TEXT, sqlTip),
+          colCcombo("Enabled", new String[] {"Y", "N"})
         };
 
     wRules =
@@ -389,11 +389,9 @@ public class TargetTypeMappingMetaEditor extends MetadataEditor<TargetTypeMappin
       item.setText(10, Const.NVL(rule.getTargetSqlType(), ""));
       item.setText(11, rule.isEnabled() ? "Y" : "N");
     }
-    if (wRules.table.getItemCount() == 0) {
-      new TableItem(wRules.table, SWT.NONE);
-    }
-    wRules.setRowNums();
-    wRules.optWidth(true);
+    // Pack to the header and the cell text. A fixed ColumnInfo width is kept by optWidth, so
+    // values draw into the next column.
+    wRules.optimizeTableView();
     refreshPreview();
   }
 
@@ -493,21 +491,16 @@ public class TargetTypeMappingMetaEditor extends MetadataEditor<TargetTypeMappin
     return withEmpty;
   }
 
-  private static ColumnInfo col(String name, int type, int width, String tooltip) {
+  private static ColumnInfo col(String name, int type, String tooltip) {
     ColumnInfo c = new ColumnInfo(name, type, false);
-    c.setWidth(width);
     c.setUsingVariables(true);
-    c.setAutoResize(false);
     if (!Utils.isEmpty(tooltip)) {
       c.setToolTip(tooltip);
     }
     return c;
   }
 
-  private static ColumnInfo colCcombo(String name, String[] values, int width) {
-    ColumnInfo c = new ColumnInfo(name, ColumnInfo.COLUMN_TYPE_CCOMBO, values);
-    c.setWidth(width);
-    c.setAutoResize(false);
-    return c;
+  private static ColumnInfo colCcombo(String name, String[] values) {
+    return new ColumnInfo(name, ColumnInfo.COLUMN_TYPE_CCOMBO, values);
   }
 }
