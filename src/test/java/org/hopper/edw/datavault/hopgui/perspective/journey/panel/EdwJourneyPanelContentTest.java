@@ -69,6 +69,9 @@ class EdwJourneyPanelContentTest {
         EdwJourneyPanelContent.build(
             EdwJourneyPanelId.WAVE_BOARD,
             EdwJourneyPanelContent.Inputs.of(EdwJourneySnapshot.empty(), overlay, null));
+    var duration = spec.charts().get(0);
+    assertEquals("when", duration.category());
+    assertEquals(-25, duration.labelAngle());
     var models = spec.charts().get(1);
     assertEquals(-25, models.labelAngle());
     assertTrue(models.linkTemplate().contains("element={model}"));
@@ -77,6 +80,28 @@ class EdwJourneyPanelContentTest {
     assertTrue(labels.contains("retail-f-orders"));
     assertTrue(labels.contains("retail-360" + EdwJourneyModelLookup.LAYER_MARK + "dv"));
     assertTrue(labels.contains("retail-360" + EdwJourneyModelLookup.LAYER_MARK + "bv"));
+  }
+
+  @Test
+  void dateAxesUseTheSameTiltAsModelNames() {
+    var inputs =
+        EdwJourneyPanelContent.Inputs.of(
+            EdwJourneySnapshot.empty(), EdwJourneyOpsOverlay.empty(), EdwJourneyHistory.empty(null));
+    for (EdwJourneyPanelId id :
+        List.of(
+            EdwJourneyPanelId.PROJECT_PULSE,
+            EdwJourneyPanelId.SOURCE_DRIFT,
+            EdwJourneyPanelId.HARVEST_WATCH,
+            EdwJourneyPanelId.GATE_DESK,
+            EdwJourneyPanelId.WAVE_BOARD)) {
+      var spec = EdwJourneyPanelContent.build(id, inputs);
+      assertFalse(spec.charts().isEmpty(), id.name());
+      for (var chart : spec.charts()) {
+        if ("when".equals(chart.category())) {
+          assertEquals(-25, chart.labelAngle(), id.name() + " " + chart.title());
+        }
+      }
+    }
   }
 
   @Test

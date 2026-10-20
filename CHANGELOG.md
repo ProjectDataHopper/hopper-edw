@@ -14,6 +14,7 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 - A presentation link uses `hop-edw://`. A table cell click carries every field of the row, including columns the table does not display, and an Open link can substitute `{field}` from that row.
 - The dashboard under the poster uses the report viewer (zoom, fit width, export) and stays in the light poster palette even when Hop is dark. The report toolbar sits at the top of that panel. Charts keep a fixed height. Tables and titles size to their content and sit beside or under the previous block. A Float icon on that toolbar opens the same presentation in its own window.
 - The wave-board chart of models in the latest wave draws category labels at −25° so long names stay apart. Clicking a bar opens that model. A name that exists in more than one layer is labeled with the layer.
+- Date labels on the horizontal axis of Journey charts, such as wave duration, are drawn at −25° so stamps like 10-19 22:17 stay apart.
 
 ## [0.13.0] — 2026-10-17
 

@@ -29,6 +29,7 @@ import org.hopper.edw.datavault.hopgui.perspective.journey.EdwJourneyOpsOverlay.
 import org.hopper.edw.datavault.hopgui.perspective.journey.EdwJourneySnapshot;
 import org.hopper.edw.datavault.hopgui.presentation.EdwPresentationViewerPane;
 import org.hopper.presentation.HPresentation;
+import org.hopper.presentation.component.types.chart.HBarChartComponent;
 import org.hopper.presentation.component.HComponent;
 import org.hopper.presentation.layout.HLayout;
 import org.hopper.presentation.page.HPage;
@@ -67,6 +68,10 @@ class EdwJourneyPanelLayoutTest {
     HComponent table = component(page, "HTableComponent");
     assertNotNull(chart);
     assertNotNull(table);
+    assertTrue(chart.getComponent() instanceof HBarChartComponent);
+    HBarChartComponent bars = (HBarChartComponent) chart.getComponent();
+    assertTrue(bars.isUsingAngledHorizontalLabels());
+    assertEquals("-25", bars.getHorizontalLabelAngle());
     HLayout tableLayout = table.getLayout();
     assertEquals(chart.getName(), tableLayout.getTop().getComponentName());
     assertEquals(HAttachment.Alignment.TOP, tableLayout.getTop().getAlignment());

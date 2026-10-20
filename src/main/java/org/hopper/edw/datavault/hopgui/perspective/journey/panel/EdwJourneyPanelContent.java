@@ -47,6 +47,12 @@ public final class EdwJourneyPanelContent {
 
   private static final Class<?> PKG = EdwJourneyPerspective.class;
 
+  /**
+   * Tilt for horizontal category labels that would otherwise overlap. Negative so the text hangs
+   * down-left from the category tick. Date stamps use {@code MM-dd HH:mm}.
+   */
+  private static final int CATEGORY_LABEL_ANGLE = -25;
+
   private EdwJourneyPanelContent() {}
 
   public record Inputs(
@@ -416,7 +422,7 @@ public final class EdwJourneyPanelContent {
                 "duration",
                 "hop-edw://open?element={model}&verb=select",
                 modelBars,
-                -25)),
+                CATEGORY_LABEL_ANGLE)),
         List.of(
             table(
                 "Latest wave",
@@ -852,7 +858,8 @@ public final class EdwJourneyPanelContent {
       String value,
       String linkTemplate,
       List<Map<String, String>> rows) {
-    return chart(title, category, series, value, linkTemplate, rows, null);
+    Integer angle = "when".equals(category) ? CATEGORY_LABEL_ANGLE : null;
+    return chart(title, category, series, value, linkTemplate, rows, angle);
   }
 
   private static ChartSpec chart(
