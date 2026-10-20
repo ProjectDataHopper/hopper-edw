@@ -4,6 +4,12 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+## [0.14.0] — 2026-10-20
+
+Requires **Apache Hop 2.20.0-SNAPSHOT** and **Java 21**.
+
+**Downloads:** [GitHub release zip](https://github.com/ProjectDataHopper/hopper-edw/releases/download/v0.14.0/hopper-edw-0.14.0.zip) · [Data Hopper Nexus](https://repository.data-hopper.com/repository/hop-community-plugins/org/hopper/hopper-edw/0.14.0/hopper-edw-0.14.0.zip) (`org.hopper:hopper-edw:0.14.0`)
+
 ### Retail example on Windows 11 (issue #210)
 
 - `docs/getting-started-retail-windows.adoc` explains Hop GUI on Windows 11 with PostgreSQL and Marquez in Ubuntu on WSL2. A Hop environment named `retail-wsl` points `DB_HOST` and the Marquez URLs at the Ubuntu address. From that environment, run `workflows/run-retail-initial.hwf` and `workflows/run-retail-update.hwf`.
