@@ -118,6 +118,8 @@ Modelers that “get attributes from source” therefore see pre-modeled types (
 
 Harvest, catalog refresh, and **Validate resource definitions** rediscover **PIPELINE**, **JSON**, and **COMPOSITE** feeds through the same projection path as publish, including attached mapping profiles.
 
+**Validate sources** uses that same effective length when a satellite attribute has no length of its own. A pipeline String with no length that `premodel-defaults` maps to 2000 is not reported as narrower than a catalog length of 2000. An explicit shorter attribute length is still blocking.
+
 The catalog is a **second model**. Editing lengths or mappings on the `.hsm` card does not change vault loads or the schema gate until you **publish**. Source-model **Check model** / dialog **Validate** report a stale catalog feed; harvest findings for those source kinds say to republish rather than to widen hub/link keys to the last published length.
 
 == Load pipelines

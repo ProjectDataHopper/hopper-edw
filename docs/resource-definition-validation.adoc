@@ -133,6 +133,8 @@ The status banner also restates **compare mode** and **baseline** (current worki
 | `FIELD_*` / `MODEL_ATTRIBUTE_NARROWER` | Field contract or model attribute length/type drift |
 |===
 
+A satellite attribute with no length is compared using the effective length from the source-model card that published the feed. Pipeline, JSON, masking, and query cards apply their data type mapping profiles and field overrides first. A pipeline String with no length that `premodel-defaults` maps to 2000 matches a working-catalog length of 2000 and is not blocking. An explicit shorter length on the attribute is still blocking.
+
 === Catalog is never rewritten by length remediation
 
 The **working catalog field length is the contract** used to expand models and target DDL. Remediation does **not** change the catalog. If the live source should define a new length, update the catalog yourself in the Data Catalog, then re-validate.

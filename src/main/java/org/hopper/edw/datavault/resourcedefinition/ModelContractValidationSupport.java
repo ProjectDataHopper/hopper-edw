@@ -17,6 +17,7 @@ package org.hopper.edw.datavault.resourcedefinition;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.hop.core.Const;
@@ -164,6 +165,11 @@ public final class ModelContractValidationSupport {
       return issues;
     }
     List<SourceField> baselineFields = BaselineContractSupport.fieldsOf(baselineDef.get());
+    // A blank satellite length is the physical pipeline or file field. The source card's data type
+    // mapping (for example premodel-defaults) supplies the effective length catalog publish stores.
+    Map<String, String> mappedLengths =
+        SourceModelContractLengthSupport.effectiveLengthsByFieldName(
+            baselineDef.get(), variables, metadataProvider);
 
     for (SourceUsage usage : usages) {
       if (usage == null
@@ -195,8 +201,9 @@ public final class ModelContractValidationSupport {
         if (attribute == null) {
           continue;
         }
+        String modelLength = lengthForComparison(attribute, mappedLengths, fieldName);
         int baselineLen = BaselineContractSupport.parsePositiveInt(baselineField.getLength());
-        int modelLen = BaselineContractSupport.parsePositiveInt(attribute.getLength());
+        int modelLen = BaselineContractSupport.parsePositiveInt(modelLength);
         if (baselineLen > 0 && (modelLen <= 0 || modelLen < baselineLen)) {
           String message =
               BaseMessages.getString(
@@ -205,7 +212,7 @@ public final class ModelContractValidationSupport {
                   fieldName,
                   satellite.getName(),
                   Const.NVL(usage.modelName(), usage.modelFilename()),
-                  Const.NVL(attribute.getLength(), "?"),
+                  displayLength(modelLength),
                   Const.NVL(baselineField.getLength(), "?"),
                   Utils.isEmpty(baselineVersionTag)
                       ? "working catalog"
@@ -235,6 +242,38 @@ public final class ModelContractValidationSupport {
       }
     }
     return issues;
+  }
+
+  /**
+   * An explicit positive attribute length wins. Otherwise use the effective length from the source
+   * card after data type mappings. A variable expression is left as stored.
+   */
+  private static String lengthForComparison(
+      SatelliteAttribute attribute, Map<String, String> mappedLengths, String fieldName) {
+    String stored = attribute.getLength();
+    if (!lengthUnspecified(stored) || mappedLengths == null || Utils.isEmpty(fieldName)) {
+      return stored;
+    }
+    String mapped = mappedLengths.get(fieldName.trim().toLowerCase(Locale.ROOT));
+    if (BaselineContractSupport.parsePositiveInt(mapped) > 0) {
+      return mapped;
+    }
+    return stored;
+  }
+
+  private static boolean lengthUnspecified(String value) {
+    if (Utils.isEmpty(value)) {
+      return true;
+    }
+    try {
+      return Integer.parseInt(value.trim()) <= 0;
+    } catch (NumberFormatException e) {
+      return false;
+    }
+  }
+
+  private static String displayLength(String length) {
+    return lengthUnspecified(length) ? "?" : length.trim();
   }
 
   private static SatelliteAttribute findAttribute(DvSatellite satellite, String fieldName) {

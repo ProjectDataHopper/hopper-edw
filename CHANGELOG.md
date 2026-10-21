@@ -4,6 +4,10 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Resource definition validation
+
+- **Validate sources** compares a satellite attribute that has no length using the source card's data type mapping. A pipeline String with no length that `premodel-defaults` maps to 2000 is not a blocking narrower-than-catalog error. An explicit shorter attribute length still is.
+
 ### Configuration perspective label (issue #220)
 
 - The Hop configuration perspective tab is **Hopper EDW**. It was labeled Data Vault 2.0.
