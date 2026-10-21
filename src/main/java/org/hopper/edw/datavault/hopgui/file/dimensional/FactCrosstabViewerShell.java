@@ -20,7 +20,6 @@ import org.apache.hop.core.Props;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
-import org.apache.hop.ui.hopgui.HopGui;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
@@ -34,23 +33,26 @@ import org.hopper.presentation.simple.HGeneratedCatalog;
 import org.hopper.presentation.swt.HPresentationChrome;
 import org.hopper.presentation.swt.HPresentationViewer;
 
-/** Non-modal presentation viewer with an Edit button back to the crosstab editor. */
+/** Viewer opened on top of the crosstab editor. Closing it returns to that editor. */
 final class FactCrosstabViewerShell {
 
   private static final Class<?> PKG = HopGuiDimensionalModelGraph.class;
 
-  private final HopGui hopGui;
+  private final Shell parent;
   private final HGeneratedCatalog catalog;
-  private final Runnable onEdit;
+  private Shell shell;
 
-  FactCrosstabViewerShell(HopGui hopGui, HGeneratedCatalog catalog, Runnable onEdit) {
-    this.hopGui = hopGui;
+  FactCrosstabViewerShell(Shell parent, HGeneratedCatalog catalog) {
+    this.parent = parent;
     this.catalog = catalog;
-    this.onEdit = onEdit;
   }
 
   void open() {
-    Shell shell = new Shell(hopGui.getShell(), SWT.SHELL_TRIM);
+    if (parent == null || parent.isDisposed()) {
+      return;
+    }
+    close();
+    shell = new Shell(parent, SWT.SHELL_TRIM);
     String title =
         catalog.getPresentation() != null
                 && StringUtils.isNotBlank(catalog.getPresentation().getName())
@@ -78,19 +80,13 @@ final class FactCrosstabViewerShell {
     fdEdit.top = new FormAttachment(0, margin);
     fdEdit.bottom = new FormAttachment(100, -margin);
     edit.setLayoutData(fdEdit);
-    edit.addListener(
-        SWT.Selection,
-        e -> {
-          shell.dispose();
-          if (onEdit != null) {
-            onEdit.run();
-          }
-        });
+    edit.addListener(SWT.Selection, e -> close());
 
     // Open before the query so the progress dialog has a visible parent. The viewer fills in
-    // after the query returns.
+    // after the query returns. The editor shell stays open underneath.
     shell.setSize(1100, 800);
     shell.open();
+    shell.forceActive();
 
     try {
       PresentationGuiPlugin.ensureEnvironment();
@@ -113,20 +109,21 @@ final class FactCrosstabViewerShell {
       viewer.setLayoutData(fdViewer);
       shell.layout(true, true);
     } catch (HQueryCancelledException e) {
-      if (!shell.isDisposed()) {
-        shell.dispose();
-      }
-      return;
+      close();
     } catch (Exception e) {
+      Shell errorParent = parent != null && !parent.isDisposed() ? parent : shell;
       new ErrorDialog(
-          hopGui.getShell(),
+          errorParent,
           BaseMessages.getString(PKG, "FactCrosstabEditorDialog.Error.Title"),
           BaseMessages.getString(PKG, "FactCrosstabEditorDialog.Error.Generate"),
           e);
-      if (!shell.isDisposed()) {
-        shell.dispose();
-      }
-      return;
+      close();
+    }
+  }
+
+  void close() {
+    if (shell != null && !shell.isDisposed()) {
+      shell.dispose();
     }
   }
 }

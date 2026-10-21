@@ -19,6 +19,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hopper.core.AggregationMethod;
+import org.hopper.core.HHorizontalAlignment;
+import org.hopper.core.HVerticalAlignment;
 
 /** One source column placed in a crosstab editor zone. */
 @Getter
@@ -38,6 +40,18 @@ public class FactCrosstabField {
   /** Set only for the facts zone. */
   private AggregationMethod aggregation;
 
+  /** Cell alignment. Null uses the zone default (dimensions center, facts right). */
+  private HHorizontalAlignment horizontalAlignment;
+
+  /** Cell alignment. Null uses middle. */
+  private HVerticalAlignment verticalAlignment;
+
+  /**
+   * Facts only. When every fact opts out, the generated crosstab omits totals. Default on so
+   * existing selections keep totals.
+   */
+  private boolean showingTotals = true;
+
   public FactCrosstabField(String tableName, String columnName, String header) {
     this.tableName = tableName;
     this.columnName = columnName;
@@ -51,7 +65,45 @@ public class FactCrosstabField {
   }
 
   public FactCrosstabField copy() {
-    return new FactCrosstabField(tableName, columnName, header, aggregation);
+    FactCrosstabField copy = new FactCrosstabField(tableName, columnName, header, aggregation);
+    copy.horizontalAlignment = horizontalAlignment;
+    copy.verticalAlignment = verticalAlignment;
+    copy.showingTotals = showingTotals;
+    return copy;
+  }
+
+  /** Dimensions default to center. Facts default to right. */
+  public HHorizontalAlignment resolveHorizontalAlignment(boolean fact) {
+    if (horizontalAlignment != null) {
+      return horizontalAlignment;
+    }
+    return fact ? HHorizontalAlignment.RIGHT : HHorizontalAlignment.CENTER;
+  }
+
+  public HVerticalAlignment resolveVerticalAlignment() {
+    return verticalAlignment != null ? verticalAlignment : HVerticalAlignment.MIDDLE;
+  }
+
+  public static HHorizontalAlignment parseHorizontalAlignment(String raw) {
+    if (raw == null || raw.isBlank()) {
+      return null;
+    }
+    try {
+      return HHorizontalAlignment.valueOf(raw.trim().toUpperCase());
+    } catch (IllegalArgumentException ignored) {
+      return null;
+    }
+  }
+
+  public static HVerticalAlignment parseVerticalAlignment(String raw) {
+    if (raw == null || raw.isBlank()) {
+      return null;
+    }
+    try {
+      return HVerticalAlignment.valueOf(raw.trim().toUpperCase());
+    } catch (IllegalArgumentException ignored) {
+      return null;
+    }
   }
 
   public boolean sameSource(FactCrosstabField other) {

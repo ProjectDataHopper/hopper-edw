@@ -27,6 +27,8 @@ import org.apache.hop.core.variables.IVariables;
 import org.apache.hop.core.variables.Variables;
 import org.hopper.core.AggregationMethod;
 import org.hopper.edw.datavault.presentation.fact.FactCrosstabQuery.SelectedColumn;
+import org.hopper.edw.semantic.model.SemanticModel;
+import org.hopper.edw.semantic.query.SemanticSelectionAdapter;
 
 /** Builds the star join for a {@link FactCrosstabSpec}, aggregated at the selected grain. */
 public final class FactCrosstabSqlBuilder {
@@ -41,6 +43,16 @@ public final class FactCrosstabSqlBuilder {
       FactCrosstabSourceModel sourceModel,
       DatabaseMeta databaseMeta,
       IVariables variables)
+      throws HopException {
+    return build(spec, sourceModel, databaseMeta, variables, null);
+  }
+
+  public static FactCrosstabQuery build(
+      FactCrosstabSpec spec,
+      FactCrosstabSourceModel sourceModel,
+      DatabaseMeta databaseMeta,
+      IVariables variables,
+      SemanticModel semanticModel)
       throws HopException {
     if (spec == null || spec.isEmpty()) {
       throw new HopException("Select at least one column for the crosstab");
@@ -94,17 +106,34 @@ public final class FactCrosstabSqlBuilder {
       String resultAlias = uniqueAlias(field, usedAliases);
       usedAliases.add(resultAlias);
       String qualified = qualifiedColumn(databaseMeta, table.getJoinAlias(), field.getColumnName());
+      if (!spec.getFacts().contains(field)) {
+        String formatted =
+            FactCrosstabDateSql.expression(
+                databaseMeta,
+                qualified,
+                SemanticSelectionAdapter.formatMask(semanticModel, field));
+        if (formatted != null) {
+          qualified = formatted;
+        }
+      }
       if (spec.getFacts().contains(field)) {
         AggregationMethod method =
             field.getAggregation() != null ? field.getAggregation() : AggregationMethod.SUM;
         String weightAlias = null;
+        // A crosstab re-aggregates pivoted cells, so AVERAGE is a SUM plus a weight count.
+        // A flat table shows the SQL aggregate directly.
+        boolean pivot = spec.usesCrosstab();
         switch (method) {
           case COUNT -> selectList.add("NULLIF(COUNT(" + qualified + "), 0) AS " + resultAlias);
           case AVERAGE -> {
-            selectList.add("SUM(" + qualified + ") AS " + resultAlias);
-            weightAlias = uniqueWeightAlias(resultAlias, usedAliases);
-            usedAliases.add(weightAlias);
-            selectList.add("COUNT(" + qualified + ") AS " + weightAlias);
+            if (pivot) {
+              selectList.add("SUM(" + qualified + ") AS " + resultAlias);
+              weightAlias = uniqueWeightAlias(resultAlias, usedAliases);
+              usedAliases.add(weightAlias);
+              selectList.add("COUNT(" + qualified + ") AS " + weightAlias);
+            } else {
+              selectList.add("AVG(" + qualified + ") AS " + resultAlias);
+            }
           }
           case SUM -> selectList.add("SUM(" + qualified + ") AS " + resultAlias);
           default -> selectList.add("SUM(" + qualified + ") AS " + resultAlias);

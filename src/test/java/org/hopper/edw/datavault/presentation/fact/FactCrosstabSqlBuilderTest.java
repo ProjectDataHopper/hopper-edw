@@ -186,8 +186,7 @@ class FactCrosstabSqlBuilderTest {
                   new FactCrosstabField("dim_customer", "customer_name", "Customer"));
               spec.addField(
                   FactCrosstabSpec.Zone.FACTS,
-                  new FactCrosstabField(
-                      "f_order_lines", "quantity", "Qty", AggregationMethod.SUM));
+                  new FactCrosstabField("f_order_lines", "quantity", "Qty", AggregationMethod.SUM));
             });
     String sql = query.getSql();
     String upper = sql.toUpperCase();
@@ -221,7 +220,7 @@ class FactCrosstabSqlBuilderTest {
   }
 
   @Test
-  void averageSelectsSumAndAWeightCount() throws Exception {
+  void listAverageUsesAvg() throws Exception {
     FactCrosstabQuery query =
         buildQuery(
             spec -> {
@@ -235,11 +234,35 @@ class FactCrosstabSqlBuilderTest {
             });
     String sql = query.getSql();
     String upper = sql.toUpperCase();
+    assertTrue(upper.contains("AVG("), sql);
+    assertFalse(upper.contains("SUM("), sql);
+    assertNull(query.getColumns().get(1).getWeightAlias());
+    assertEquals("amount", query.getColumns().get(1).getResultAlias());
+  }
+
+  @Test
+  void crosstabAverageSelectsSumAndAWeightCount() throws Exception {
+    FactCrosstabQuery query =
+        buildQuery(
+            spec -> {
+              spec.addField(
+                  FactCrosstabSpec.Zone.HORIZONTAL,
+                  new FactCrosstabField("dim_order_date", "year", "Year"));
+              spec.addField(
+                  FactCrosstabSpec.Zone.VERTICAL,
+                  new FactCrosstabField("dim_customer", "customer_name", "Customer"));
+              spec.addField(
+                  FactCrosstabSpec.Zone.FACTS,
+                  new FactCrosstabField(
+                      "f_order_lines", "amount", "Amount", AggregationMethod.AVERAGE));
+            });
+    String sql = query.getSql();
+    String upper = sql.toUpperCase();
     assertTrue(upper.contains("SUM("), sql);
     assertTrue(upper.contains("COUNT("), sql);
     assertFalse(upper.contains("NULLIF"), sql);
-    assertEquals("amount", query.getColumns().get(1).getResultAlias());
-    assertEquals("amount_n", query.getColumns().get(1).getWeightAlias());
+    assertEquals("amount", query.getColumns().get(2).getResultAlias());
+    assertEquals("amount_n", query.getColumns().get(2).getWeightAlias());
     assertFalse(upper.substring(upper.indexOf("GROUP BY")).contains("AMOUNT"), sql);
   }
 

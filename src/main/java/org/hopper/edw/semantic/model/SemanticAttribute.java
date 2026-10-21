@@ -38,6 +38,12 @@ public class SemanticAttribute {
 
   @HopMetadataProperty private String formatMask;
 
+  /** LEFT, CENTER, or RIGHT. Empty uses the presentation default. */
+  @HopMetadataProperty private String horizontalAlignment;
+
+  /** TOP, MIDDLE, or BOTTOM. Empty uses the presentation default. */
+  @HopMetadataProperty private String verticalAlignment;
+
   @HopMetadataProperty private Map<String, String> properties = new HashMap<>();
 
   public SemanticAttribute(String name, String physicalColumn) {

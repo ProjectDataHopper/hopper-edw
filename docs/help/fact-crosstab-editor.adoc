@@ -23,17 +23,27 @@ Four toolbar buttons above the tree add the selected column (or every column of 
 * **Vertical dimensions**
 * **Facts / KPIs** (with `SUM`, `COUNT`, or `AVERAGE`)
 
-On desktop Hop GUI you can also drag a tree item onto a zone. Hop Web uses the toolbar only.
+On desktop Hop GUI you can drag a column, or a whole table, onto any of the four zones. Double-click a source table to expand or collapse its columns. Hop Web uses the toolbar only.
 
-Check **Show horizontal totals** and **Show vertical totals** to add crosstab grand totals.
+Horizontal dimensions, vertical dimensions, and facts have **Horizontal alignment** and **Vertical alignment** lists (`LEFT` / `CENTER` / `RIGHT` and `TOP` / `MIDDLE` / `BOTTOM`). Facts also have an editable **Aggregation** list and a **Totals** choice (`Y` or `N`). **Swap dimensions** moves every horizontal dimension into the vertical list and the other way around.
 
-**Save selection** / **Open selection** store the zone layout on the current `.hsl`. Reopening **Create presentation...** from that layer reloads the last selection for that fact. Several `.hsl` files may bind to one `.hdm`.
+**Groups** can stay empty. The page is then one crosstab or one table. When groups has fields, that component repeats once per group value.
+
+Check **Show horizontal totals** and **Show vertical totals** to add crosstab grand totals. **Page format** under those checkboxes chooses A4 **Landscape** (the default) or **Portrait**. Set **Totals** to `N` on a fact to drop that fact from the totals. When every fact is `N`, the crosstab has no total row or total column. When at least one fact stays `Y`, those totals still include every fact.
+
+The selection name is shown at the top. The toolbar there saves, saves as, or renames it. **Save** keeps the current name and does not ask again. **Open selection** at the bottom loads another saved layout. **Create presentation...** starts unnamed. Open a saved selection from the semantic layer tree (double-click or the **Open** toolbar icon). Several `.hsl` files may bind to one `.hdm`.
 
 **SQL** opens that query in Hop's database explorer, with a dialect limit of 1000 rows (`LIMIT` / `TOP`) applied after `GROUP BY`, so the cap limits groups rather than fact rows. The editor stays open.
 
-**Show** builds that query (fact plus only the tables that contribute selected columns), generates a presentation in an isolated catalog (not saved in the Hop project), and opens the Hopper viewer (zoom, paging, SVG/PDF export, refresh). While the warehouse query runs, a progress dialog shows how many rows have been read. **Cancel** stops the query and closes the window. **Refresh** in the viewer runs the query again with the same dialog; cancelling that leaves the page that is already on screen. **Edit crosstab…** on that window returns here with the same selections.
+**Show** builds that query (fact plus only the tables that contribute selected columns), generates a presentation in an isolated catalog (not saved in the Hop project), and opens the Hopper viewer (zoom, paging, SVG/PDF export, refresh). The crosstab editor stays open underneath. While the warehouse query runs, a progress dialog shows how many rows have been read. **Cancel** stops the query and closes the viewer. **Refresh** in the viewer runs the query again with the same dialog; cancelling that leaves the page that is already on screen. Closing the viewer, or choosing **Edit crosstab…**, returns to this editor with the same selections.
 
-The query groups by the columns in **Groups**, **Horizontal dimensions**, and **Vertical dimensions**, and aggregates each fact with the selected `SUM`, `COUNT`, or `AVERAGE`. The crosstab still rolls those rows into totals, and a group repeats the crosstab once per group value.
+The query groups by the columns in **Groups**, **Horizontal dimensions**, and **Vertical dimensions**, and aggregates each fact with the selected `SUM`, `COUNT`, or `AVERAGE`.
+
+Attribute format masks apply to crosstab axes, table columns, and group labels. A date in **Groups** with mask `yyyy-MM-dd` is shown as that date, not as a raw timestamp.
+
+When both axes have at least one field, **Show** draws a crosstab. The pivot rolls those rows into totals, and a group repeats the crosstab once per group value. `AVERAGE` is sent as a sum plus a row count so the pivot can combine cells.
+
+When either axis is empty, **Show** draws a table instead. The columns are the group fields, then the horizontal dimensions, then the vertical dimensions, then the facts. `AVERAGE` is SQL `AVG`. With no groups, that table is the only component on the page. With groups, the same table repeats once per group value.
 
 == Requirements
 

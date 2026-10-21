@@ -7,7 +7,7 @@ toc::[]
 The **semantic layer** (`.hsl`) is the consumption model above a loaded warehouse. It is not a second Kimball canvas and not an extension of catalog record definitions.
 
 * **Physical bindings** point at `.hdm` tables (later: catalog, RDBMS).
-* **Logical entities** hold attributes and measures with headers, default aggregations, and format masks.
+* **Logical entities** hold attributes and measures with headers, alignments, default aggregations, totals, and format masks.
 * **Relationships** describe joins (including role-playing dates).
 * **Named selections** store a crosstab / presentation query so fields do not have to be re-picked.
 
@@ -18,10 +18,10 @@ Calcite compiles a structured selection to warehouse SQL (logical entity names �
 * **File → New → Semantic layer**, then **Select dimensional model...**
 * The editor shows the bound `.hdm` under the buttons. Several `.hsl` files can bind to the same dimensional model (for example finance vs operations presentations).
 
-Edit headers, format masks (default `#,##0.00` for numbers), and aggregations in the tree editor.
+Edit headers, format masks (default `#,##0.00` for numbers), horizontal and vertical alignment, aggregations, and the totals checkbox in the tree editor.
 
 == Crosstab
 
-**Create presentation...** on the semantic layer opens the fact crosstab editor. The source tree is the `.hsl` (not the raw `.hdm` field list), so dropping a measure from the layer hides it in the editor. The last saved selection for that fact is reloaded. **Save selection** / **Open selection** persist layout on this `.hsl`. Presentations apply measure format masks.
+**Create presentation...** on the semantic layer opens an empty fact crosstab editor. The source tree is the `.hsl` (not the raw `.hdm` field list), so dropping a measure from the layer hides it in the editor. Double-click a saved selection, or use the tree toolbar **Open** icon, to load that selection. The crosstab editor shows the selection name and saves it from the toolbar. **Save** keeps that name. **Open selection** loads another saved layout. The tree toolbar also deletes and renames selections. Presentations apply attribute and measure format masks, including date masks on crosstab axes.
 
 A `.hdm` fact still has **Create presentation...** as a shortcut; that path seeds an in-memory layer from the star and does not pick or overwrite a particular `.hsl` file.

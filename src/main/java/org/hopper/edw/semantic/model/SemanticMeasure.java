@@ -42,6 +42,16 @@ public class SemanticMeasure {
   /** SUM, COUNT, or AVERAGE. Stored as a string so XML metadata need not implement IEnumHasCode. */
   @HopMetadataProperty private String aggregation = AggregationMethod.SUM.name();
 
+  /** LEFT, CENTER, or RIGHT. Empty uses right in the generated presentation. */
+  @HopMetadataProperty private String horizontalAlignment;
+
+  /** TOP, MIDDLE, or BOTTOM. Empty uses middle in the generated presentation. */
+  @HopMetadataProperty private String verticalAlignment;
+
+  /** Include this measure in crosstab totals. Missing XML stays on so older layers keep totals. */
+  @HopMetadataProperty(defaultBoolean = true)
+  private boolean showingTotals = true;
+
   @HopMetadataProperty private boolean additive = true;
 
   @HopMetadataProperty private Map<String, String> properties = new HashMap<>();

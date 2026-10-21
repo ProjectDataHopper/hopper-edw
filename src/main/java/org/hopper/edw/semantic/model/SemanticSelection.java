@@ -49,12 +49,16 @@ public class SemanticSelection {
 
   @HopMetadataProperty private boolean showingVerticalTotals = true;
 
+  /** A4 portrait. Missing XML stays landscape. */
+  @HopMetadataProperty private boolean portrait;
+
   public SemanticSelection copy() {
     SemanticSelection copy = new SemanticSelection();
     copy.name = name;
     copy.entityName = entityName;
     copy.showingHorizontalTotals = showingHorizontalTotals;
     copy.showingVerticalTotals = showingVerticalTotals;
+    copy.portrait = portrait;
     copy.groups = copyFields(groups);
     copy.rows = copyFields(rows);
     copy.columns = copyFields(columns);

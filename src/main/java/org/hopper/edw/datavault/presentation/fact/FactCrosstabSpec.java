@@ -33,6 +33,9 @@ public class FactCrosstabSpec {
   }
 
   private String factTableName;
+
+  /** Saved selection name. Empty when this editor session is a new presentation. */
+  private String selectionName;
   private List<FactCrosstabField> groups = new ArrayList<>();
   private List<FactCrosstabField> horizontalDimensions = new ArrayList<>();
   private List<FactCrosstabField> verticalDimensions = new ArrayList<>();
@@ -40,13 +43,18 @@ public class FactCrosstabSpec {
   private boolean showingHorizontalTotals = true;
   private boolean showingVerticalTotals = true;
 
+  /** A4 portrait when true. The default is landscape, matching earlier presentations. */
+  private boolean portrait;
+
   public FactCrosstabSpec() {}
 
   public FactCrosstabSpec copy() {
     FactCrosstabSpec copy = new FactCrosstabSpec();
     copy.factTableName = factTableName;
+    copy.selectionName = selectionName;
     copy.showingHorizontalTotals = showingHorizontalTotals;
     copy.showingVerticalTotals = showingVerticalTotals;
+    copy.portrait = portrait;
     copy.groups = copyFields(groups);
     copy.horizontalDimensions = copyFields(horizontalDimensions);
     copy.verticalDimensions = copyFields(verticalDimensions);
@@ -68,6 +76,24 @@ public class FactCrosstabSpec {
         && horizontalDimensions.isEmpty()
         && verticalDimensions.isEmpty()
         && facts.isEmpty();
+  }
+
+  /** A pivot needs both axes. Otherwise the presentation is a flat table. */
+  public boolean usesCrosstab() {
+    return horizontalDimensions != null
+        && !horizontalDimensions.isEmpty()
+        && verticalDimensions != null
+        && !verticalDimensions.isEmpty();
+  }
+
+  /** Exchange the horizontal and vertical dimension lists. */
+  public void swapAxes() {
+    List<FactCrosstabField> horizontal =
+        horizontalDimensions != null ? horizontalDimensions : new ArrayList<>();
+    List<FactCrosstabField> vertical =
+        verticalDimensions != null ? verticalDimensions : new ArrayList<>();
+    horizontalDimensions = vertical;
+    verticalDimensions = horizontal;
   }
 
   public List<FactCrosstabField> allFields() {

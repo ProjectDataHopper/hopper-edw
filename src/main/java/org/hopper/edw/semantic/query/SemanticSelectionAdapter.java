@@ -41,6 +41,7 @@ public final class SemanticSelectionAdapter {
     }
     selection.setShowingHorizontalTotals(spec.isShowingHorizontalTotals());
     selection.setShowingVerticalTotals(spec.isShowingVerticalTotals());
+    selection.setPortrait(spec.isPortrait());
     copyZone(selection.getGroups(), spec.getGroups());
     copyZone(selection.getRows(), spec.getVerticalDimensions());
     copyZone(selection.getColumns(), spec.getHorizontalDimensions());
@@ -54,8 +55,10 @@ public final class SemanticSelectionAdapter {
       return spec;
     }
     spec.setFactTableName(selection.getEntityName());
+    spec.setSelectionName(selection.getName());
     spec.setShowingHorizontalTotals(selection.isShowingHorizontalTotals());
     spec.setShowingVerticalTotals(selection.isShowingVerticalTotals());
+    spec.setPortrait(selection.isPortrait());
     for (SemanticSelectionField field : selection.getGroups()) {
       spec.getGroups().add(toCrosstabField(model, field, false));
     }
@@ -103,6 +106,13 @@ public final class SemanticSelectionAdapter {
           new SemanticSelectionField(field.getTableName(), field.getColumnName());
       mapped.setHeader(field.getHeader());
       mapped.setAggregationMethod(field.getAggregation());
+      if (field.getHorizontalAlignment() != null) {
+        mapped.setHorizontalAlignment(field.getHorizontalAlignment().name());
+      }
+      if (field.getVerticalAlignment() != null) {
+        mapped.setVerticalAlignment(field.getVerticalAlignment().name());
+      }
+      mapped.setShowingTotals(field.isShowingTotals());
       target.add(mapped);
     }
   }
@@ -114,6 +124,8 @@ public final class SemanticSelectionAdapter {
     }
     String header = field.getHeader();
     AggregationMethod aggregation = field.resolveAggregation();
+    String horizontal = field.getHorizontalAlignment();
+    String vertical = field.getVerticalAlignment();
     if (model != null) {
       SemanticEntity entity = model.findEntity(field.getEntityName());
       if (entity != null) {
@@ -126,15 +138,34 @@ public final class SemanticSelectionAdapter {
             if (aggregation == null) {
               aggregation = measure.resolveAggregation();
             }
+            if (Utils.isEmpty(horizontal)) {
+              horizontal = measure.getHorizontalAlignment();
+            }
+            if (Utils.isEmpty(vertical)) {
+              vertical = measure.getVerticalAlignment();
+            }
           }
         } else {
           SemanticAttribute attribute = entity.findAttribute(field.getFieldName());
-          if (attribute != null && Utils.isEmpty(header)) {
-            header = attribute.getHeader();
+          if (attribute != null) {
+            if (Utils.isEmpty(header)) {
+              header = attribute.getHeader();
+            }
+            if (Utils.isEmpty(horizontal)) {
+              horizontal = attribute.getHorizontalAlignment();
+            }
+            if (Utils.isEmpty(vertical)) {
+              vertical = attribute.getVerticalAlignment();
+            }
           }
         }
       }
     }
-    return new FactCrosstabField(field.getEntityName(), field.getFieldName(), header, aggregation);
+    FactCrosstabField crosstabField =
+        new FactCrosstabField(field.getEntityName(), field.getFieldName(), header, aggregation);
+    crosstabField.setHorizontalAlignment(FactCrosstabField.parseHorizontalAlignment(horizontal));
+    crosstabField.setVerticalAlignment(FactCrosstabField.parseVerticalAlignment(vertical));
+    crosstabField.setShowingTotals(field.isShowingTotals());
+    return crosstabField;
   }
 }

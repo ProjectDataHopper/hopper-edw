@@ -53,7 +53,8 @@ limitations under the License.
           <name>row_count</name>
           <physicalColumn>row_count</physicalColumn>
           <header>Row count</header>
-          <formatMask>#,##0.00</formatMask>
+          <description/>
+          <formatMask>#,##0</formatMask>
           <aggregation>SUM</aggregation>
           <additive>Y</additive>
         </measure>
@@ -110,7 +111,8 @@ limitations under the License.
           <name>month</name>
           <physicalColumn>month</physicalColumn>
           <header>Month</header>
-          <formatMask>#,##0</formatMask>
+          <description/>
+          <formatMask>00</formatMask>
         </attribute>
         <attribute>
           <name>month_name</name>
@@ -151,6 +153,47 @@ limitations under the License.
       <roleName>dim_load_date</roleName>
     </relationship>
   </relationships>
-  <selections/>
+  <selections>
+    <selection>
+      <name>fact_load_insight</name>
+      <entityName>fact_load_insight</entityName>
+      <groups>
+        <group>
+          <entityName>dim_load_date</entityName>
+          <fieldName>year</fieldName>
+          <header>Year</header>
+        </group>
+        <group>
+          <entityName>dim_load_date</entityName>
+          <fieldName>month</fieldName>
+          <header>Month</header>
+        </group>
+      </groups>
+      <rows>
+        <row>
+          <entityName>fact_load_insight</entityName>
+          <fieldName>element_name</fieldName>
+          <header>Element name</header>
+        </row>
+      </rows>
+      <columns>
+        <column>
+          <entityName>fact_load_insight</entityName>
+          <fieldName>code</fieldName>
+          <header>Code</header>
+        </column>
+      </columns>
+      <measures>
+        <measure>
+          <entityName>fact_load_insight</entityName>
+          <fieldName>row_count</fieldName>
+          <header>Row count</header>
+          <aggregation>SUM</aggregation>
+        </measure>
+      </measures>
+      <showingHorizontalTotals>Y</showingHorizontalTotals>
+      <showingVerticalTotals>Y</showingVerticalTotals>
+    </selection>
+  </selections>
   <name>ops-f-load-insight</name>
 </semantic-model>

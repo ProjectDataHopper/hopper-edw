@@ -44,10 +44,12 @@ import org.hopper.edw.semantic.model.SemanticModel;
 import org.hopper.edw.semantic.query.SemanticSelectionAdapter;
 import org.hopper.presentation.HPresentation;
 import org.hopper.presentation.component.HComponent;
+import org.hopper.presentation.component.type.IHComponent;
 import org.hopper.presentation.component.types.composite.HCompositeComponent;
 import org.hopper.presentation.component.types.crosstab.HCrosstabComponent;
 import org.hopper.presentation.component.types.group.HGroupComponent;
 import org.hopper.presentation.component.types.label.HLabelComponent;
+import org.hopper.presentation.component.types.table.HTableComponent;
 import org.hopper.presentation.connector.HConnector;
 import org.hopper.presentation.connector.types.sql.HSqlConnector;
 import org.hopper.presentation.layout.HLayoutBuilder;
@@ -61,8 +63,8 @@ import org.hopper.presentation.theme.HTheme;
 public final class FactCrosstabPresentationBuilder {
 
   public static final String CONNECTOR_NAME = "fact-query";
-  public static final String COMPONENT_TITLE = "Title";
   public static final String COMPONENT_CROSSTAB = "Crosstab";
+  public static final String COMPONENT_TABLE = "Table";
   public static final String COMPONENT_COMPOSITE = "Composite";
   public static final String COMPONENT_GROUP = "Group";
   public static final String COMPONENT_GROUP_LABEL = "GroupLabel";
@@ -99,7 +101,8 @@ public final class FactCrosstabPresentationBuilder {
       throw new HopException(
           "Set a target database on the dimensional configuration before creating a presentation");
     }
-    FactCrosstabQuery query = FactCrosstabSqlBuilder.build(spec, sourceModel, target, variables);
+    FactCrosstabQuery query =
+        FactCrosstabSqlBuilder.build(spec, sourceModel, target, variables, semanticModel);
     HDatabaseConnection connection =
         FactCrosstabConnectionSupport.fromDatabaseMeta(target, variables);
 
@@ -120,21 +123,16 @@ public final class FactCrosstabPresentationBuilder {
     presentation.setDarkThemeName(Constants.GENERATED_DARK_THEME_NAME);
     presentation.setLayoutMode(HLayoutMode.PAGINATED.wireValue());
 
-    HPage page = HPage.getA4(false);
+    HPage page = HPage.getA4(spec.isPortrait());
     presentation.getPages().add(page);
 
-    HCrosstabComponent crosstab = createCrosstab(spec, query, semanticModel);
+    IHComponent body = createBody(spec, query, semanticModel);
+    String bodyName = spec.usesCrosstab() ? COMPONENT_CROSSTAB : COMPONENT_TABLE;
     if (spec.getGroups().isEmpty()) {
-      HLabelComponent label = new HLabelComponent(title);
-      label.setDefaultFont(new HFont("Arial", "18", true, false));
-      HComponent titleComponent = new HComponent(COMPONENT_TITLE, label);
-      titleComponent.setLayout(new HLayoutBuilder().left().top().right().build());
-      page.getComponents().add(titleComponent);
-
-      HComponent crosstabComponent = new HComponent(COMPONENT_CROSSTAB, crosstab);
-      crosstabComponent.setLayout(
-          new HLayoutBuilder().left().right().below(COMPONENT_TITLE, 8).build());
-      page.getComponents().add(crosstabComponent);
+      // No group fields: the page is the one crosstab or table.
+      HComponent bodyComponent = new HComponent(bodyName, body);
+      bodyComponent.setLayout(new HLayoutBuilder().left().top().right().build());
+      page.getComponents().add(bodyComponent);
     } else {
       HCompositeComponent composite = new HCompositeComponent();
       HLabelComponent groupLabel = new HLabelComponent(groupLabelText(query, spec));
@@ -143,10 +141,10 @@ public final class FactCrosstabPresentationBuilder {
       labelComponent.setLayout(new HLayoutBuilder().left().top().right().build());
       composite.getChildren().add(labelComponent);
 
-      HComponent crosstabComponent = new HComponent(COMPONENT_CROSSTAB, crosstab);
-      crosstabComponent.setLayout(
+      HComponent bodyComponent = new HComponent(bodyName, body);
+      bodyComponent.setLayout(
           new HLayoutBuilder().left().right().below(COMPONENT_GROUP_LABEL, 8).build());
-      composite.getChildren().add(crosstabComponent);
+      composite.getChildren().add(bodyComponent);
 
       HComponent compositeComponent = new HComponent(COMPONENT_COMPOSITE, composite);
       compositeComponent.setLayout(new HLayoutBuilder().left().top().build());
@@ -154,12 +152,19 @@ public final class FactCrosstabPresentationBuilder {
       List<HColumn> groupColumns = new ArrayList<>();
       List<HSortMethod> sorts = new ArrayList<>();
       for (SelectedColumn column : query.matching(spec.getGroups())) {
-        groupColumns.add(
+        HColumn groupColumn =
             new HColumn(
                 column.getResultAlias(),
                 headerOf(column),
                 HHorizontalAlignment.LEFT,
-                HVerticalAlignment.TOP));
+                HVerticalAlignment.TOP);
+        // Date masks are applied in SQL. A Java mask here would format only the label and the
+        // group filter would no longer match the source timestamp.
+        if (!FactCrosstabDateSql.isDateMask(
+            SemanticSelectionAdapter.formatMask(semanticModel, column.getField()))) {
+          applyFormatMask(groupColumn, semanticModel, column.getField());
+        }
+        groupColumns.add(groupColumn);
         sorts.add(new HSortMethod(HSortMethod.Type.NATIVE_VALUE, true));
       }
       HGroupComponent group =
@@ -180,10 +185,14 @@ public final class FactCrosstabPresentationBuilder {
   static HCrosstabComponent createCrosstab(
       FactCrosstabSpec spec, FactCrosstabQuery query, SemanticModel semanticModel) {
     HCrosstabComponent crosstab = new HCrosstabComponent(CONNECTOR_NAME);
-    crosstab.setHorizontalDimensions(toDimensions(query.matching(spec.getHorizontalDimensions())));
-    crosstab.setVerticalDimensions(toDimensions(query.matching(spec.getVerticalDimensions())));
+    crosstab.setHorizontalDimensions(
+        toDimensions(query.matching(spec.getHorizontalDimensions()), semanticModel));
+    crosstab.setVerticalDimensions(
+        toDimensions(query.matching(spec.getVerticalDimensions()), semanticModel));
+    List<SelectedColumn> factColumns = query.matching(spec.getFacts());
+    boolean anyFactTotals = factColumns.isEmpty() || anyShowingTotals(factColumns);
     List<HFact> facts = new ArrayList<>();
-    for (SelectedColumn column : query.matching(spec.getFacts())) {
+    for (SelectedColumn column : factColumns) {
       AggregationMethod selectionMethod =
           column.getField().getAggregation() != null
               ? column.getField().getAggregation()
@@ -200,19 +209,19 @@ public final class FactCrosstabPresentationBuilder {
           new HFact(
               column.getResultAlias(),
               headerOf(column),
-              HHorizontalAlignment.RIGHT,
-              HVerticalAlignment.MIDDLE,
+              column.getField().resolveHorizontalAlignment(true),
+              column.getField().resolveVerticalAlignment(),
               pivotMethod,
               mask);
-      if (selectionMethod == AggregationMethod.AVERAGE
-          && !Utils.isEmpty(column.getWeightAlias())) {
+      if (selectionMethod == AggregationMethod.AVERAGE && !Utils.isEmpty(column.getWeightAlias())) {
         fact.setWeightColumnName(column.getWeightAlias());
       }
-      if (spec.isShowingHorizontalTotals()) {
+      boolean totals = column.getField().isShowingTotals();
+      if (spec.isShowingHorizontalTotals() && totals) {
         fact.setHorizontalAggregation(true);
         fact.setHorizontalAggregationHeader("Total");
       }
-      if (spec.isShowingVerticalTotals()) {
+      if (spec.isShowingVerticalTotals() && totals) {
         fact.setVerticalAggregation(true);
         fact.setVerticalAggregationHeader("Total");
       }
@@ -221,8 +230,8 @@ public final class FactCrosstabPresentationBuilder {
       facts.add(fact);
     }
     crosstab.setFacts(facts);
-    crosstab.setShowingHorizontalTotals(spec.isShowingHorizontalTotals());
-    crosstab.setShowingVerticalTotals(spec.isShowingVerticalTotals());
+    crosstab.setShowingHorizontalTotals(spec.isShowingHorizontalTotals() && anyFactTotals);
+    crosstab.setShowingVerticalTotals(spec.isShowingVerticalTotals() && anyFactTotals);
     crosstab.setBackground(true);
     crosstab.setBorder(false);
     crosstab.setHorizontalMargin(3);
@@ -232,17 +241,100 @@ public final class FactCrosstabPresentationBuilder {
     return crosstab;
   }
 
-  private static List<HDimension> toDimensions(List<SelectedColumn> columns) {
+  private static IHComponent createBody(
+      FactCrosstabSpec spec, FactCrosstabQuery query, SemanticModel semanticModel) {
+    if (spec.usesCrosstab()) {
+      return createCrosstab(spec, query, semanticModel);
+    }
+    return createTable(spec, query, semanticModel);
+  }
+
+  static HTableComponent createTable(
+      FactCrosstabSpec spec, FactCrosstabQuery query, SemanticModel semanticModel) {
+    List<HColumn> columns = new ArrayList<>();
+    for (SelectedColumn column : query.matching(spec.getGroups())) {
+      columns.add(dimensionColumn(column, semanticModel));
+    }
+    for (SelectedColumn column : query.matching(spec.getHorizontalDimensions())) {
+      columns.add(dimensionColumn(column, semanticModel));
+    }
+    for (SelectedColumn column : query.matching(spec.getVerticalDimensions())) {
+      columns.add(dimensionColumn(column, semanticModel));
+    }
+    for (SelectedColumn column : query.matching(spec.getFacts())) {
+      columns.add(factColumn(column, semanticModel));
+    }
+    HTableComponent table = new HTableComponent(CONNECTOR_NAME, columns);
+    table.setHeader(true);
+    table.setHeaderOnEveryPage(true);
+    table.setEvenHeights(true);
+    table.setHorizontalMargin(3);
+    table.setVerticalMargin(2);
+    return table;
+  }
+
+  private static HColumn dimensionColumn(SelectedColumn column, SemanticModel semanticModel) {
+    HColumn dimension =
+        new HColumn(
+            column.getResultAlias(),
+            headerOf(column),
+            column.getField().resolveHorizontalAlignment(false),
+            column.getField().resolveVerticalAlignment());
+    applyFormatMask(dimension, semanticModel, column.getField());
+    return dimension;
+  }
+
+  private static HColumn factColumn(SelectedColumn column, SemanticModel semanticModel) {
+    AggregationMethod selectionMethod =
+        column.getField().getAggregation() != null
+            ? column.getField().getAggregation()
+            : AggregationMethod.SUM;
+    String mask = SemanticSelectionAdapter.formatMask(semanticModel, column.getField());
+    if (Utils.isEmpty(mask)) {
+      mask = selectionMethod == AggregationMethod.COUNT ? "0" : null;
+    }
+    HColumn fact =
+        new HColumn(
+            column.getResultAlias(),
+            headerOf(column),
+            column.getField().resolveHorizontalAlignment(true),
+            column.getField().resolveVerticalAlignment());
+    fact.setFormatMask(mask);
+    return fact;
+  }
+
+  private static boolean anyShowingTotals(List<SelectedColumn> factColumns) {
+    for (SelectedColumn column : factColumns) {
+      if (column.getField() != null && column.getField().isShowingTotals()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private static List<HDimension> toDimensions(
+      List<SelectedColumn> columns, SemanticModel semanticModel) {
     List<HDimension> dimensions = new ArrayList<>();
     for (SelectedColumn column : columns) {
-      dimensions.add(
+      HDimension dimension =
           new HDimension(
               column.getResultAlias(),
               headerOf(column),
-              HHorizontalAlignment.CENTER,
-              HVerticalAlignment.MIDDLE));
+              column.getField().resolveHorizontalAlignment(false),
+              column.getField().resolveVerticalAlignment());
+      applyFormatMask(dimension, semanticModel, column.getField());
+      dimensions.add(dimension);
     }
     return dimensions;
+  }
+
+  /** Attribute and measure masks, including date patterns such as {@code yyyy-MM-dd}. */
+  private static void applyFormatMask(
+      HColumn column, SemanticModel semanticModel, FactCrosstabField field) {
+    String mask = SemanticSelectionAdapter.formatMask(semanticModel, field);
+    if (!Utils.isEmpty(mask)) {
+      column.setFormatMask(mask);
+    }
   }
 
   private static String headerOf(SelectedColumn column) {

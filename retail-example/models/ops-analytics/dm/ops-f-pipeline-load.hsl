@@ -33,25 +33,37 @@ limitations under the License.
           <name>run_id</name>
           <physicalColumn>run_id</physicalColumn>
           <header>Run id</header>
+          <description/>
           <formatMask/>
+          <horizontalAlignment>LEFT</horizontalAlignment>
+          <verticalAlignment>MIDDLE</verticalAlignment>
         </attribute>
         <attribute>
           <name>element_type</name>
           <physicalColumn>element_type</physicalColumn>
           <header>Element type</header>
+          <description/>
           <formatMask/>
+          <horizontalAlignment>LEFT</horizontalAlignment>
+          <verticalAlignment>MIDDLE</verticalAlignment>
         </attribute>
         <attribute>
           <name>element_name</name>
           <physicalColumn>element_name</physicalColumn>
           <header>Element name</header>
+          <description/>
           <formatMask/>
+          <horizontalAlignment>LEFT</horizontalAlignment>
+          <verticalAlignment>MIDDLE</verticalAlignment>
         </attribute>
         <attribute>
           <name>source_name</name>
           <physicalColumn>source_name</physicalColumn>
           <header>Source name</header>
+          <description/>
           <formatMask/>
+          <horizontalAlignment>LEFT</horizontalAlignment>
+          <verticalAlignment>MIDDLE</verticalAlignment>
         </attribute>
       </attributes>
       <measures>
@@ -59,40 +71,60 @@ limitations under the License.
           <name>source_rows_read</name>
           <physicalColumn>source_rows_read</physicalColumn>
           <header>Source rows read</header>
-          <formatMask>#,##0.00</formatMask>
+          <description/>
+          <formatMask>#,##0</formatMask>
           <aggregation>SUM</aggregation>
+          <horizontalAlignment>RIGHT</horizontalAlignment>
+          <verticalAlignment>MIDDLE</verticalAlignment>
+          <showingTotals>N</showingTotals>
           <additive>Y</additive>
         </measure>
         <measure>
           <name>target_rows_read</name>
           <physicalColumn>target_rows_read</physicalColumn>
           <header>Target rows read</header>
-          <formatMask>#,##0.00</formatMask>
+          <description/>
+          <formatMask>#,##0</formatMask>
           <aggregation>SUM</aggregation>
+          <horizontalAlignment>RIGHT</horizontalAlignment>
+          <verticalAlignment>MIDDLE</verticalAlignment>
+          <showingTotals>N</showingTotals>
           <additive>Y</additive>
         </measure>
         <measure>
           <name>target_rows_inserted</name>
           <physicalColumn>target_rows_inserted</physicalColumn>
           <header>Target rows inserted</header>
-          <formatMask>#,##0.00</formatMask>
+          <description/>
+          <formatMask>#,##0</formatMask>
           <aggregation>SUM</aggregation>
+          <horizontalAlignment>RIGHT</horizontalAlignment>
+          <verticalAlignment>MIDDLE</verticalAlignment>
+          <showingTotals>N</showingTotals>
           <additive>Y</additive>
         </measure>
         <measure>
           <name>errors</name>
           <physicalColumn>errors</physicalColumn>
           <header>Errors</header>
-          <formatMask>#,##0.00</formatMask>
+          <description/>
+          <formatMask>#,##0</formatMask>
           <aggregation>SUM</aggregation>
+          <horizontalAlignment>RIGHT</horizontalAlignment>
+          <verticalAlignment>MIDDLE</verticalAlignment>
+          <showingTotals>N</showingTotals>
           <additive>Y</additive>
         </measure>
         <measure>
           <name>duration_ms</name>
           <physicalColumn>duration_ms</physicalColumn>
           <header>Duration ms</header>
-          <formatMask>#,##0.00</formatMask>
+          <description/>
+          <formatMask>#,##0</formatMask>
           <aggregation>SUM</aggregation>
+          <horizontalAlignment>RIGHT</horizontalAlignment>
+          <verticalAlignment>MIDDLE</verticalAlignment>
+          <showingTotals>N</showingTotals>
           <additive>Y</additive>
         </measure>
       </measures>
@@ -112,7 +144,10 @@ limitations under the License.
           <name>pipeline_name</name>
           <physicalColumn>pipeline_name</physicalColumn>
           <header>Pipeline name</header>
+          <description/>
           <formatMask/>
+          <horizontalAlignment>LEFT</horizontalAlignment>
+          <verticalAlignment>MIDDLE</verticalAlignment>
         </attribute>
       </attributes>
       <measures/>
@@ -227,22 +262,82 @@ limitations under the License.
         <row>
           <entityName>dim_pipeline</entityName>
           <fieldName>pipeline_name</fieldName>
+          <header>Pipeline name</header>
+          <horizontalAlignment>LEFT</horizontalAlignment>
+          <verticalAlignment>MIDDLE</verticalAlignment>
+          <showingTotals>Y</showingTotals>
         </row>
       </rows>
       <columns>
         <column>
           <entityName>dim_load_date</entityName>
           <fieldName>full_date</fieldName>
+          <header>Full date</header>
+          <horizontalAlignment>CENTER</horizontalAlignment>
+          <verticalAlignment>MIDDLE</verticalAlignment>
+          <showingTotals>Y</showingTotals>
         </column>
       </columns>
       <measures>
         <measure>
           <entityName>fact_pipeline_load</entityName>
           <fieldName>duration_ms</fieldName>
+          <header>Duration ms</header>
+          <aggregation>SUM</aggregation>
+          <horizontalAlignment>RIGHT</horizontalAlignment>
+          <verticalAlignment>MIDDLE</verticalAlignment>
+          <showingTotals>Y</showingTotals>
         </measure>
       </measures>
       <showingHorizontalTotals>Y</showingHorizontalTotals>
-      <showingVerticalTotals>Y</showingVerticalTotals>
+      <showingVerticalTotals>N</showingVerticalTotals>
+      <portrait>N</portrait>
+    </selection>
+    <selection>
+      <name>fact_pipeline_load</name>
+      <entityName>fact_pipeline_load</entityName>
+      <groups>
+        <group>
+          <entityName>dim_load_date</entityName>
+          <fieldName>full_date</fieldName>
+          <header>Full date</header>
+          <showingTotals>Y</showingTotals>
+        </group>
+      </groups>
+      <rows>
+        <row>
+          <entityName>dim_pipeline</entityName>
+          <fieldName>pipeline_name</fieldName>
+          <header>Pipeline name</header>
+          <horizontalAlignment>LEFT</horizontalAlignment>
+          <verticalAlignment>MIDDLE</verticalAlignment>
+          <showingTotals>Y</showingTotals>
+        </row>
+      </rows>
+      <columns>
+        <column>
+          <entityName>dim_load_date</entityName>
+          <fieldName>full_date</fieldName>
+          <header>Full date</header>
+          <horizontalAlignment>CENTER</horizontalAlignment>
+          <verticalAlignment>MIDDLE</verticalAlignment>
+          <showingTotals>Y</showingTotals>
+        </column>
+      </columns>
+      <measures>
+        <measure>
+          <entityName>fact_pipeline_load</entityName>
+          <fieldName>duration_ms</fieldName>
+          <header>Duration ms</header>
+          <aggregation>SUM</aggregation>
+          <horizontalAlignment>RIGHT</horizontalAlignment>
+          <verticalAlignment>MIDDLE</verticalAlignment>
+          <showingTotals>Y</showingTotals>
+        </measure>
+      </measures>
+      <showingHorizontalTotals>Y</showingHorizontalTotals>
+      <showingVerticalTotals>N</showingVerticalTotals>
+      <portrait>N</portrait>
     </selection>
   </selections>
   <name>ops-f-pipeline-load</name>

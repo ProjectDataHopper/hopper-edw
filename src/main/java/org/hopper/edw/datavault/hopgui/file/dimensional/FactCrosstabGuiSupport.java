@@ -39,7 +39,6 @@ import org.hopper.edw.semantic.model.SemanticEntity;
 import org.hopper.edw.semantic.model.SemanticModel;
 import org.hopper.edw.semantic.model.SemanticSelection;
 import org.hopper.edw.semantic.query.SemanticSelectionAdapter;
-import org.hopper.presentation.simple.HGeneratedCatalog;
 
 /** Opens the fact crosstab editor and generated presentation viewer. */
 public final class FactCrosstabGuiSupport {
@@ -81,8 +80,29 @@ public final class FactCrosstabGuiSupport {
     }
   }
 
+  /** Opens an empty crosstab for a new presentation. */
   public static void openFromSemanticLayer(
       HopGui hopGui, SemanticModel semantic, String preferredFactName) {
+    openFromSemanticLayer(hopGui, semantic, preferredFactName, null);
+  }
+
+  /** Opens one saved selection in the crosstab editor. */
+  public static void openSelection(HopGui hopGui, SemanticModel semantic, String selectionName) {
+    if (semantic == null || Utils.isEmpty(selectionName)) {
+      return;
+    }
+    SemanticSelection selection = semantic.findSelection(selectionName);
+    if (selection == null) {
+      return;
+    }
+    openFromSemanticLayer(hopGui, semantic, selection.getEntityName(), selection);
+  }
+
+  private static void openFromSemanticLayer(
+      HopGui hopGui,
+      SemanticModel semantic,
+      String preferredFactName,
+      SemanticSelection selection) {
     if (hopGui == null || semantic == null) {
       return;
     }
@@ -110,9 +130,11 @@ public final class FactCrosstabGuiSupport {
       IDmFactLikeTable fact = sources.getFact();
       FactCrosstabSpec spec = new FactCrosstabSpec();
       spec.setFactTableName(factEntity.getName());
-      SemanticSelection last = lastSelectionFor(semantic, factEntity.getName());
-      if (last != null) {
-        spec = SemanticSelectionAdapter.toSpec(semantic, last);
+      if (selection != null) {
+        spec = SemanticSelectionAdapter.toSpec(semantic, selection);
+        if (Utils.isEmpty(spec.getFactTableName())) {
+          spec.setFactTableName(factEntity.getName());
+        }
       }
       openEditor(hopGui, model, fact, spec, sources, variables, metadataProvider, semantic);
     } catch (Exception e) {
@@ -190,43 +212,8 @@ public final class FactCrosstabGuiSupport {
             variables,
             metadataProvider,
             semanticModel);
-    if (!dialog.open()) {
-      return;
-    }
-    HGeneratedCatalog catalog = dialog.getCatalog();
-    FactCrosstabSpec shown = dialog.getSpec();
-    if (catalog == null) {
-      return;
-    }
-    new FactCrosstabViewerShell(
-            hopGui,
-            catalog,
-            () ->
-                openEditor(
-                    hopGui,
-                    model,
-                    fact,
-                    shown.copy(),
-                    sources,
-                    variables,
-                    metadataProvider,
-                    semanticModel))
-        .open();
-  }
-
-  private static SemanticSelection lastSelectionFor(SemanticModel semantic, String factName) {
-    if (semantic == null
-        || semantic.getSelections() == null
-        || semantic.getSelections().isEmpty()) {
-      return null;
-    }
-    for (int i = semantic.getSelections().size() - 1; i >= 0; i--) {
-      SemanticSelection selection = semantic.getSelections().get(i);
-      if (selection != null && factName.equals(selection.getEntityName())) {
-        return selection;
-      }
-    }
-    return semantic.getSelections().get(semantic.getSelections().size() - 1);
+    // Show opens the viewer and leaves this dialog open. Closing the viewer returns here.
+    dialog.open();
   }
 
   static LoggingObject loggingObject() {

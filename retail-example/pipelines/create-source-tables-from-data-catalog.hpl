@@ -6,7 +6,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-     http://www.apache.org/licenses/LICENSE-2.0
+      http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,16 +16,15 @@ limitations under the License.
 -->
 <pipeline>
   <info>
-    <capture_transform_performance>N</capture_transform_performance>
+    <capture_transform_performance>Y</capture_transform_performance>
     <transform_performance_capturing_delay>1000</transform_performance_capturing_delay>
     <transform_performance_capturing_size_limit>100</transform_performance_capturing_size_limit>
-    <pipeline_type>Normal</pipeline_type>
     <pipeline_status>-1</pipeline_status>
     <parameters>
       <parameter>
         <name>CATALOG_NAMESPACE</name>
-        <default_value>hop/retail-example/sources</default_value>
         <description>Working-tree FILE catalog namespace of retail E2E sources</description>
+        <default_value>hop/retail-example/sources</default_value>
       </parameter>
     </parameters>
     <name>create-source-tables-from-data-catalog</name>
@@ -33,7 +32,9 @@ limitations under the License.
     <created_user>-</created_user>
     <modified_user>-</modified_user>
     <created_date>2026/07/01 00:00:00.000</created_date>
-    <modified_date>2026/07/01 00:00:00.000</modified_date>
+    <modified_date>2026/10/21 15:05:55.251</modified_date>
+    <created_hop_version/>
+    <modified_hop_version>2.20.0-SNAPSHOT</modified_hop_version>
   </info>
   <transform>
     <type>RecordDefinitionInput</type>
@@ -76,7 +77,7 @@ limitations under the License.
     <distribute>Y</distribute>
     <copies>1</copies>
     <GUI>
-      <xloc>256</xloc>
+      <xloc>80</xloc>
       <yloc>80</yloc>
     </GUI>
     <partitioning>
@@ -87,7 +88,7 @@ limitations under the License.
   </transform>
   <transform>
     <type>FilterRows</type>
-    <name>Filter rows</name>
+    <name>dv_source_type = DATABASE</name>
     <compare>
       <condition>
         <negated>N</negated>
@@ -126,7 +127,7 @@ limitations under the License.
     <distribute>Y</distribute>
     <copies>1</copies>
     <GUI>
-      <xloc>400</xloc>
+      <xloc>304</xloc>
       <yloc>80</yloc>
     </GUI>
     <partitioning>
@@ -137,7 +138,7 @@ limitations under the License.
   </transform>
   <transform>
     <type>SelectValues</type>
-    <name>Select values</name>
+    <name>namespace, name, db, schema, table, dv_source_type</name>
     <fields>
       <field>
         <name>namespace</name>
@@ -180,7 +181,7 @@ limitations under the License.
     <distribute>Y</distribute>
     <copies>1</copies>
     <GUI>
-      <xloc>528</xloc>
+      <xloc>608</xloc>
       <yloc>80</yloc>
     </GUI>
     <partitioning>
@@ -211,7 +212,7 @@ limitations under the License.
     <distribute>Y</distribute>
     <copies>1</copies>
     <GUI>
-      <xloc>704</xloc>
+      <xloc>896</xloc>
       <yloc>80</yloc>
     </GUI>
     <partitioning>
@@ -223,16 +224,16 @@ limitations under the License.
   <order>
     <hop>
       <from>Record Definition Input</from>
-      <to>Filter rows</to>
+      <to>dv_source_type = DATABASE</to>
       <enabled>Y</enabled>
     </hop>
     <hop>
-      <from>Filter rows</from>
-      <to>Select values</to>
+      <from>dv_source_type = DATABASE</from>
+      <to>namespace, name, db, schema, table, dv_source_type</to>
       <enabled>Y</enabled>
     </hop>
     <hop>
-      <from>Select values</from>
+      <from>namespace, name, db, schema, table, dv_source_type</from>
       <to>Record Definition DDL</to>
       <enabled>Y</enabled>
     </hop>

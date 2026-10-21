@@ -8,6 +8,18 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 - **Validate sources** compares a satellite attribute that has no length using the source card's data type mapping. A pipeline String with no length that `premodel-defaults` maps to 2000 is not a blocking narrower-than-catalog error. An explicit shorter attribute length still is.
 
+### Semantic layer presentations (issue #221)
+
+- Dimension and fact columns in the crosstab editor have horizontal and vertical alignment lists. Facts keep an editable aggregation list (`SUM`, `COUNT`, or `AVERAGE`) and a **Totals** choice. **Swap dimensions** exchanges the horizontal and vertical lists. The same alignment, aggregation, and totals choices are edited on each attribute and measure in the semantic layer and stored on a saved selection.
+- **Groups** stays optional. With no group fields the page is one crosstab or one table. With group fields, that component repeats once per group value.
+- When either axis is empty, **Show** draws a table of the group fields, the selected dimensions, and the facts. Both axes still draw a crosstab. A table average is SQL `AVG`. A crosstab average stays a sum plus a weight count so the pivot can roll up.
+- Crosstab axes, table columns, and group labels use the semantic-layer format mask. A date such as `full_date` with mask `yyyy-MM-dd` is formatted in the query (`to_char` / `DATE_FORMAT` / `FORMAT` / `TO_VARCHAR`), so the group label and the nested crosstab see the same text.
+- The crosstab editor has a **Page format** list under the totals checkboxes. Choose **Landscape** (the default) or **Portrait**. The choice is stored with a saved selection.
+- **Create presentation...** opens an empty crosstab. The semantic layer tree has a toolbar to create, open, delete, and rename selections. Double-click a selection to open it. Open, delete, and rename are enabled only when a selection is selected.
+- The crosstab editor shows the selection name at the top. Save, save as, and rename are toolbar icons. Save keeps the current name. The bottom **Save selection** button is gone.
+- **Show** leaves the crosstab editor open. Closing the presentation viewer returns to that editor.
+- Source columns and tables can be dragged onto the four crosstab zones. Double-click a source table to expand or collapse its columns.
+
 ### Configuration perspective label (issue #220)
 
 - The Hop configuration perspective tab is **Hopper EDW**. It was labeled Data Vault 2.0.

@@ -36,6 +36,16 @@ public class SemanticSelectionField {
   /** Measure aggregation override (SUM/COUNT/AVERAGE); ignored for attributes. */
   @HopMetadataProperty private String aggregation;
 
+  /** LEFT, CENTER, or RIGHT. Empty uses the zone default. */
+  @HopMetadataProperty private String horizontalAlignment;
+
+  /** TOP, MIDDLE, or BOTTOM. Empty uses middle. */
+  @HopMetadataProperty private String verticalAlignment;
+
+  /** Facts only. Missing XML stays on. */
+  @HopMetadataProperty(defaultBoolean = true)
+  private boolean showingTotals = true;
+
   public SemanticSelectionField(String entityName, String fieldName) {
     this.entityName = entityName;
     this.fieldName = fieldName;
@@ -45,6 +55,9 @@ public class SemanticSelectionField {
     SemanticSelectionField copy = new SemanticSelectionField(entityName, fieldName);
     copy.header = header;
     copy.aggregation = aggregation;
+    copy.horizontalAlignment = horizontalAlignment;
+    copy.verticalAlignment = verticalAlignment;
+    copy.showingTotals = showingTotals;
     return copy;
   }
 
