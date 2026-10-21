@@ -41,7 +41,7 @@ The query groups by the columns in **Groups**, **Horizontal dimensions**, and **
 
 Attribute format masks apply to crosstab axes, table columns, and group labels. A date in **Groups** with mask `yyyy-MM-dd` is shown as that date, not as a raw timestamp.
 
-When both axes have at least one field, **Show** draws a crosstab. The pivot rolls those rows into totals, and a group repeats the crosstab once per group value. `AVERAGE` is sent as a sum plus a row count so the pivot can combine cells.
+When both axes have at least one field, **Show** draws a crosstab. The pivot rolls those rows into totals, and a group repeats the crosstab once per group value. `AVERAGE` is sent as a sum plus a row count so the pivot can combine cells. The crosstab keeps only dimension combinations that have data. A month that exists for another year is omitted when that year has no facts, instead of leaving a blank row. The same rule applies to columns.
 
 When either axis is empty, **Show** draws a table instead. The columns are the group fields, then the horizontal dimensions, then the vertical dimensions, then the facts. `AVERAGE` is SQL `AVG`. With no groups, that table is the only component on the page. With groups, the same table repeats once per group value.
 

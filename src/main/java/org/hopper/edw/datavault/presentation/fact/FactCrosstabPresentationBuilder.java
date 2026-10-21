@@ -232,6 +232,9 @@ public final class FactCrosstabPresentationBuilder {
     crosstab.setFacts(facts);
     crosstab.setShowingHorizontalTotals(spec.isShowingHorizontalTotals() && anyFactTotals);
     crosstab.setShowingVerticalTotals(spec.isShowingVerticalTotals() && anyFactTotals);
+    // Drop pairings such as 2025-03 when that month has no facts. The component default still
+    // draws the full cartesian grid for hand-authored crosstabs.
+    crosstab.setOnlyAvailableDimensionValues(true);
     crosstab.setBackground(true);
     crosstab.setBorder(false);
     crosstab.setHorizontalMargin(3);

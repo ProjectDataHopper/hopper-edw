@@ -4,6 +4,10 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Crosstab dimension values (issue #222)
+
+- A crosstab can omit dimension combinations that have no data. **Only available dimension values?** on the crosstab component drops a row such as 2025-03 when that month has no facts, even if March exists for another year. The same rule applies to columns. Presentations from the semantic layer and the fact crosstab editor turn the option on. A hand-authored crosstab keeps the full grid until the option is checked.
+
 ### Resource definition validation
 
 - **Validate sources** compares a satellite attribute that has no length using the source card's data type mapping. A pipeline String with no length that `premodel-defaults` maps to 2000 is not a blocking narrower-than-catalog error. An explicit shorter attribute length still is.

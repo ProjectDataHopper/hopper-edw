@@ -78,6 +78,7 @@ class FactCrosstabPresentationBuilderTest {
     assertEquals(1, crosstab.getFacts().size());
     assertTrue(crosstab.isShowingHorizontalTotals());
     assertTrue(crosstab.isShowingVerticalTotals());
+    assertTrue(crosstab.isOnlyAvailableDimensionValues());
     assertTrue(crosstab.getFacts().get(0).isHorizontalAggregation());
     assertTrue(crosstab.getFacts().get(0).isVerticalAggregation());
 
@@ -185,6 +186,7 @@ class FactCrosstabPresentationBuilderTest {
     HCrosstabComponent crosstab = findCrosstab(composite.getChildren().get(1));
     assertFalse(crosstab.isShowingHorizontalTotals());
     assertTrue(crosstab.isShowingVerticalTotals());
+    assertTrue(crosstab.isOnlyAvailableDimensionValues());
     assertEquals(1, catalog.getPresentation().getPages().get(0).getComponents().size());
   }
 

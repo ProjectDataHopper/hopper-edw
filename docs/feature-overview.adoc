@@ -240,7 +240,7 @@ For a slide-style executive summary, see link:presentations/hop-data-vault-overv
 
 |Hopper presentations in Hop GUI
 |Preview (issues https://github.com/ProjectDataHopper/hopper-edw/issues/170[#170], https://github.com/ProjectDataHopper/hopper-edw/issues/185[#185])
-|Generated dashboards (no web server, no Hop metadata editors) via **Tools → Project presentation…** and explorer **View execution presentation** on `.hpl`/`.hwf`. Pipeline results **Performance** tab (throughput over time) and workflow results **Gantt** tab (action durations). Built on the fly with `HSimplePresentation`; drawn by `HPresentationViewer` / `HPresentationSession` (Hop Web: inline SVG + JS). Semantic layer **Create presentation...** (or a `.hdm` fact shortcut) opens the link:help/fact-crosstab-editor.adoc[crosstab editor] and generates a SQL star-join crosstab, or a table when an axis is empty (groups stay optional).
+|Generated dashboards (no web server, no Hop metadata editors) via **Tools → Project presentation…** and explorer **View execution presentation** on `.hpl`/`.hwf`. Pipeline results **Performance** tab (throughput over time) and workflow results **Gantt** tab (action durations). Built on the fly with `HSimplePresentation`; drawn by `HPresentationViewer` / `HPresentationSession` (Hop Web: inline SVG + JS). Semantic layer **Create presentation...** (or a `.hdm` fact shortcut) opens the link:help/fact-crosstab-editor.adoc[crosstab editor] and generates a SQL star-join crosstab, or a table when an axis is empty (groups stay optional). The crosstab omits dimension combinations that have no data.
 
 |Semantic layer (`.hsl`)
 |Preview
