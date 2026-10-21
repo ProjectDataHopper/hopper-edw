@@ -67,6 +67,5 @@ audit/
 /retail-example/files/order_shipment_event*.csv
 /retail-example/files/order_rep*.csv
 /retail-example/metadata/ai-provider/Grok.json
-/src/main/java/org/hopper/edw/datavault/presentation/fact/FactCrosstabDateSql.java
 /src/test/java/org/hopper/edw/semantic/query/SemanticSelectionAdapterTest.java
 /docs/plans/screenshot-refresh.ods
