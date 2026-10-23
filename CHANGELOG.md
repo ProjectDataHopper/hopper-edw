@@ -2,7 +2,11 @@
 
 All notable changes to Data Hopper EDW (formerly hop-datavault) are documented in this file.
 
-## Unreleased
+## [0.16.0] — 2026-10-23
+
+Requires **Apache Hop 2.20.0-SNAPSHOT** and **Java 21**.
+
+**Downloads:** [GitHub release zip](https://github.com/ProjectDataHopper/hopper-edw/releases/download/v0.16.0/hopper-edw-0.16.0.zip) · [Data Hopper Nexus](https://repository.data-hopper.com/repository/hop-community-plugins/org/hopper/hopper-edw/0.16.0/hopper-edw-0.16.0.zip) (`org.hopper:hopper-edw:0.16.0`)
 
 ### Dimensional model service (issue #223)
 
