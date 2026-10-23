@@ -2,7 +2,7 @@
 <!-- Hand-laid poster. Rows are positioned by hand. There is no .puml. -->
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="708" viewBox="0 0 1280 708" role="img">
 <title>Data Hopper EDW overview</title>
-<desc>Landing databases, files, and JSON feed a source model. Clients query that model through Hop JDBC. Hop loads the Data Vault, Business Vault, and dimensional databases from their model files and records OPS metrics and lineage. The coach moves from one model to the next. Generate Data Vault builds the raw vault from the source model. Hopper presentations report from the dimensional model. The catalog sits under every model. Documentation, the EDW Journey, and the lineage view sit on that catalog. A harvester watches live schemas and the catalog.</desc>
+<desc>Landing databases, files, and JSON feed a source model. Clients query that model through Hop JDBC. Hop loads the Data Vault, Business Vault, and dimensional databases from their model files and records OPS metrics and lineage. The coach moves from one model to the next. Generate Data Vault builds the raw vault from the source model. Hop JDBC clients query the dimensional model through a Masking arrow. Hopper presentations report from that model. The catalog sits under every model. Documentation, the EDW Journey, and the lineage view sit on that catalog. A harvester watches live schemas and the catalog.</desc>
 <defs>
 <marker id="arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 1.1 L 10 5 L 0 8.9 Z" fill="#5A6A7E"/></marker>
 <marker id="arrow-start" viewBox="0 0 10 10" refX="1.5" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M 10 1.1 L 0 5 L 10 8.9 Z" fill="#5A6A7E"/></marker>
@@ -86,11 +86,17 @@
 <line x1="489.0" y1="197" x2="489.0" y2="213" fill="none" stroke="#5A6A7E" stroke-width="1.6"/>
 <line x1="723.0" y1="197" x2="723.0" y2="213" fill="none" stroke="#5A6A7E" stroke-width="1.6"/>
 <line x1="957.0" y1="197" x2="957.0" y2="213" fill="none" stroke="#5A6A7E" stroke-width="1.6"/>
-<rect x="1118" y="328" width="136" height="108" rx="8" ry="8" fill="#FFF3DF" stroke="#181818" stroke-width="1.5"/>
-<text x="1186.0" y="366" fill="#181818" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">Hopper</text>
-<text x="1186.0" y="386" fill="#181818" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">presentations</text>
-<text x="1186.0" y="412" fill="#3d4a5c" font-family="sans-serif" font-size="13" font-weight="normal" text-anchor="middle">Reporting</text>
-<path d="M 1034 382 Q 1075.0 352 1116 382" fill="none" stroke="#5A6A7E" stroke-width="1.8" marker-end="url(#arrow)"/>
+<rect x="1118" y="228" width="136" height="96" rx="8" ry="8" fill="#FFF3DF" stroke="#181818" stroke-width="1.5"/>
+<text x="1186.0" y="262" fill="#181818" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">Hop JDBC</text>
+<text x="1186.0" y="282" fill="#181818" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">clients</text>
+<text x="1186.0" y="308" fill="#3d4a5c" font-family="sans-serif" font-size="13" font-weight="normal" text-anchor="middle">Masked SQL</text>
+<path d="M 1034 276 Q 1076.0 248 1116 276" fill="none" stroke="#5A6A7E" stroke-width="1.8" marker-end="url(#arrow)"/>
+<text x="1076.0" y="252" fill="#3d4a5c" font-family="sans-serif" font-size="12" font-weight="bold" text-anchor="middle">Masking</text>
+<rect x="1118" y="412" width="136" height="108" rx="8" ry="8" fill="#FFF3DF" stroke="#181818" stroke-width="1.5"/>
+<text x="1186.0" y="450" fill="#181818" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">Hopper</text>
+<text x="1186.0" y="470" fill="#181818" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">presentations</text>
+<text x="1186.0" y="496" fill="#3d4a5c" font-family="sans-serif" font-size="13" font-weight="normal" text-anchor="middle">Reporting</text>
+<path d="M 1034 466 Q 1076.0 438 1116 466" fill="none" stroke="#5A6A7E" stroke-width="1.8" marker-end="url(#arrow)"/>
 <path d="M 334 308 Q 372.0 280 408 308" fill="none" stroke="#8A5A12" stroke-width="1.8" marker-end="url(#arrow-coach)"/>
 <text x="372.0" y="268" fill="#8A5A12" font-family="sans-serif" font-size="12" font-weight="bold" text-anchor="middle">Coach</text>
 <path d="M 334 430 Q 372.0 466 408 430" fill="none" stroke="#8A5A12" stroke-width="1.8" marker-end="url(#arrow-coach)"/>

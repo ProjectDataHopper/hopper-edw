@@ -15,6 +15,7 @@
  */
 package org.hopper.edw.hsm.jdbc;
 
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -74,6 +75,53 @@ public final class HsmJson {
     } catch (NumberFormatException e) {
       return def;
     }
+  }
+
+  public static String jsonArray(List<String> values, List<Boolean> sqlNull) {
+    StringBuilder sb = new StringBuilder();
+    sb.append('[');
+    if (values != null) {
+      for (int i = 0; i < values.size(); i++) {
+        if (i > 0) {
+          sb.append(',');
+        }
+        boolean isNull = sqlNull != null && i < sqlNull.size() && Boolean.TRUE.equals(sqlNull.get(i));
+        if (isNull || values.get(i) == null) {
+          sb.append("null");
+        } else {
+          sb.append('"');
+          for (int c = 0; c < values.get(i).length(); c++) {
+            char ch = values.get(i).charAt(c);
+            switch (ch) {
+              case '"' -> sb.append("\\\"");
+              case '\\' -> sb.append("\\\\");
+              case '\n' -> sb.append("\\n");
+              case '\r' -> sb.append("\\r");
+              case '\t' -> sb.append("\\t");
+              default -> sb.append(ch);
+            }
+          }
+          sb.append('"');
+        }
+      }
+    }
+    sb.append(']');
+    return sb.toString();
+  }
+
+  public static String jsonIntArray(List<Integer> values) {
+    StringBuilder sb = new StringBuilder();
+    sb.append('[');
+    if (values != null) {
+      for (int i = 0; i < values.size(); i++) {
+        if (i > 0) {
+          sb.append(',');
+        }
+        sb.append(values.get(i) != null ? values.get(i) : Types.VARCHAR);
+      }
+    }
+    sb.append(']');
+    return sb.toString();
   }
 
   public static String encodeForm(Map<String, String> fields) {

@@ -42,6 +42,12 @@ public class DmDimensionAttribute implements IDmDocumentedField {
    */
   @HopMetadataProperty private String previousFieldName;
 
+  /**
+   * Hop masking pattern applied by the dimensional model service before a JDBC client sees this
+   * column. Empty returns the warehouse value. The Type 3 previous column uses the same pattern.
+   */
+  @HopMetadataProperty private String maskingPatternName;
+
   @HopMetadataProperty private DmFieldDocumentation documentation;
 
   public DmDimensionAttribute(String fieldName) {

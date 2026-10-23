@@ -1515,6 +1515,9 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     if ("dm-graph-preview-target-table".equals(contextActionId)) {
       return !(context.getTable() instanceof DmDimensionAlias);
     }
+    if ("dm-graph-preview-masked-rows".equals(contextActionId)) {
+      return !(context.getTable() instanceof org.hopper.edw.datavault.metadata.dimensional.DmRangeDimension);
+    }
     return true;
   }
 
@@ -1556,6 +1559,64 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     HopGuiDimensionalModelGraph graph = context.getDimensionalGraph();
     if (table != null && graph != null) {
       graph.openUpdatePipeline(table);
+    }
+  }
+
+  @GuiContextAction(
+      id = "dm-graph-preview-masked-rows",
+      parentId = HopGuiDimensionalTableContext.CONTEXT_ID,
+      type = GuiActionType.Info,
+      name = "i18n::HopGuiDimensionalModelGraph.Context.PreviewMaskedRows.Name",
+      tooltip = "i18n::HopGuiDimensionalModelGraph.Context.PreviewMaskedRows.Tooltip",
+      image = "ui/images/preview.svg",
+      category = "Dimensional",
+      categoryOrder = "7")
+  public void previewMaskedRowsAction(HopGuiDimensionalTableContext context) {
+    IDmTable table = context.getTable();
+    DimensionalModel dmModel = context.getModel();
+    if (table == null || dmModel == null || Utils.isEmpty(table.getName())) {
+      return;
+    }
+    try {
+      var result =
+          org.hopper.edw.datavault.virtualization.dimensional.DimensionalQueryExecutor.preview(
+              dmModel,
+              "SELECT * FROM " + table.getName(),
+              org.hopper.edw.datavault.metadata.dimensional.service.DimensionalMaskingPolicy.SAFE,
+              100,
+              getVariables(),
+              hopGui.getMetadataProvider());
+      if (result.rows().isEmpty()) {
+        new org.apache.hop.ui.core.dialog.ShowRowsDialog(
+                hopGui.getShell(),
+                getVariables(),
+                BaseMessages.getString(
+                    PKG, "HopGuiDimensionalModelGraph.Context.PreviewMaskedRows.Name"),
+                table.getName(),
+                new org.apache.hop.core.row.RowMeta(),
+                java.util.List.of())
+            .open();
+        return;
+      }
+      java.util.List<Object[]> data = new java.util.ArrayList<>();
+      for (org.apache.hop.core.RowMetaAndData row : result.rows()) {
+        data.add(row.getData());
+      }
+      new org.apache.hop.ui.core.dialog.ShowRowsDialog(
+              hopGui.getShell(),
+              getVariables(),
+              BaseMessages.getString(
+                  PKG, "HopGuiDimensionalModelGraph.Context.PreviewMaskedRows.Name"),
+              table.getName(),
+              result.rows().get(0).getRowMeta(),
+              data)
+          .open();
+    } catch (Exception e) {
+      new ErrorDialog(
+          hopGui.getShell(),
+          BaseMessages.getString(PKG, "HopGuiDimensionalModelGraph.Context.PreviewMaskedRows.Name"),
+          e.getMessage(),
+          e);
     }
   }
 

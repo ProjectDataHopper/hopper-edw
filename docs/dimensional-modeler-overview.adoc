@@ -114,6 +114,8 @@ Left-click the dimensional canvas background to:
 * **Add date dimension** — standard calendar `dim_date` with **Date generator** source (see <<date-dimension>>)
 * Add dimension, fact, junk dimension, bridge, factless fact, or note
 
+Left-click a table for **Preview masked rows**. That runs the modeled columns through the Safe masking policy. **Preview target table** still reads the warehouse directly.
+
 === Data Vault canvas
 
 From a `.hdv` model, use **Publish draft dimensional model** to create a draft `.hdm` via the same publish adapter as the workflow action.
@@ -176,6 +178,44 @@ Imported tables are **draft** metadata — review grains, roles, and source SQL 
 |===
 
 Unit tests: `DmBasicStarPipelineTest`, `DmCatalogPipelineTest`, `DvToDimensionalPublishTest`, `DmDatabaseTableImportTest`, `DmGoldenFixtureTest`.
+
+[[dimensional-model-service]]
+== Dimensional model service
+
+A **Dimensional model service** publishes one `.hdm` as a JDBC schema on the same Hop Server virtual database as a Source model service. DBeaver, Oracle Analytics, and MicroStrategy keep the thin driver `jdbc:hop-hsm:` and the URL `jdbc:hop-hsm://user:pass@host:port/<service name>`. The service name is the schema. The `.hdm` path stays on the server.
+
+A Hop database connection of type Apache Hop Source Model with authentication **Embedded** uses the same schemas in-process: `jdbc:hop-hsm:embedded` or `jdbc:hop-hsm:service=<service name>`. Masking and the audit table apply there too. The embedded principal is the operating-system user name, which is what **Allowed users** is matched against.
+
+One connection lists every enabled service as a schema. A qualified name such as `f_orders.d_customer` runs on that service, including when the connection default is another source or dimensional service. The database explorer preview uses that form (`SELECT * FROM f_orders.d_customer`). A bare table name stays on the connection's default schema.
+
+Create it under **Metadata → Servers and Web Services → Dimensional model service**:
+
+* **Dimensional model file** — server-side `.hdm` (variables such as `'${PROJECT_HOME}'` are allowed)
+* **Default / max row limit** and **query timeout**
+* **Allowed users** — one Hop Server user per line. Empty allows every user who can already run on the server
+* **Masking policy** — **Safe** (default) or **Display**
+* **Audit queries** — one row per attempt in `edw_dimensional_query_audit`. **Create audit table** builds that table on the chosen connection. When auditing is on and the insert fails, the client receives no rows
+
+image::images/dimensional-model-service-editor.png[Dimensional model service f_orders. The model file is retail-f-orders.hdm, the masking policy is Display, and query audit is written to edw_dimensional_query_audit on connection OPS.,align="center"]
+
+Each dimension, junk dimension, fact, factless fact, bridge, and conformed dimension alias is a table. Columns are the modeled ones: surrogate key, natural keys, attributes, a Type 3 previous column, `date_from` and `date_to` on a versioned dimension, measures, degenerate dimensions, and fact foreign keys. `SELECT *` expands to that list. Two roles against one date dimension are two foreign keys to the same primary key, which `getImportedKeys` returns.
+
+On a dimension attribute, natural key, measure, or degenerate dimension, **Masking pattern** names a Hop masking pattern. The warehouse runs the statement. Mask fields then rewrites the flagged cells before they leave Hop Server. The Type 3 previous column uses the attribute's pattern. Surrogate keys and fact foreign keys are not masked.
+
+In the retail example, `d_customer` names patterns on email, phone, and address. From the `crm-embedded` connection, `SELECT * FROM f_orders.d_customer LIMIT 5000` still runs on the `f_orders` service. Those three columns come back as tokens. City and the other attributes stay as stored.
+
+image::images/dimensional-model-service-masked-d-customer-query.png[Retail d_customer attributes with masking patterns email, phone, and address, and the database explorer result of SELECT * FROM f_orders.d_customer. Email, phone, and address are tokens. City and the other attributes are unchanged.,align="center"]
+
+| Policy | What the client can do |
+|---|---|
+| Safe | A masked column may appear only as a bare select item. `WHERE`, `JOIN`, `GROUP BY`, `ORDER BY`, `DISTINCT`, and expressions on that column are rejected. Counts and sums of unmasked measures still run on the warehouse. |
+| Display | The statement is pushed down, including predicates on masked columns. Result cells are still masked. |
+
+The canvas shows `masked` on a table that has at least one pattern. **Preview masked rows** on the table runs `SELECT *` through the Safe policy and opens the rows a JDBC client would receive.
+
+The audit row stores the principal, the time, the service, the SQL, the status (`OK`, `REJECTED`, or `ERROR`), the row count, and the duration. String and numeric literals in the logged SQL are replaced with `?` unless **Store query text verbatim** is checked. Parameter values are not stored.
+
+Non-production tools use only the Hop Server login. The warehouse password stays on the server, and non-production databases stay empty of production rows.
 
 == Related documents
 

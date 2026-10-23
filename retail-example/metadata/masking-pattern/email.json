@@ -1,0 +1,17 @@
+{
+  "sequenceStart": "1",
+  "piiClassification": "Direct identifier",
+  "prefix": "email-",
+  "trimKey": false,
+  "description": "e-Mail address is PII",
+  "storage": "NONE",
+  "schemaName": "",
+  "suffix": "",
+  "hashSecret": "Encrypted ",
+  "tableName": "",
+  "token": "SEQUENCE",
+  "ignoreCase": false,
+  "name": "email",
+  "connection": "",
+  "valueSource": "SYNTHETIC"
+}

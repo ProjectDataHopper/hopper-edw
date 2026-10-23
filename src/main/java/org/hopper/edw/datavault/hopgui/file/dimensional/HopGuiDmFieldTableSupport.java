@@ -15,10 +15,15 @@
  */
 package org.hopper.edw.datavault.hopgui.file.dimensional;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.metadata.api.IHopMetadataProvider;
+import org.apache.hop.pipeline.transforms.maskfields.MaskingPattern;
 import org.apache.hop.ui.core.widget.ColumnInfo;
 import org.apache.hop.ui.core.widget.TableView;
+import org.apache.hop.ui.hopgui.HopGui;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
@@ -40,6 +45,37 @@ public final class HopGuiDmFieldTableSupport {
   static final String DOCUMENTATION_DATA_KEY = "dm-field-documentation";
 
   private HopGuiDmFieldTableSupport() {}
+
+  public static ColumnInfo maskingPatternColumn() {
+    ColumnInfo column =
+        new ColumnInfo(
+            BaseMessages.getString(PKG, "HopGuiDmFieldEditorDialog.Column.MaskingPattern"),
+            ColumnInfo.COLUMN_TYPE_CCOMBO,
+            new String[] {""},
+            false);
+    column.setComboValueSupplier(HopGuiDmFieldTableSupport::patternNames);
+    column.setToolTip(
+        BaseMessages.getString(PKG, "HopGuiDmFieldEditorDialog.Column.MaskingPattern.ToolTip"));
+    return column;
+  }
+
+  public static String[] patternNames() {
+    List<String> names = new ArrayList<>();
+    names.add("");
+    try {
+      HopGui hopGui = HopGui.getInstance();
+      IHopMetadataProvider provider = hopGui != null ? hopGui.getMetadataProvider() : null;
+      if (provider != null) {
+        List<String> stored = provider.getSerializer(MaskingPattern.class).listObjectNames();
+        if (stored != null) {
+          names.addAll(stored);
+        }
+      }
+    } catch (Exception ignored) {
+      // The combo stays empty when masking-pattern metadata cannot be listed.
+    }
+    return names.toArray(String[]::new);
+  }
 
   public static ColumnInfo docsColumn() {
     ColumnInfo column =
@@ -91,7 +127,8 @@ public final class HopGuiDmFieldTableSupport {
     if (!Utils.isEmpty(attribute.getPreviousFieldName())) {
       item.setText(4, attribute.getPreviousFieldName());
     }
-    attachDocumentation(item, 5, attribute.getDocumentation());
+    item.setText(5, ConstOrEmpty(attribute.getMaskingPatternName()));
+    attachDocumentation(item, 6, attribute.getDocumentation());
   }
 
   public static DmDimensionAttribute readAttribute(TableItem item) {
@@ -116,6 +153,9 @@ public final class HopGuiDmFieldTableSupport {
     if (!Utils.isEmpty(item.getText(4))) {
       attribute.setPreviousFieldName(item.getText(4));
     }
+    if (!Utils.isEmpty(item.getText(5))) {
+      attribute.setMaskingPatternName(item.getText(5).trim());
+    }
     attribute.setDocumentation(documentationOf(item));
     return attribute;
   }
@@ -125,7 +165,8 @@ public final class HopGuiDmFieldTableSupport {
       return;
     }
     item.setText(1, field.getFieldName());
-    attachDocumentation(item, 2, field.getDocumentation());
+    item.setText(2, ConstOrEmpty(field.getMaskingPatternName()));
+    attachDocumentation(item, 3, field.getDocumentation());
   }
 
   public static DmNaturalKeyField readNaturalKey(TableItem item) {
@@ -133,6 +174,9 @@ public final class HopGuiDmFieldTableSupport {
       return null;
     }
     DmNaturalKeyField field = new DmNaturalKeyField(item.getText(1));
+    if (!Utils.isEmpty(item.getText(2))) {
+      field.setMaskingPatternName(item.getText(2).trim());
+    }
     field.setDocumentation(documentationOf(item));
     return field;
   }
@@ -143,7 +187,8 @@ public final class HopGuiDmFieldTableSupport {
     }
     item.setText(1, measure.getFieldName());
     item.setText(2, measure.isAdditive() ? "Y" : "N");
-    attachDocumentation(item, 3, measure.getDocumentation());
+    item.setText(3, ConstOrEmpty(measure.getMaskingPatternName()));
+    attachDocumentation(item, 4, measure.getDocumentation());
   }
 
   public static DmFactMeasure readMeasure(TableItem item) {
@@ -152,6 +197,9 @@ public final class HopGuiDmFieldTableSupport {
     }
     boolean additive = !"N".equalsIgnoreCase(item.getText(2));
     DmFactMeasure measure = new DmFactMeasure(item.getText(1), additive);
+    if (!Utils.isEmpty(item.getText(3))) {
+      measure.setMaskingPatternName(item.getText(3).trim());
+    }
     measure.setDocumentation(documentationOf(item));
     return measure;
   }
@@ -161,7 +209,8 @@ public final class HopGuiDmFieldTableSupport {
       return;
     }
     item.setText(1, degenerate.getFieldName());
-    attachDocumentation(item, 2, degenerate.getDocumentation());
+    item.setText(2, ConstOrEmpty(degenerate.getMaskingPatternName()));
+    attachDocumentation(item, 3, degenerate.getDocumentation());
   }
 
   public static DmFactDegenerateDimension readDegenerate(TableItem item) {
@@ -169,6 +218,9 @@ public final class HopGuiDmFieldTableSupport {
       return null;
     }
     DmFactDegenerateDimension degenerate = new DmFactDegenerateDimension(item.getText(1));
+    if (!Utils.isEmpty(item.getText(2))) {
+      degenerate.setMaskingPatternName(item.getText(2).trim());
+    }
     degenerate.setDocumentation(documentationOf(item));
     return degenerate;
   }
@@ -216,6 +268,7 @@ public final class HopGuiDmFieldTableSupport {
           model.setSourceFieldName(attribute.getSourceFieldName());
           model.setScdUpdatePolicy(attribute.getScdUpdatePolicy());
           model.setPreviousFieldName(attribute.getPreviousFieldName());
+          model.setMaskingPatternName(attribute.getMaskingPatternName());
           copyDocs(attribute.getDocumentation(), model.getDocumentation());
         } else {
           model.setFieldName(item.getText(2));
@@ -227,13 +280,26 @@ public final class HopGuiDmFieldTableSupport {
         if (measure != null) {
           model.setFieldName(measure.getFieldName());
           model.setAdditive(measure.isAdditive());
+          model.setMaskingPatternName(measure.getMaskingPatternName());
           copyDocs(measure.getDocumentation(), model.getDocumentation());
         } else {
           model.setFieldName(item.getText(1));
         }
       }
-      case NATURAL_KEY, DEGENERATE -> {
+      case NATURAL_KEY -> {
+        DmNaturalKeyField field = readNaturalKey(item);
         model.setFieldName(item.getText(1));
+        if (field != null) {
+          model.setMaskingPatternName(field.getMaskingPatternName());
+        }
+        copyDocs(documentationOf(item), model.getDocumentation());
+      }
+      case DEGENERATE -> {
+        DmFactDegenerateDimension degenerate = readDegenerate(item);
+        model.setFieldName(item.getText(1));
+        if (degenerate != null) {
+          model.setMaskingPatternName(degenerate.getMaskingPatternName());
+        }
         copyDocs(documentationOf(item), model.getDocumentation());
       }
     }
@@ -253,16 +319,19 @@ public final class HopGuiDmFieldTableSupport {
           item.setText(3, EnumDialogSupport.descriptionOf(model.getScdUpdatePolicy()));
         }
         item.setText(4, ConstOrEmpty(model.getPreviousFieldName()));
-        attachDocumentation(item, 5, model.getDocumentation());
+        item.setText(5, ConstOrEmpty(model.getMaskingPatternName()));
+        attachDocumentation(item, 6, model.getDocumentation());
       }
       case MEASURE -> {
         item.setText(1, ConstOrEmpty(model.getFieldName()));
         item.setText(2, model.isAdditive() ? "Y" : "N");
-        attachDocumentation(item, 3, model.getDocumentation());
+        item.setText(3, ConstOrEmpty(model.getMaskingPatternName()));
+        attachDocumentation(item, 4, model.getDocumentation());
       }
       case NATURAL_KEY, DEGENERATE -> {
         item.setText(1, ConstOrEmpty(model.getFieldName()));
-        attachDocumentation(item, 2, model.getDocumentation());
+        item.setText(2, ConstOrEmpty(model.getMaskingPatternName()));
+        attachDocumentation(item, 3, model.getDocumentation());
       }
     }
   }

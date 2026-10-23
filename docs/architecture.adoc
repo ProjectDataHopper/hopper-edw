@@ -19,7 +19,7 @@ It is *not* a Draw.io export of one project. For those derived diagrams see link
 
 image::images/diagrams/edw-overview.svg[Data Hopper EDW overview. Landing sources feed a source model. Clients use Hop JDBC. Hop loads the Data Vault, Business Vault, and dimensional databases. The catalog, documentation, Journey, and lineage view sit underneath.,align="center"]
 
-Landing databases, files, and JSON feed the source model. Clients query that model through Hop JDBC. Hop loads each later layer into its database and records OPS metrics and lineage. The coach is the guide from one model file to the next, and **Generate Data Vault** builds the raw vault from the source model. Hopper presentations report from the dimensional model. The catalog under the models is the shared contract. Documentation, the EDW Journey, and the lineage view (`.hlv`) read that stack.
+Landing databases, files, and JSON feed the source model. Clients query that model through Hop JDBC. Hop loads each later layer into its database and records OPS metrics and lineage. The coach is the guide from one model file to the next, and **Generate Data Vault** builds the raw vault from the source model. The **Masking** arrow is Hop JDBC clients reading the dimensional model with masked columns. Hopper presentations report from that same model. The catalog under the models is the shared contract. Documentation, the EDW Journey, and the lineage view (`.hlv`) read that stack.
 
 The sections below take one slice of this picture. To build a warehouse in this order, start at link:getting-started-edw.adoc[Getting started — building an EDW].
 

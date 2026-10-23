@@ -554,6 +554,11 @@ public class DimensionalModelPainter extends BasePainter {
       if (Utils.isEmpty(extraLine) && base.isLogicalContract()) {
         extraLine = BaseMessages.getString(PKG, "DimensionalModelPainter.LogicalBadge");
       }
+      if (Utils.isEmpty(extraLine)
+          && org.hopper.edw.datavault.metadata.dimensional.DimensionalFieldMasking.maskedCount(base)
+              > 0) {
+        extraLine = BaseMessages.getString(PKG, "DimensionalModelPainter.Masked.Label");
+      }
 
       ModelGraphTableCardLayout.BoxSize boxSize =
           ModelGraphTableCardLayout.computeBoxSize(gc, label, secondaryField, typeLabel, extraLine);

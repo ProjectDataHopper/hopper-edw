@@ -1,0 +1,17 @@
+{
+  "sequenceStart": "1",
+  "piiClassification": "Sensitive",
+  "prefix": "addr-",
+  "trimKey": false,
+  "description": "",
+  "storage": "NONE",
+  "schemaName": "",
+  "suffix": "",
+  "hashSecret": "Encrypted ",
+  "tableName": "",
+  "token": "SEQUENCE",
+  "ignoreCase": false,
+  "name": "address",
+  "connection": "",
+  "valueSource": "SYNTHETIC"
+}

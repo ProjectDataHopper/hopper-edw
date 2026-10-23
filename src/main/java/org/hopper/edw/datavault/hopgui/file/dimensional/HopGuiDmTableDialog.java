@@ -1585,7 +1585,11 @@ public class HopGuiDmTableDialog {
             new String[] {""},
             false);
     ColumnInfo[] keyFieldColumns =
-        new ColumnInfo[] {naturalKeyFieldColumn, HopGuiDmFieldTableSupport.docsColumn()};
+        new ColumnInfo[] {
+          naturalKeyFieldColumn,
+          HopGuiDmFieldTableSupport.maskingPatternColumn(),
+          HopGuiDmFieldTableSupport.docsColumn()
+        };
 
     Button wEditJunkKey = new Button(comp, SWT.PUSH);
     wEditJunkKey.setText(BaseMessages.getString(PKG, "HopGuiDmTableDialog.EditField.Label"));
@@ -1671,7 +1675,11 @@ public class HopGuiDmTableDialog {
             new String[] {""},
             false);
     ColumnInfo[] naturalKeyColumns =
-        new ColumnInfo[] {naturalKeyFieldColumn, HopGuiDmFieldTableSupport.docsColumn()};
+        new ColumnInfo[] {
+          naturalKeyFieldColumn,
+          HopGuiDmFieldTableSupport.maskingPatternColumn(),
+          HopGuiDmFieldTableSupport.docsColumn()
+        };
 
     Button wEditKey = new Button(comp, SWT.PUSH);
     wEditKey.setText(BaseMessages.getString(PKG, "HopGuiDmTableDialog.EditField.Label"));
@@ -1739,6 +1747,7 @@ public class HopGuiDmTableDialog {
               BaseMessages.getString(PKG, "HopGuiDmTableDialog.Attributes.Column.PreviousField"),
               ColumnInfo.COLUMN_TYPE_TEXT,
               false),
+          HopGuiDmFieldTableSupport.maskingPatternColumn(),
           HopGuiDmFieldTableSupport.docsColumn()
         };
 
@@ -1951,6 +1960,7 @@ public class HopGuiDmTableDialog {
               ColumnInfo.COLUMN_TYPE_CCOMBO,
               new String[] {"Y", "N"},
               true),
+          HopGuiDmFieldTableSupport.maskingPatternColumn(),
           HopGuiDmFieldTableSupport.docsColumn()
         };
 
@@ -2029,7 +2039,9 @@ public class HopGuiDmTableDialog {
             comp,
             SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI,
             new ColumnInfo[] {
-              degenerateDimensionFieldColumn, HopGuiDmFieldTableSupport.docsColumn()
+              degenerateDimensionFieldColumn,
+              HopGuiDmFieldTableSupport.maskingPatternColumn(),
+              HopGuiDmFieldTableSupport.docsColumn()
             },
             1,
             null,

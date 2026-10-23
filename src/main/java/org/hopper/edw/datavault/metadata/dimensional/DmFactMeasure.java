@@ -32,6 +32,9 @@ public class DmFactMeasure implements IDmDocumentedField {
 
   @HopMetadataProperty private boolean additive = true;
 
+  /** Hop masking pattern applied by the dimensional model service. Empty returns the warehouse value. */
+  @HopMetadataProperty private String maskingPatternName;
+
   @HopMetadataProperty private DmFieldDocumentation documentation;
 
   public DmFactMeasure(String fieldName) {

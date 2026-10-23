@@ -37,7 +37,14 @@ public final class EdwJourneyPosterStatus {
   public static final long STALE_MS = 7L * 24 * 60 * 60 * 1000;
 
   private static final Set<String> UNMARKED =
-      Set.of("documentation", "clients", "hop-jdbc", "edw-journey", "presentations", "coach");
+      Set.of(
+          "documentation",
+          "clients",
+          "hop-jdbc",
+          "jdbc-clients",
+          "edw-journey",
+          "presentations",
+          "coach");
 
   private EdwJourneyPosterStatus() {}
 

@@ -21,7 +21,7 @@ The four model files run left to right.
 
 * **Landing** databases, files, and JSON are imported into a **source model** (`.hsm`). The **harvester** watches live schemas and the catalog, and can generate a source model from what it finds.
 * **Clients** query the source model through **Hop JDBC**. **Hop** loads the Data Vault, Business Vault, and dimensional databases from `.hdv`, `.hbv`, and `.hdm`. **OPS metrics and lineage** are recorded on that same runtime.
-* The **coach** is the guide from one model file to the next. **Generate Data Vault** builds the raw vault from the source model. **Hopper presentations** report from the dimensional model.
+* The **coach** is the guide from one model file to the next. **Generate Data Vault** builds the raw vault from the source model. The **Masking** arrow is **Hop JDBC clients** reading the dimensional model with masked columns. **Hopper presentations** report from that same model.
 * Every model publishes to the **catalog** and reads from it. **Documentation**, the **EDW Journey**, and the **lineage view** (`.hlv`) sit on that catalog.
 
 Names for the four model files are in <<terms>>. The link:architecture.adoc[architecture] page splits this picture into the catalog, the resource definition group, and the load wave.

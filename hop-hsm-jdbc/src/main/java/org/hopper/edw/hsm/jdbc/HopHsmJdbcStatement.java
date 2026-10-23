@@ -41,10 +41,16 @@ public class HopHsmJdbcStatement implements Statement {
 
   @Override
   public ResultSet executeQuery(String sql) throws SQLException {
+    return executeQuery(sql, List.of(), List.of());
+  }
+
+  ResultSet executeQuery(String sql, List<String> parameterValues, List<Integer> parameterTypes)
+      throws SQLException {
     connection.checkOpen();
     checkOpen();
     int limit = maxRows > 0 ? maxRows : connection.config().rowLimit();
-    Map<String, Object> response = connection.http().query(connection.requireSchema(), sql, limit);
+    Map<String, Object> response =
+        connection.http().query(connection.requireSchema(), sql, limit, parameterValues, parameterTypes);
     current = HopHsmJdbcResultSet.fromQueryResponse(this, response);
     updateCount = -1;
     return current;

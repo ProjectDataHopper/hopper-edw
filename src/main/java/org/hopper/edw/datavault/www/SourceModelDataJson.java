@@ -123,6 +123,36 @@ public final class SourceModelDataJson {
     return sb.toString();
   }
 
+  public static String importedKeys(List<ImportedKeyInfo> keys) {
+    StringBuilder sb = new StringBuilder(256);
+    sb.append("{\"ok\":true,\"v\":").append(SourceModelDataProtocol.VERSION);
+    sb.append(",\"importedKeys\":[");
+    for (int i = 0; i < keys.size(); i++) {
+      if (i > 0) {
+        sb.append(',');
+      }
+      ImportedKeyInfo key = keys.get(i);
+      sb.append("{\"fkSchema\":");
+      appendString(sb, key.fkSchema());
+      sb.append(",\"fkTable\":");
+      appendString(sb, key.fkTable());
+      sb.append(",\"fkColumn\":");
+      appendString(sb, key.fkColumn());
+      sb.append(",\"pkSchema\":");
+      appendString(sb, key.pkSchema());
+      sb.append(",\"pkTable\":");
+      appendString(sb, key.pkTable());
+      sb.append(",\"pkColumn\":");
+      appendString(sb, key.pkColumn());
+      sb.append(",\"seq\":").append(key.keySeq());
+      sb.append(",\"fkName\":");
+      appendString(sb, key.fkName());
+      sb.append('}');
+    }
+    sb.append("]}");
+    return sb.toString();
+  }
+
   public static String queryResult(List<RowMetaAndData> rows, boolean truncated) throws Exception {
     IRowMeta meta = null;
     if (rows != null) {
@@ -275,6 +305,16 @@ public final class SourceModelDataJson {
       int sqlType,
       int position,
       boolean primaryKey) {}
+
+  public record ImportedKeyInfo(
+      String fkSchema,
+      String fkTable,
+      String fkColumn,
+      String pkSchema,
+      String pkTable,
+      String pkColumn,
+      int keySeq,
+      String fkName) {}
 
   /** Expose Types constants used only for documentation / tests. */
   public static int varcharType() {

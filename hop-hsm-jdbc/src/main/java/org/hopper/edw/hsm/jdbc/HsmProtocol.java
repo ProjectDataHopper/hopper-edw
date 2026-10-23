@@ -33,12 +33,17 @@ public final class HsmProtocol {
   public static final String PARAM_ROW_LIMIT = "rowLimit";
   public static final String PARAM_ACTION = "action";
   public static final String PARAM_TABLE = "table";
+  public static final String PARAM_PARAMS = "params";
+  public static final String PARAM_PARAM_TYPES = "paramTypes";
+  public static final String PARAM_PARENT = "parent";
+  public static final String PARAM_CLIENT_INFO = "clientInfo";
 
   public static final String ACTION_QUERY = "query";
   public static final String ACTION_TABLES = "tables";
   public static final String ACTION_COLUMNS = "columns";
   public static final String ACTION_SCHEMAS = "schemas";
   public static final String ACTION_PING = "ping";
+  public static final String ACTION_IMPORTED_KEYS = "importedKeys";
 
   private HsmProtocol() {}
 }

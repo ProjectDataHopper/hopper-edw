@@ -4,6 +4,14 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Dimensional model service (issue #223)
+
+- A **Dimensional model service** publishes a `.hdm` as a JDBC schema on the existing Hop Server virtual database (`jdbc:hop-hsm:`), next to each Source model service. Facts, dimensions, bridges, junk dimensions, and conformed aliases are tables. `SELECT` is pushed to the dimensional warehouse. `SELECT *` returns modeled columns. `getImportedKeys` exposes fact-to-dimension roles, including two roles against one date dimension. The in-process driver (`jdbc:hop-hsm:embedded` and `jdbc:hop-hsm:service=<name>`) lists and queries those schemas as well, with the same masking and audit behavior.
+- A schema-qualified query such as `SELECT * FROM f_orders.d_customer` runs on that service even when the open connection's default schema is a different source or dimensional service. Hop's database explorer preview uses that form. A bare table name stays on the connection schema.
+- A **Masking pattern** on a dimension attribute, natural key, measure, or degenerate dimension is applied with Mask fields before the rows leave the server. **Safe** (the default) allows that column only as a bare select item and rejects filters, joins, grouping, ordering, and expressions on it. **Display** pushes the statement down and masks the result cells. **Preview masked rows** shows that projection in Hop.
+- **Audit queries** writes one row per attempt, including rejected statements, to `edw_dimensional_query_audit`. The editor button creates the table. Literals in the logged SQL are redacted unless verbatim storage is turned on. When auditing is enabled and the insert fails, the client receives no rows. **Allowed users** limits the schema to named Hop Server users.
+- The architecture poster adds **Hop JDBC clients** above **Hopper presentations**, with a **Masking** arrow from the dimensional model. The component explorer card explains the service, the Safe and Display policies, and the audit table. The EDW Journey poster uses the same drawing. The explorer is on the **Start here** table of the shipped documentation, so **Help → EDW documentation** opens it.
+
 ### Lineage view cards (issue #217)
 
 - Lineage cards have rounder corners and a logo for the job or the table type (hub, link, satellite, dimension, fact, source, and the other modeled types). A dataset with no table type of its own uses the producing job's type when the names match, so **Open model** is available on that card. A chevron on the card compacts it to the logo. **Collapse all** and **Expand all** on the toolbar do that for every node. Those choices are kept for the session and are not written into the `.hlv`.

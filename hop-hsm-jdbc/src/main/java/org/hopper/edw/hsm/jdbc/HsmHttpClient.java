@@ -23,7 +23,9 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.Base64;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /** Minimal HTTP client for the hop-hsm sourceModelData servlet (JDK only). */
@@ -132,6 +134,16 @@ final class HsmHttpClient {
   }
 
   Map<String, Object> query(String schema, String sql, int rowLimit) throws SQLException {
+    return query(schema, sql, rowLimit, List.of(), List.of());
+  }
+
+  Map<String, Object> query(
+      String schema,
+      String sql,
+      int rowLimit,
+      List<String> parameterValues,
+      List<Integer> parameterTypes)
+      throws SQLException {
     Map<String, String> params = new LinkedHashMap<>();
     params.put(HsmProtocol.PARAM_ACTION, HsmProtocol.ACTION_QUERY);
     if (schema != null && !schema.isEmpty()) {
@@ -140,6 +152,33 @@ final class HsmHttpClient {
     params.put(HsmProtocol.PARAM_SQL, sql);
     if (rowLimit > 0) {
       params.put(HsmProtocol.PARAM_ROW_LIMIT, Integer.toString(rowLimit));
+    }
+    if (parameterValues != null && !parameterValues.isEmpty()) {
+      List<Boolean> nulls = new ArrayList<>();
+      for (String value : parameterValues) {
+        nulls.add(value == null);
+      }
+      params.put(HsmProtocol.PARAM_PARAMS, HsmJson.jsonArray(parameterValues, nulls));
+      params.put(
+          HsmProtocol.PARAM_PARAM_TYPES,
+          HsmJson.jsonIntArray(parameterTypes != null ? parameterTypes : List.of()));
+    }
+    params.put(HsmProtocol.PARAM_CLIENT_INFO, "hop-hsm-jdbc");
+    return call(params);
+  }
+
+  Map<String, Object> importedKeys(String schema, String foreignTable, String parentTable)
+      throws SQLException {
+    Map<String, String> params = new LinkedHashMap<>();
+    params.put(HsmProtocol.PARAM_ACTION, HsmProtocol.ACTION_IMPORTED_KEYS);
+    if (schema != null && !schema.isEmpty()) {
+      params.put(HsmProtocol.PARAM_SCHEMA, schema);
+    }
+    if (foreignTable != null && !foreignTable.isEmpty()) {
+      params.put(HsmProtocol.PARAM_TABLE, foreignTable);
+    }
+    if (parentTable != null && !parentTable.isEmpty()) {
+      params.put(HsmProtocol.PARAM_PARENT, parentTable);
     }
     return call(params);
   }

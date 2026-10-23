@@ -268,5 +268,6 @@ public abstract class DmTableBase extends HopMetadataBase implements IHopMetadat
                   PKG, "DmTableBase.CheckResult.MissingTableName", Const.NVL(getName(), "?")),
               this));
     }
+    DimensionalFieldMasking.check(remarks, this, metadataProvider, variables, model);
   }
 }

@@ -55,9 +55,11 @@ import org.hopper.edw.datavault.metadata.sourcemodel.SourcePipeline;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceQuery;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceQueryColumn;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceTable;
+import org.hopper.edw.datavault.metadata.dimensional.service.DimensionalModelService;
 import org.hopper.edw.datavault.metadata.sourcemodel.service.SourceModelService;
 import org.hopper.edw.datavault.virtualization.execute.SourceModelSqlExecutor;
 import org.hopper.edw.datavault.virtualization.jdbc.HopSourceModelJdbcResultSet;
+import org.hopper.edw.datavault.virtualization.jdbc.JdbcSqlSchemaResolver;
 
 /**
  * Hop Server servlet for free SQL over {@link SourceModelService} metadata.
@@ -140,7 +142,7 @@ public class SourceModelDataServlet extends BaseHttpServlet implements IHopServe
         writeJson(
             response,
             HttpServletResponse.SC_OK,
-            SourceModelDataJson.schemas(listSchemas(serializer)));
+            SourceModelDataJson.schemas(listSchemas(metadataProvider, request.getRemoteUser())));
         return;
       }
       if (SourceModelDataProtocol.ACTION_PING.equals(action)) {
@@ -149,8 +151,31 @@ public class SourceModelDataServlet extends BaseHttpServlet implements IHopServe
         return;
       }
 
-      // Schema-scoped actions: schema = Source model service name (alias modelName)
+      // Schema-scoped actions: schema = Source model service name (alias modelName).
+      // A qualified query (f_orders.d_customer) selects that service even when the
+      // connection's default schema is a different one. Hop's database explorer preview
+      // sends the qualified form without changing the connection schema.
       String schemaName = resolveSchemaName(request);
+      if (SourceModelDataProtocol.ACTION_QUERY.equals(action)) {
+        String sqlParameter =
+            firstNonEmpty(request.getParameter(SourceModelDataProtocol.PARAM_SQL));
+        if (!Utils.isEmpty(sqlParameter)) {
+          List<String> knownSchemas = new ArrayList<>();
+          for (SourceModelDataJson.SchemaInfo info :
+              listSchemas(metadataProvider, request.getRemoteUser())) {
+            knownSchemas.add(info.name());
+          }
+          try {
+            schemaName = JdbcSqlSchemaResolver.resolve(sqlParameter, schemaName, knownSchemas);
+          } catch (JdbcSqlSchemaResolver.JdbcSqlSchemaException e) {
+            writeJson(
+                response,
+                HttpServletResponse.SC_BAD_REQUEST,
+                SourceModelDataJson.error(e.getMessage()));
+            return;
+          }
+        }
+      }
       if (Utils.isEmpty(schemaName)) {
         // tables/columns without schema → all enabled services
         if (SourceModelDataProtocol.ACTION_TABLES.equals(action)
@@ -168,12 +193,38 @@ public class SourceModelDataServlet extends BaseHttpServlet implements IHopServe
         return;
       }
 
+      DimensionalModelService dimensional =
+          DimensionalModelDataRequests.load(
+              metadataProvider.getSerializer(DimensionalModelService.class), schemaName);
       SourceModelService service = loadService(serializer, schemaName);
+      boolean sourceEnabled = service != null && service.isEnabled();
+      boolean dimensionalEnabled = dimensional != null && dimensional.isEnabled();
+      if (sourceEnabled && dimensionalEnabled) {
+        writeJson(
+            response,
+            HttpServletResponse.SC_CONFLICT,
+            SourceModelDataJson.error(
+                "JDBC schema '"
+                    + schemaName
+                    + "' is both an enabled Source model service and an enabled Dimensional model"
+                    + " service. Disable one of them."));
+        return;
+      }
+      if (dimensionalEnabled) {
+        String denied = DimensionalModelDataRequests.validate(dimensional, schemaName, request.getRemoteUser());
+        if (denied != null) {
+          writeJson(response, HttpServletResponse.SC_FORBIDDEN, SourceModelDataJson.error(denied));
+          return;
+        }
+        handleDimensional(request, response, action, dimensional, variables, metadataProvider);
+        return;
+      }
       if (service == null) {
         String message =
-            "Source model service (schema) '"
+            "JDBC schema '"
                 + schemaName
-                + "' not found. Create metadata type 'Source model service' on the Hop Server project.";
+                + "' was not found. Create a Source model service or a Dimensional model service"
+                + " with that name on the Hop Server project.";
         logError(message);
         writeJson(response, HttpServletResponse.SC_NOT_FOUND, SourceModelDataJson.error(message));
         return;
@@ -217,6 +268,11 @@ public class SourceModelDataServlet extends BaseHttpServlet implements IHopServe
               HttpServletResponse.SC_OK,
               SourceModelDataJson.columns(listColumns(schemaName, model, tablePattern)));
         }
+        case SourceModelDataProtocol.ACTION_IMPORTED_KEYS ->
+            writeJson(
+                response,
+                HttpServletResponse.SC_OK,
+                SourceModelDataJson.importedKeys(List.of()));
         case SourceModelDataProtocol.ACTION_QUERY -> {
           String sql = resolveSql(request);
           if (Utils.isEmpty(sql)) {
@@ -259,7 +315,7 @@ public class SourceModelDataServlet extends BaseHttpServlet implements IHopServe
                 SourceModelDataJson.error(
                     "Unknown action '"
                         + action
-                        + "'. Use query, tables, columns, schemas, or ping."));
+                        + "'. Use query, tables, columns, importedKeys, schemas, or ping."));
       }
     } catch (HopException e) {
       logError("Source model data request failed", e);
@@ -285,21 +341,28 @@ public class SourceModelDataServlet extends BaseHttpServlet implements IHopServe
       IVariables variables,
       MultiMetadataProvider metadataProvider)
       throws Exception {
-    List<SourceModelDataJson.SchemaInfo> services = listSchemas(serializer);
+    List<SourceModelDataJson.SchemaInfo> services =
+        listSchemas(metadataProvider, request.getRemoteUser());
     if (SourceModelDataProtocol.ACTION_TABLES.equals(action)) {
       List<SourceModelDataJson.TableInfo> all = new ArrayList<>();
       for (SourceModelDataJson.SchemaInfo s : services) {
         SourceModelService service = loadService(serializer, s.name());
-        if (service == null || validateService(service, s.name()) != null) {
+        if (service != null && service.isEnabled() && service.isAllowSchemaMetadata()) {
+          SourceModel model =
+              SourceModelLoadSupport.load(
+                  variables.resolve(service.getModelFilename()), variables, metadataProvider);
+          all.addAll(listTables(s.name(), model));
           continue;
         }
-        if (!service.isAllowSchemaMetadata()) {
-          continue;
+        DimensionalModelService dimensional =
+            DimensionalModelDataRequests.load(
+                metadataProvider.getSerializer(DimensionalModelService.class), s.name());
+        if (dimensional != null
+            && dimensional.isEnabled()
+            && dimensional.isAllowSchemaMetadata()
+            && dimensional.allows(request.getRemoteUser())) {
+          all.addAll(DimensionalModelDataRequests.tableInfos(dimensional, variables, metadataProvider));
         }
-        SourceModel model =
-            SourceModelLoadSupport.load(
-                variables.resolve(service.getModelFilename()), variables, metadataProvider);
-        all.addAll(listTables(s.name(), model));
       }
       writeJson(response, HttpServletResponse.SC_OK, SourceModelDataJson.tables(all));
       return;
@@ -309,23 +372,33 @@ public class SourceModelDataServlet extends BaseHttpServlet implements IHopServe
     List<SourceModelDataJson.ColumnInfo> all = new ArrayList<>();
     for (SourceModelDataJson.SchemaInfo s : services) {
       SourceModelService service = loadService(serializer, s.name());
-      if (service == null || validateService(service, s.name()) != null) {
+      if (service != null && service.isEnabled() && service.isAllowSchemaMetadata()) {
+        SourceModel model =
+            SourceModelLoadSupport.load(
+                variables.resolve(service.getModelFilename()), variables, metadataProvider);
+        all.addAll(listColumns(s.name(), model, tablePattern));
         continue;
       }
-      if (!service.isAllowSchemaMetadata()) {
-        continue;
+      DimensionalModelService dimensional =
+          DimensionalModelDataRequests.load(
+              metadataProvider.getSerializer(DimensionalModelService.class), s.name());
+      if (dimensional != null
+          && dimensional.isEnabled()
+          && dimensional.isAllowSchemaMetadata()
+          && dimensional.allows(request.getRemoteUser())) {
+        all.addAll(
+            DimensionalModelDataRequests.columnInfos(
+                dimensional, variables, metadataProvider, tablePattern));
       }
-      SourceModel model =
-          SourceModelLoadSupport.load(
-              variables.resolve(service.getModelFilename()), variables, metadataProvider);
-      all.addAll(listColumns(s.name(), model, tablePattern));
     }
     writeJson(response, HttpServletResponse.SC_OK, SourceModelDataJson.columns(all));
   }
 
   private static List<SourceModelDataJson.SchemaInfo> listSchemas(
-      IHopMetadataSerializer<SourceModelService> serializer) throws HopException {
+      MultiMetadataProvider metadataProvider, String remoteUser) throws HopException {
     List<SourceModelDataJson.SchemaInfo> list = new ArrayList<>();
+    IHopMetadataSerializer<SourceModelService> serializer =
+        metadataProvider.getSerializer(SourceModelService.class);
     for (String name : serializer.listObjectNames()) {
       if (Utils.isEmpty(name)) {
         continue;
@@ -340,7 +413,106 @@ public class SourceModelDataServlet extends BaseHttpServlet implements IHopServe
               : "Source model service";
       list.add(new SourceModelDataJson.SchemaInfo(name, remarks));
     }
+    list.addAll(
+        DimensionalModelDataRequests.listSchemas(
+            metadataProvider.getSerializer(DimensionalModelService.class), remoteUser));
     return list;
+  }
+
+  private void handleDimensional(
+      HttpServletRequest request,
+      HttpServletResponse response,
+      String action,
+      DimensionalModelService service,
+      IVariables variables,
+      MultiMetadataProvider metadataProvider)
+      throws Exception {
+    switch (action) {
+      case SourceModelDataProtocol.ACTION_TABLES -> {
+        if (!service.isAllowSchemaMetadata()) {
+          writeJson(
+              response,
+              HttpServletResponse.SC_FORBIDDEN,
+              SourceModelDataJson.error("Schema metadata is disabled for this service"));
+          return;
+        }
+        writeJson(
+            response,
+            HttpServletResponse.SC_OK,
+            DimensionalModelDataRequests.tables(service, variables, metadataProvider));
+      }
+      case SourceModelDataProtocol.ACTION_COLUMNS -> {
+        if (!service.isAllowSchemaMetadata()) {
+          writeJson(
+              response,
+              HttpServletResponse.SC_FORBIDDEN,
+              SourceModelDataJson.error("Schema metadata is disabled for this service"));
+          return;
+        }
+        writeJson(
+            response,
+            HttpServletResponse.SC_OK,
+            DimensionalModelDataRequests.columns(
+                service,
+                variables,
+                metadataProvider,
+                firstNonEmpty(request.getParameter(SourceModelDataProtocol.PARAM_TABLE))));
+      }
+      case SourceModelDataProtocol.ACTION_IMPORTED_KEYS -> {
+        if (!service.isAllowSchemaMetadata()) {
+          writeJson(
+              response,
+              HttpServletResponse.SC_FORBIDDEN,
+              SourceModelDataJson.error("Schema metadata is disabled for this service"));
+          return;
+        }
+        writeJson(
+            response,
+            HttpServletResponse.SC_OK,
+            DimensionalModelDataRequests.importedKeys(
+                service,
+                variables,
+                metadataProvider,
+                firstNonEmpty(request.getParameter(SourceModelDataProtocol.PARAM_TABLE)),
+                firstNonEmpty(request.getParameter(SourceModelDataProtocol.PARAM_PARENT))));
+      }
+      case SourceModelDataProtocol.ACTION_QUERY -> {
+        String sql = resolveSql(request);
+        if (Utils.isEmpty(sql)) {
+          writeJson(
+              response,
+              HttpServletResponse.SC_BAD_REQUEST,
+              SourceModelDataJson.error("Missing sql parameter or request body"));
+          return;
+        }
+        int requested = parseInt(request.getParameter(SourceModelDataProtocol.PARAM_ROW_LIMIT), 0);
+        try {
+          writeJson(
+              response,
+              HttpServletResponse.SC_OK,
+              DimensionalModelDataRequests.query(
+                  request, service, variables, metadataProvider, sql, requested));
+        } catch (HopException e) {
+          int status =
+              e.getCause() instanceof org.hopper.edw.datavault.virtualization.dimensional.DimensionalSqlException sqlException
+                      && sqlException.isRejected()
+                  ? HttpServletResponse.SC_BAD_REQUEST
+                  : HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+          if (e.getMessage() != null && e.getMessage().contains("audit insert failed")) {
+            status = HttpServletResponse.SC_SERVICE_UNAVAILABLE;
+          }
+          writeJson(response, status, SourceModelDataJson.error(e.getMessage()));
+        }
+      }
+      default ->
+          writeJson(
+              response,
+              HttpServletResponse.SC_BAD_REQUEST,
+              SourceModelDataJson.error(
+                  "Unknown action '"
+                      + action
+                      + "'. Use query, tables, columns, importedKeys, schemas, or ping."));
+    }
   }
 
   private static SourceModelService loadService(

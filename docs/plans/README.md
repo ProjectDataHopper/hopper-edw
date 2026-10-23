@@ -43,3 +43,4 @@ For product documentation, start at [../README.md](../README.md) or [../feature-
 | [edw-operational-analytics-plan.md](edw-operational-analytics-plan.md) | Issue #195 — generate an EDW stack from the OPS database. Product doc: [../ops-analytics.adoc](../ops-analytics.adoc) |
 | [online-training-modules-plan.md](online-training-modules-plan.md) | Issue #206 — online training modules (walkthrough + questionnaire) over the existing docs build. Product entry point: [../training/index.adoc](../training/index.adoc) |
 | [screenshot-refresh.md](screenshot-refresh.md) | Issue #213 — checklist of documentation screenshots to recapture. Spreadsheet: [screenshot-refresh.csv](screenshot-refresh.csv) |
+| [dimensional-model-service-plan.md](dimensional-model-service-plan.md) | Issue #223 — Dimensional model service: masked JDBC over `.hdm` (and existing source schemas) on Hop Server, plus a query audit table |

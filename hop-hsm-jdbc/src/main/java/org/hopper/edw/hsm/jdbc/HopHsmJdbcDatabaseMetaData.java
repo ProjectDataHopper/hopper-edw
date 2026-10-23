@@ -956,13 +956,15 @@ public class HopHsmJdbcDatabaseMetaData implements DatabaseMetaData {
   @Override
   public ResultSet getImportedKeys(String catalog, String schema, String table)
       throws SQLException {
-    return empty();
+    String schemaArg = schema != null && !schema.isEmpty() ? schema : connection.getSchema();
+    return foreignKeys(connection.http().importedKeys(schemaArg, table, null));
   }
 
   @Override
   public ResultSet getExportedKeys(String catalog, String schema, String table)
       throws SQLException {
-    return empty();
+    String schemaArg = schema != null && !schema.isEmpty() ? schema : connection.getSchema();
+    return foreignKeys(connection.http().importedKeys(schemaArg, null, table));
   }
 
   @Override
@@ -974,7 +976,76 @@ public class HopHsmJdbcDatabaseMetaData implements DatabaseMetaData {
       String foreignSchema,
       String foreignTable)
       throws SQLException {
-    return empty();
+    String schemaArg =
+        foreignSchema != null && !foreignSchema.isEmpty()
+            ? foreignSchema
+            : parentSchema != null && !parentSchema.isEmpty() ? parentSchema : connection.getSchema();
+    return foreignKeys(connection.http().importedKeys(schemaArg, foreignTable, parentTable));
+  }
+
+  private ResultSet foreignKeys(Map<String, Object> response) {
+    List<Object> keys = HsmJson.asArray(response.get("importedKeys"));
+    List<Object[]> rows = new ArrayList<>();
+    if (keys != null) {
+      for (Object item : keys) {
+        Map<String, Object> key = HsmJson.asObject(item);
+        if (key == null) {
+          continue;
+        }
+        rows.add(
+            new Object[] {
+              null,
+              HsmJson.str(key, "pkSchema"),
+              HsmJson.str(key, "pkTable"),
+              HsmJson.str(key, "pkColumn"),
+              null,
+              HsmJson.str(key, "fkSchema"),
+              HsmJson.str(key, "fkTable"),
+              HsmJson.str(key, "fkColumn"),
+              (long) HsmJson.integer(key, "seq", 1),
+              importedKeyNoAction,
+              importedKeyNoAction,
+              HsmJson.str(key, "fkName"),
+              "PRIMARY",
+              importedKeyNotDeferrable
+            });
+      }
+    }
+    return HopHsmJdbcResultSet.of(
+        null,
+        new String[] {
+          "PKTABLE_CAT",
+          "PKTABLE_SCHEM",
+          "PKTABLE_NAME",
+          "PKCOLUMN_NAME",
+          "FKTABLE_CAT",
+          "FKTABLE_SCHEM",
+          "FKTABLE_NAME",
+          "FKCOLUMN_NAME",
+          "KEY_SEQ",
+          "UPDATE_RULE",
+          "DELETE_RULE",
+          "FK_NAME",
+          "PK_NAME",
+          "DEFERRABILITY"
+        },
+        new int[] {
+          Types.VARCHAR,
+          Types.VARCHAR,
+          Types.VARCHAR,
+          Types.VARCHAR,
+          Types.VARCHAR,
+          Types.VARCHAR,
+          Types.VARCHAR,
+          Types.VARCHAR,
+          Types.BIGINT,
+          Types.SMALLINT,
+          Types.SMALLINT,
+          Types.VARCHAR,
+          Types.VARCHAR,
+          Types.SMALLINT
+        },
+        rows);
   }
 
   @Override

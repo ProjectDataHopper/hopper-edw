@@ -17,12 +17,16 @@ package org.hopper.edw.datavault.hopgui.file.dimensional;
 
 import org.apache.hop.core.Const;
 import org.apache.hop.core.Props;
+import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.pipeline.transforms.maskfields.MaskingPattern;
 import org.apache.hop.ui.core.FormDataBuilder;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.BaseDialog;
 import org.apache.hop.ui.core.gui.WindowProperty;
+import org.apache.hop.ui.core.widget.MetaSelectionLine;
+import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
@@ -57,6 +61,7 @@ public class HopGuiDmFieldEditorDialog {
     private String sourceFieldName;
     private DmScdUpdatePolicy scdUpdatePolicy = DmScdUpdatePolicy.TYPE1;
     private String previousFieldName;
+    private String maskingPatternName;
     private boolean additive = true;
     private final DmFieldDocumentation documentation = new DmFieldDocumentation();
 
@@ -100,6 +105,14 @@ public class HopGuiDmFieldEditorDialog {
       this.previousFieldName = previousFieldName;
     }
 
+    public String getMaskingPatternName() {
+      return maskingPatternName;
+    }
+
+    public void setMaskingPatternName(String maskingPatternName) {
+      this.maskingPatternName = maskingPatternName;
+    }
+
     public boolean isAdditive() {
       return additive;
     }
@@ -125,6 +138,7 @@ public class HopGuiDmFieldEditorDialog {
   private Combo wScdPolicy;
   private Text wPreviousFieldName;
   private Button wAdditive;
+  private MetaSelectionLine<MaskingPattern> wMaskingPattern;
   private Button wRequired;
   private Text wDescription;
   private MarkdownEditPreviewComposite wNotes;
@@ -245,6 +259,25 @@ public class HopGuiDmFieldEditorDialog {
       last = wAdditive;
     }
 
+    HopGui hopGui = HopGui.getInstance();
+    wMaskingPattern =
+        new MetaSelectionLine<>(
+            hopGui != null ? hopGui.getVariables() : null,
+            hopGui != null ? hopGui.getMetadataProvider() : null,
+            MaskingPattern.class,
+            comp,
+            SWT.SINGLE | SWT.LEFT | SWT.BORDER,
+            BaseMessages.getString(PKG, "HopGuiDmFieldEditorDialog.MaskingPattern.Label"),
+            BaseMessages.getString(PKG, "HopGuiDmFieldEditorDialog.MaskingPattern.ToolTip"));
+    PropsUi.setLook(wMaskingPattern);
+    wMaskingPattern.setLayoutData(new FormDataBuilder().left().top(last, margin).right().result());
+    try {
+      wMaskingPattern.fillItems();
+    } catch (HopException e) {
+      // The list stays empty when masking-pattern metadata cannot be read.
+    }
+    last = wMaskingPattern;
+
     wRequired = new Button(comp, SWT.CHECK);
     wRequired.setText(BaseMessages.getString(PKG, "HopGuiDmFieldEditorDialog.Required.Label"));
     wRequired.setToolTipText(
@@ -312,6 +345,9 @@ public class HopGuiDmFieldEditorDialog {
     if (wAdditive != null) {
       wAdditive.setSelection(input.isAdditive());
     }
+    if (wMaskingPattern != null) {
+      wMaskingPattern.setText(Const.NVL(input.getMaskingPatternName(), ""));
+    }
     DmFieldDocumentation docs = input.getDocumentation();
     wRequired.setSelection(docs.isRequired());
     wDescription.setText(Const.NVL(docs.getDescription(), ""));
@@ -337,6 +373,9 @@ public class HopGuiDmFieldEditorDialog {
     }
     if (wAdditive != null) {
       input.setAdditive(wAdditive.getSelection());
+    }
+    if (wMaskingPattern != null) {
+      input.setMaskingPatternName(wMaskingPattern.getText());
     }
     DmFieldDocumentation docs = input.getDocumentation();
     docs.setRequiredFlag(wRequired.getSelection());

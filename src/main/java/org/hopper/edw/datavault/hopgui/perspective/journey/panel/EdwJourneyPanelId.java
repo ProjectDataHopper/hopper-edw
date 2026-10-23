@@ -45,7 +45,7 @@ public enum EdwJourneyPanelId {
       case "catalog" -> CONTRACT;
       case "ops", "lineage-view" -> LINEAGE_OPS;
       case "coach" -> NEXT_MOVE;
-      case "presentations", "hop-jdbc", "clients" -> CONSUMPTION;
+      case "presentations", "jdbc-clients", "hop-jdbc", "clients" -> CONSUMPTION;
       default -> PROJECT_PULSE;
     };
   }

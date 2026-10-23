@@ -1,0 +1,17 @@
+{
+  "sequenceStart": "2222222",
+  "piiClassification": "Quasi-identifier",
+  "prefix": "phone-",
+  "trimKey": false,
+  "description": "",
+  "storage": "NONE",
+  "schemaName": "",
+  "suffix": "",
+  "hashSecret": "Encrypted ",
+  "tableName": "",
+  "token": "SEQUENCE",
+  "ignoreCase": false,
+  "name": "phone",
+  "connection": "",
+  "valueSource": "SYNTHETIC"
+}

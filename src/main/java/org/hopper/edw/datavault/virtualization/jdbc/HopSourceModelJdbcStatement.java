@@ -49,7 +49,24 @@ public class HopSourceModelJdbcStatement implements Statement {
     connection.checkOpen();
     checkOpen();
     try {
-      SourceModel model = connection.model();
+      String schema;
+      try {
+        schema =
+            JdbcSqlSchemaResolver.resolve(
+                sql, connection.getSchema(), connection.listAvailableSchemas());
+      } catch (JdbcSqlSchemaResolver.JdbcSqlSchemaException e) {
+        throw new SQLException(e.getMessage(), e);
+      }
+      var dimensionalRows = connection.queryIfDimensional(schema, sql, maxRows);
+      if (dimensionalRows.isPresent()) {
+        currentResultSet = new HopSourceModelJdbcResultSet(this, dimensionalRows.get());
+        updateCount = -1;
+        return currentResultSet;
+      }
+      SourceModel model = !Utils.isEmpty(schema) ? connection.getModelForSchema(schema) : null;
+      if (model == null) {
+        model = connection.model();
+      }
       if (model == null) {
         for (String s : connection.listAvailableSchemas()) {
           model = connection.getModelForSchema(s);
@@ -61,8 +78,7 @@ public class HopSourceModelJdbcStatement implements Statement {
       if (model == null) {
         throw new SQLException("No source model available for query execution");
       }
-      String schemaAlias =
-          !Utils.isEmpty(connection.getSchema()) ? connection.getSchema() : model.getName();
+      String schemaAlias = !Utils.isEmpty(schema) ? schema : model.getName();
       int limit = maxRows > 0 ? maxRows : connection.defaultRowLimit();
       List<RowMetaAndData> rows;
       if (limit > 0) {

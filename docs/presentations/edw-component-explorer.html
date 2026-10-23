@@ -261,7 +261,7 @@ limitations under the License.
 <svg id="poster" width="1280" height="708" viewBox="0 0 1280 708" role="group"
      aria-label="Interactive Data Hopper EDW overview: click any block for details">
 <title>Data Hopper EDW overview (interactive)</title>
-<desc>Landing databases, files, and JSON feed a source model. Clients query that model through Hop JDBC. Hop loads the Data Vault, Business Vault, and dimensional databases from their model files and records OPS metrics and lineage. The coach moves from one model to the next. Generate Data Vault builds the raw vault from the source model. Hopper presentations report from the dimensional model. The catalog sits under every model. Documentation, the EDW Journey, and the lineage view sit on that catalog. A harvester watches live schemas and the catalog. Every element in this picture is clickable.</desc>
+<desc>Landing databases, files, and JSON feed a source model. Clients query that model through Hop JDBC. Hop loads the Data Vault, Business Vault, and dimensional databases from their model files and records OPS metrics and lineage. The coach moves from one model to the next. Generate Data Vault builds the raw vault from the source model. Hop JDBC clients query the dimensional model through a Masking arrow. Hopper presentations report from that model. The catalog sits under every model. Documentation, the EDW Journey, and the lineage view sit on that catalog. A harvester watches live schemas and the catalog. Every element in this picture is clickable.</desc>
 <defs>
 <marker id="arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 1.1 L 10 5 L 0 8.9 Z" fill="#5A6A7E"/></marker>
 <marker id="arrow-start" viewBox="0 0 10 10" refX="1.5" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M 10 1.1 L 0 5 L 10 8.9 Z" fill="#5A6A7E"/></marker>
@@ -423,15 +423,26 @@ limitations under the License.
   <rect class="hit" x="330" y="422" width="80" height="88" rx="10"/>
 </g>
 
+<!-- ============ Hop JDBC clients ============ -->
+<g class="comp" data-comp="jdbc-clients" role="button" tabindex="0" aria-label="Hop JDBC clients - masked SQL">
+  <rect x="1118" y="228" width="136" height="96" rx="8" ry="8" fill="#FFF3DF" stroke="#181818" stroke-width="1.5"/>
+  <text x="1186" y="262" fill="#181818" font-family="sans-serif" font-size="17" font-weight="bold" text-anchor="middle">Hop JDBC</text>
+  <text x="1186" y="282" fill="#181818" font-family="sans-serif" font-size="17" font-weight="bold" text-anchor="middle">clients</text>
+  <text x="1186" y="308" fill="#3d4a5c" font-family="sans-serif" font-size="16" text-anchor="middle">Masked SQL</text>
+  <rect class="hit" x="1112" y="222" width="148" height="108" rx="12"/>
+</g>
+<path d="M 1034 276 Q 1076 248 1116 276" fill="none" stroke="#5A6A7E" stroke-width="1.8" marker-end="url(#arrow)"/>
+<text x="1076" y="252" fill="#3d4a5c" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">Masking</text>
+
 <!-- ============ Hopper presentations ============ -->
 <g class="comp" data-comp="presentations" role="button" tabindex="0" aria-label="Hopper presentations - generated dashboards">
-  <rect x="1118" y="328" width="136" height="108" rx="8" ry="8" fill="#FFF3DF" stroke="#181818" stroke-width="1.5"/>
-  <text x="1186" y="366" fill="#181818" font-family="sans-serif" font-size="17" font-weight="bold" text-anchor="middle">Hopper</text>
-  <text x="1186" y="386" fill="#181818" font-family="sans-serif" font-size="17" font-weight="bold" text-anchor="middle">presentations</text>
-  <text x="1186" y="412" fill="#3d4a5c" font-family="sans-serif" font-size="16" text-anchor="middle">Reporting</text>
-  <rect class="hit" x="1112" y="322" width="148" height="120" rx="12"/>
+  <rect x="1118" y="412" width="136" height="108" rx="8" ry="8" fill="#FFF3DF" stroke="#181818" stroke-width="1.5"/>
+  <text x="1186" y="450" fill="#181818" font-family="sans-serif" font-size="17" font-weight="bold" text-anchor="middle">Hopper</text>
+  <text x="1186" y="470" fill="#181818" font-family="sans-serif" font-size="17" font-weight="bold" text-anchor="middle">presentations</text>
+  <text x="1186" y="496" fill="#3d4a5c" font-family="sans-serif" font-size="16" text-anchor="middle">Reporting</text>
+  <rect class="hit" x="1112" y="406" width="148" height="120" rx="12"/>
 </g>
-<path d="M 1034 382 Q 1075 352 1116 382" fill="none" stroke="#5A6A7E" stroke-width="1.8" marker-end="url(#arrow)"/>
+<path d="M 1034 466 Q 1076 438 1116 466" fill="none" stroke="#5A6A7E" stroke-width="1.8" marker-end="url(#arrow)"/>
 
 <!-- ============ Catalog ============ -->
 <g class="comp" data-comp="catalog" role="button" tabindex="0" aria-label="Catalog - source feeds and published layouts">
@@ -924,7 +935,7 @@ const COMPONENTS = {
     [IMG+"architecture-export-retail-example-dimensional-model-drawio.png","Retail dimensional model exported as architecture (draw.io export)"]
   ],
   links:[["Dimensional modeler overview","dimensional-modeler-overview.adoc"],["Date dimension generator","date-dimension-generator.adoc"],["Bus matrix","bus-matrix.adoc"],["Semantic layer","semantic-layer.adoc"],["Dimensional Update","dimensional-update-action.adoc"]],
-  related:["dm-db","bv-models","presentations","ops"]
+  related:["dm-db","bv-models","presentations","jdbc-clients","ops"]
 },
 
 /* ============================ GENERATED DATABASES ============================ */
@@ -1000,6 +1011,7 @@ const COMPONENTS = {
       "A calendar dimension such as <code>d_date</code> is generated by the modeler's date generator, not by a bespoke script."
     ]},
     {h:"What it feeds", items:[
+      "<b>Hop JDBC clients</b> query this star through <code>jdbc:hop-hsm:</code>. A masking pattern rewrites flagged cells before they leave Hop.",
       "<b>Hopper presentations</b> - generated dashboards, crosstabs and Gantt/performance views over the loaded warehouse.",
       "The <b>semantic layer</b> (<code>.hsl</code>) binds consumption metadata (entities, measures, selections) to this model and compiles Calcite SQL for presentations.",
       "BI and SQL clients on the warehouse side, reading the same declarations the modeler generated."
@@ -1014,7 +1026,7 @@ const COMPONENTS = {
     [IMG+"architecture-export-retail-example-dimensional-model-drawio.png","The dimensional model as an architecture export"]
   ],
   links:[["Dimensional Update and Publish","dimensional-update-action.adoc"],["Dimensional modeler overview","dimensional-modeler-overview.adoc"],["Semantic layer","semantic-layer.adoc"],["Operational analytics","ops-analytics.adoc"]],
-  related:["dm-models","presentations","ops","publish"]
+  related:["dm-models","jdbc-clients","presentations","ops","publish"]
 },
 
 /* ============================ RUNTIME ============================ */
@@ -1184,6 +1196,34 @@ const COMPONENTS = {
   related:["ops","catalog","edw-journey"]
 },
 
+"jdbc-clients": {
+  label: "Hop JDBC clients",
+  kicker: "Consumption - masked SQL",
+  title: "Hop JDBC clients: query the star without the clear text",
+  pain: {tag:"Issue #223", text:"\"The warehouse is the data, and non-production is not allowed to hold a copy.\""},
+  sections:[
+    {h:"The same driver, a dimensional schema", two:true, items:[
+      "A <b>Dimensional model service</b> publishes one <code>.hdm</code> as a JDBC schema on <code>jdbc:hop-hsm:</code>, next to each Source model service. The service name is the schema. The model path stays on the server.",
+      "<code>SELECT</code> is pushed to the dimensional warehouse. <code>SELECT *</code> expands to the modeled columns, so unmodeled physical columns stay out of the result.",
+      "Facts, dimensions, bridges, junk dimensions, and conformed aliases are tables. Fact-to-dimension roles are imported keys, including two roles against one date dimension.",
+      "Embedded Hop connections (<code>jdbc:hop-hsm:embedded</code> and <code>jdbc:hop-hsm:service=&lt;name&gt;</code>) and the thin driver share that path. A qualified name such as <code>f_orders.d_customer</code> selects the service even when the connection default is another schema."
+    ]},
+    {h:"Masking and audit", items:[
+      "A <b>masking pattern</b> on a dimension attribute, natural key, measure, or degenerate dimension is applied with Mask fields before the cell leaves Hop. Surrogate keys and fact foreign keys are not masked.",
+      "<b>Safe</b> allows a masked column only as a bare select item and rejects filters, joins, grouping, ordering, and expressions on it. <b>Display</b> pushes the statement, including those predicates, and still masks the result.",
+      "Audit writes one row per attempt, including rejected statements, to <code>edw_dimensional_query_audit</code>. The warehouse password never goes to the client."
+    ]}
+  ],
+  chips:["jdbc:hop-hsm:","Dimensional model service","Safe","Display","Mask fields","Audit table","Embedded","DBeaver / OAS / MicroStrategy"],
+  gallery:[
+    [IMG+"dimensional-model-service-editor.png","Dimensional model service f_orders - Display policy, audit on connection OPS"],
+    [IMG+"dimensional-model-service-masked-d-customer-query.png","SELECT * FROM f_orders.d_customer on crm-embedded - email, phone, and address are tokens; city stays as stored"],
+    [IMG+"hop-source-model-jdbc-dbeaver-query-editor.png","The same jdbc:hop-hsm: driver in DBeaver, here querying a source schema"]
+  ],
+  links:[["Dimensional modeler overview","dimensional-modeler-overview.adoc#dimensional-model-service"],["Source modeler overview (JDBC)","source-modeler-overview.adoc#hop-server-jdbc-dbeaver"]],
+  related:["dm-models","dm-db","presentations","hop-jdbc","clients"]
+},
+
 "presentations": {
   label: "Hopper presentations",
   kicker: "Consumption - dashboards inside Hop",
@@ -1242,7 +1282,7 @@ const COMPONENTS = {
     [IMG+"architecture-export-retail-example-solution-drawio.png","The retail solution at a glance - where clients sit in the picture"]
   ],
   links:[["Source modeler overview (JDBC)","source-modeler-overview.adoc"],["Hop Web modelers","hop-web-modelers.md"]],
-  related:["hop-jdbc","source-models","presentations"]
+  related:["hop-jdbc","jdbc-clients","source-models","presentations"]
 },
 
 "documentation": {
@@ -1279,13 +1319,14 @@ const COMPONENTS = {
 /* Tour order - the story of the stack, start to finish */
 const ORDER = ["landing","harvester","source-models","hop-jdbc","catalog","gates","publish",
                "hop-engine","dv-models","dv-db","bv-models","bv-db","dm-models","dm-db",
-               "ops","coach","edw-journey","lineage-view","presentations","clients","documentation"];
+               "ops","coach","edw-journey","lineage-view","jdbc-clients","presentations","clients","documentation"];
 
 /* Deep-link aliases so #sources, #layer-vault, and so on work as well */
 const ALIAS = {sources:"landing","source":"landing","jdbc":"hop-jdbc","harvest":"harvester",
   "quality":"gates","validate":"gates","update":"publish","engine":"hop-engine","vault":"dv-models",
   "raw-vault":"dv-models","dv":"dv-models","business-vault":"bv-models","bv":"bv-models",
   "dimensional":"dm-models","dm":"dm-models","lineage":"lineage-view","presentation":"presentations",
+  "jdbc-clients":"jdbc-clients","masking":"jdbc-clients",
   "journey":"edw-journey","docs":"documentation","client":"clients","advisor":"coach","coaching":"coach"};
 </script>
 <script>

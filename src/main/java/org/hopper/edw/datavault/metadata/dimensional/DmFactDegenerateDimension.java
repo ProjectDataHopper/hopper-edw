@@ -28,6 +28,9 @@ public class DmFactDegenerateDimension implements IDmDocumentedField {
 
   @HopMetadataProperty private String fieldName;
 
+  /** Hop masking pattern applied by the dimensional model service. Empty returns the warehouse value. */
+  @HopMetadataProperty private String maskingPatternName;
+
   @HopMetadataProperty private DmFieldDocumentation documentation;
 
   public DmFactDegenerateDimension(String fieldName) {

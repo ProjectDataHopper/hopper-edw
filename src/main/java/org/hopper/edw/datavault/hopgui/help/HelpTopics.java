@@ -153,6 +153,7 @@ public final class HelpTopics {
   public static final String DM_CONFIGURATION = "dm-configuration-dialog";
   public static final String SOURCE_MODEL_CONFIGURATION = "source-model-configuration-dialog";
   public static final String SOURCE_MODEL_SERVICE = "source-model-service-dialog";
+  public static final String DIMENSIONAL_MODEL_SERVICE = "dimensional-model-service-dialog";
   public static final String EXECUTION_METRICS_PROFILE = "execution-metrics-profile-dialog";
   public static final String DATA_QUALITY_RULE_SET = "data-quality-rule-set-dialog";
   public static final String BUSINESS_PROCESS_CATALOG = "business-process-catalog-dialog";
@@ -509,6 +510,11 @@ public final class HelpTopics {
               "source-modeler-overview.html",
               "hop-server-jdbc-dbeaver",
               "HelpTopics.SourceModelServiceDialog.Title"),
+          p(
+              DIMENSIONAL_MODEL_SERVICE,
+              "dimensional-modeler-overview.html",
+              "dimensional-model-service",
+              "HelpTopics.DimensionalModelServiceDialog.Title"),
           p(
               EXECUTION_METRICS_PROFILE,
               "help/execution-metrics-profile-dialog.html",

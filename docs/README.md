@@ -29,6 +29,7 @@ Architecture pictures are **committed SVGs** (`docs/images/diagrams/`) generated
 | Document | Description |
 |----------|-------------|
 | [architecture.adoc](architecture.adoc) | Catalog in/out, resource definition group spine, build vs run, four controls, EDW Journey |
+| [presentations/edw-component-explorer.html](presentations/edw-component-explorer.html) | **Clickable EDW overview:** each block opens the layer, the model, screenshots, and the docs behind it |
 | [edw-journey.adoc](edw-journey.adoc) | **EDW Journey** perspective: sources → controls → DV/BV/DM → workflows → reports |
 | [getting-started-edw.adoc](getting-started-edw.adoc) | **Build an EDW:** source model → catalog → Data Vault → resource definition group → load → BV/DM |
 | [getting-started-retail.adoc](getting-started-retail.adoc) | **Tour** the finished retail-example (run the sample workflows) |

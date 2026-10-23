@@ -30,6 +30,10 @@ import org.apache.hop.core.row.RowMeta;
 import org.apache.hop.core.row.value.ValueMetaInteger;
 import org.apache.hop.core.row.value.ValueMetaString;
 import org.apache.hop.core.util.Utils;
+import org.hopper.edw.datavault.virtualization.dimensional.DimensionalImportedKey;
+import org.hopper.edw.datavault.virtualization.dimensional.DimensionalJdbcCatalog;
+import org.hopper.edw.datavault.virtualization.dimensional.DimensionalJdbcColumn;
+import org.hopper.edw.datavault.virtualization.dimensional.DimensionalJdbcTable;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceColumn;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceJdbcExposure;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceJson;
@@ -680,6 +684,8 @@ public class HopSourceModelJdbcDatabaseMetaData implements DatabaseMetaData {
         SourceModel model = connection.getModelForSchema(schemaName);
         if (model != null) {
           addTablesForModel(rows, meta, model, schemaName, tableNamePattern, types);
+        } else {
+          addDimensionalTables(rows, meta, schemaName, tableNamePattern, types);
         }
       }
     }
@@ -763,6 +769,8 @@ public class HopSourceModelJdbcDatabaseMetaData implements DatabaseMetaData {
         SourceModel model = connection.getModelForSchema(schemaName);
         if (model != null) {
           addColumnsForModel(rows, meta, model, schemaName, tableNamePattern, columnNamePattern);
+        } else {
+          addDimensionalColumns(rows, meta, schemaName, tableNamePattern, columnNamePattern);
         }
       }
     }
@@ -854,6 +862,29 @@ public class HopSourceModelJdbcDatabaseMetaData implements DatabaseMetaData {
     meta.addValueMeta(new ValueMetaInteger("KEY_SEQ"));
     meta.addValueMeta(new ValueMetaString("PK_NAME"));
     List<RowMetaAndData> rows = new ArrayList<>();
+    String schemaName = !Utils.isEmpty(schema) ? schema : connection.getSchema();
+    DimensionalJdbcCatalog dimensional = connection.dimensionalCatalog(schemaName);
+    if (dimensional != null) {
+      short seq = 1;
+      DimensionalJdbcTable jdbcTable = dimensional.table(table);
+      if (jdbcTable != null) {
+        for (DimensionalJdbcColumn column : jdbcTable.columns()) {
+          if (!column.primaryKey()) {
+            continue;
+          }
+          rows.add(
+              row(
+                  meta,
+                  null,
+                  dimensional.schemaName(),
+                  jdbcTable.logicalName(),
+                  column.name(),
+                  (long) seq++,
+                  "PRIMARY"));
+        }
+      }
+      return new HopSourceModelJdbcResultSet(null, rows);
+    }
     SourceModel model = connection.model();
     if (model != null && !Utils.isEmpty(table)) {
       for (SourceTable st : model.getTables()) {
@@ -877,13 +908,13 @@ public class HopSourceModelJdbcDatabaseMetaData implements DatabaseMetaData {
   @Override
   public ResultSet getImportedKeys(String catalog, String schema, String table)
       throws SQLException {
-    return emptyResult(new RowMeta());
+    return foreignKeys(schema, table, null);
   }
 
   @Override
   public ResultSet getExportedKeys(String catalog, String schema, String table)
       throws SQLException {
-    return emptyResult(new RowMeta());
+    return foreignKeys(schema, null, table);
   }
 
   @Override
@@ -895,7 +926,58 @@ public class HopSourceModelJdbcDatabaseMetaData implements DatabaseMetaData {
       String foreignSchema,
       String foreignTable)
       throws SQLException {
-    return emptyResult(new RowMeta());
+    String schemaName = !Utils.isEmpty(foreignSchema) ? foreignSchema : parentSchema;
+    return foreignKeys(schemaName, foreignTable, parentTable);
+  }
+
+  private ResultSet foreignKeys(String schema, String foreignTable, String parentTable)
+      throws SQLException {
+    IRowMeta meta = importedKeyMeta();
+    List<RowMetaAndData> rows = new ArrayList<>();
+    String schemaName = !Utils.isEmpty(schema) ? schema : connection.getSchema();
+    DimensionalJdbcCatalog dimensional = connection.dimensionalCatalog(schemaName);
+    if (dimensional == null) {
+      return new HopSourceModelJdbcResultSet(null, rows);
+    }
+    for (DimensionalImportedKey key : dimensional.importedKeys(foreignTable, parentTable)) {
+      rows.add(
+          row(
+              meta,
+              null,
+              dimensional.schemaName(),
+              key.pkTable(),
+              key.pkColumn(),
+              null,
+              dimensional.schemaName(),
+              key.fkTable(),
+              key.fkColumn(),
+              (long) key.keySeq(),
+              (long) DatabaseMetaData.importedKeyNoAction,
+              (long) DatabaseMetaData.importedKeyNoAction,
+              key.fkName(),
+              "PRIMARY",
+              (long) DatabaseMetaData.importedKeyNotDeferrable));
+    }
+    return new HopSourceModelJdbcResultSet(null, rows);
+  }
+
+  private static IRowMeta importedKeyMeta() {
+    IRowMeta meta = new RowMeta();
+    meta.addValueMeta(new ValueMetaString("PKTABLE_CAT"));
+    meta.addValueMeta(new ValueMetaString("PKTABLE_SCHEM"));
+    meta.addValueMeta(new ValueMetaString("PKTABLE_NAME"));
+    meta.addValueMeta(new ValueMetaString("PKCOLUMN_NAME"));
+    meta.addValueMeta(new ValueMetaString("FKTABLE_CAT"));
+    meta.addValueMeta(new ValueMetaString("FKTABLE_SCHEM"));
+    meta.addValueMeta(new ValueMetaString("FKTABLE_NAME"));
+    meta.addValueMeta(new ValueMetaString("FKCOLUMN_NAME"));
+    meta.addValueMeta(new ValueMetaInteger("KEY_SEQ"));
+    meta.addValueMeta(new ValueMetaInteger("UPDATE_RULE"));
+    meta.addValueMeta(new ValueMetaInteger("DELETE_RULE"));
+    meta.addValueMeta(new ValueMetaString("FK_NAME"));
+    meta.addValueMeta(new ValueMetaString("PK_NAME"));
+    meta.addValueMeta(new ValueMetaInteger("DEFERRABILITY"));
+    return meta;
   }
 
   @Override
@@ -1174,6 +1256,102 @@ public class HopSourceModelJdbcDatabaseMetaData implements DatabaseMetaData {
       return true;
     }
     return "source".equalsIgnoreCase(pattern);
+  }
+
+  private void addDimensionalTables(
+      List<RowMetaAndData> rows,
+      IRowMeta meta,
+      String schemaName,
+      String tableNamePattern,
+      String[] types)
+      throws SQLException {
+    DimensionalJdbcCatalog catalog = connection.dimensionalCatalog(schemaName);
+    if (catalog == null) {
+      return;
+    }
+    for (DimensionalJdbcTable table : catalog.tables()) {
+      if (!matchesPattern(tableNamePattern, table.logicalName())) {
+        continue;
+      }
+      if (types != null && types.length > 0) {
+        boolean ok = false;
+        for (String type : types) {
+          if (type != null && type.equalsIgnoreCase("TABLE")) {
+            ok = true;
+            break;
+          }
+        }
+        if (!ok) {
+          continue;
+        }
+      }
+      rows.add(
+          row(
+              meta,
+              null,
+              schemaName,
+              table.logicalName(),
+              "TABLE",
+              table.remarks(),
+              null,
+              null,
+              null,
+              null,
+              null));
+    }
+  }
+
+  private void addDimensionalColumns(
+      List<RowMetaAndData> rows,
+      IRowMeta meta,
+      String schemaName,
+      String tableNamePattern,
+      String columnNamePattern)
+      throws SQLException {
+    DimensionalJdbcCatalog catalog = connection.dimensionalCatalog(schemaName);
+    if (catalog == null) {
+      return;
+    }
+    for (DimensionalJdbcTable table : catalog.tables()) {
+      if (!matchesPattern(tableNamePattern, table.logicalName())) {
+        continue;
+      }
+      int position = 1;
+      for (DimensionalJdbcColumn column : table.columns()) {
+        if (!matchesPattern(columnNamePattern, column.name())) {
+          continue;
+        }
+        int sqlType = column.sqlType();
+        String typeName = DimensionalJdbcCatalog.typeName(column.hopType());
+        rows.add(
+            row(
+                meta,
+                null,
+                schemaName,
+                table.logicalName(),
+                column.name(),
+                (long) sqlType,
+                typeName,
+                0L,
+                null,
+                0L,
+                10L,
+                (long) DatabaseMetaData.columnNullable,
+                null,
+                null,
+                0L,
+                null,
+                0L,
+                (long) position++,
+                "YES",
+                null,
+                null,
+                null,
+                null,
+                "NO",
+                "NO"));
+      }
+    }
   }
 
   private static List<TableEntry> listTables(SourceModel model) {

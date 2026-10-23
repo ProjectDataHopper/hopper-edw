@@ -39,6 +39,7 @@ import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
 import org.apache.hop.metadata.serializer.multi.MultiMetadataProvider;
 import org.apache.hop.metadata.util.HopMetadataInstance;
 import org.apache.hop.metadata.util.HopMetadataUtil;
+import org.hopper.edw.datavault.metadata.dimensional.service.DimensionalModelService;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModelLoadSupport;
 import org.hopper.edw.datavault.metadata.sourcemodel.service.SourceModelService;
@@ -152,32 +153,10 @@ public class HopSourceModelJdbcDriver implements Driver {
             model, schema, variables, metadataProvider, parsed.rowLimit());
       }
 
-      // 4. Named service from metadata provider
+      // 4. Named service from metadata provider (source model or dimensional model)
       if (!Utils.isEmpty(parsed.serviceName())) {
         String serviceName = variables.resolve(parsed.serviceName());
-        IHopMetadataSerializer<SourceModelService> serializer =
-            metadataProvider.getSerializer(SourceModelService.class);
-        SourceModelService service = serializer.load(serviceName);
-        if (service == null) {
-          throw new SQLException(
-              "Source model service '" + serviceName + "' not found in metadata provider");
-        }
-        if (!service.isEnabled()) {
-          throw new SQLException("Source model service '" + serviceName + "' is disabled");
-        }
-        String filename =
-            resolveModelFilename(service.getModelFilename(), variables, metadataProvider);
-        if (Utils.isEmpty(filename)) {
-          throw new SQLException(
-              "Source model service '" + serviceName + "' has no model file configured");
-        }
-        SourceModel model = SourceModelLoadSupport.load(filename, variables, metadataProvider);
-        if (Utils.isEmpty(model.getName())) {
-          model.setName(service.getName());
-        }
-        int rowLimit = parsed.rowLimit() > 0 ? parsed.rowLimit() : service.getDefaultRowLimit();
-        return new HopSourceModelJdbcConnection(
-            model, service.getName(), variables, metadataProvider, rowLimit);
+        return connectNamedService(serviceName, variables, metadataProvider, parsed.rowLimit());
       }
 
       // 5. Embedded mode without explicit service name
@@ -199,6 +178,15 @@ public class HopSourceModelJdbcDriver implements Driver {
           if (Utils.isEmpty(defaultModel.getName())) {
             defaultModel.setName(service.getName());
           }
+          if (rowLimit <= 0) {
+            rowLimit = service.getDefaultRowLimit();
+          }
+        }
+      } else if (enabledServices.isEmpty()) {
+        List<DimensionalModelService> dimensional = enabledDimensionalServices(metadataProvider);
+        if (dimensional.size() == 1) {
+          DimensionalModelService service = dimensional.get(0);
+          defaultSchema = service.getName();
           if (rowLimit <= 0) {
             rowLimit = service.getDefaultRowLimit();
           }
@@ -231,7 +219,7 @@ public class HopSourceModelJdbcDriver implements Driver {
   @Override
   public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) {
     return new DriverPropertyInfo[] {
-      prop("service", "Source model service metadata name (schema)", false),
+      prop("service", "Source or dimensional model service metadata name (schema)", false),
       prop("file", "Path to the .hsm source model", false),
       prop("memory", "Registered in-memory model name", false),
       prop("metadataFolder", "Hop JSON metadata folder (rdbms connections)", false),
@@ -264,6 +252,107 @@ public class HopSourceModelJdbcDriver implements Driver {
   @Override
   public Logger getParentLogger() throws SQLFeatureNotSupportedException {
     throw new SQLFeatureNotSupportedException();
+  }
+
+  private static Connection connectNamedService(
+      String serviceName, Variables variables, IHopMetadataProvider metadataProvider, int requestedLimit)
+      throws Exception {
+    SourceModelService source = loadSourceService(metadataProvider, serviceName);
+    DimensionalModelService dimensional = loadDimensionalService(metadataProvider, serviceName);
+    boolean sourceEnabled = source != null && source.isEnabled();
+    boolean dimensionalEnabled = dimensional != null && dimensional.isEnabled();
+    if (sourceEnabled && dimensionalEnabled) {
+      throw new SQLException(
+          "JDBC schema '"
+              + serviceName
+              + "' is both an enabled Source model service and an enabled Dimensional model"
+              + " service. Disable one of them.");
+    }
+    if (sourceEnabled) {
+      String filename =
+          resolveModelFilename(source.getModelFilename(), variables, metadataProvider);
+      if (Utils.isEmpty(filename)) {
+        throw new SQLException(
+            "Source model service '" + serviceName + "' has no model file configured");
+      }
+      SourceModel model = SourceModelLoadSupport.load(filename, variables, metadataProvider);
+      if (Utils.isEmpty(model.getName())) {
+        model.setName(source.getName());
+      }
+      int rowLimit = requestedLimit > 0 ? requestedLimit : source.getDefaultRowLimit();
+      return new HopSourceModelJdbcConnection(
+          model, source.getName(), variables, metadataProvider, rowLimit);
+    }
+    if (dimensionalEnabled) {
+      if (!dimensional.allows(HopSourceModelJdbcConnection.embeddedPrincipal())) {
+        throw new SQLException(
+            "Dimensional model service (schema) '"
+                + serviceName
+                + "' is not available to this user");
+      }
+      if (Utils.isEmpty(dimensional.getModelFilename())) {
+        throw new SQLException(
+            "Dimensional model service '" + serviceName + "' has no model file configured");
+      }
+      int rowLimit = requestedLimit > 0 ? requestedLimit : dimensional.getDefaultRowLimit();
+      return new HopSourceModelJdbcConnection(
+          null, dimensional.getName(), variables, metadataProvider, rowLimit);
+    }
+    if (source != null) {
+      throw new SQLException("Source model service '" + serviceName + "' is disabled");
+    }
+    if (dimensional != null) {
+      throw new SQLException("Dimensional model service '" + serviceName + "' is disabled");
+    }
+    throw new SQLException(
+        "JDBC schema '"
+            + serviceName
+            + "' was not found. Create a Source model service or a Dimensional model service with"
+            + " that name.");
+  }
+
+  private static SourceModelService loadSourceService(
+      IHopMetadataProvider metadataProvider, String serviceName) throws Exception {
+    IHopMetadataSerializer<SourceModelService> serializer =
+        metadataProvider.getSerializer(SourceModelService.class);
+    SourceModelService service = serializer.load(serviceName);
+    if (service != null) {
+      return service;
+    }
+    for (String name : serializer.listObjectNames()) {
+      if (name != null && name.equalsIgnoreCase(serviceName)) {
+        return serializer.load(name);
+      }
+    }
+    return null;
+  }
+
+  private static DimensionalModelService loadDimensionalService(
+      IHopMetadataProvider metadataProvider, String serviceName) throws Exception {
+    IHopMetadataSerializer<DimensionalModelService> serializer =
+        metadataProvider.getSerializer(DimensionalModelService.class);
+    DimensionalModelService service = serializer.load(serviceName);
+    if (service != null) {
+      return service;
+    }
+    for (String name : serializer.listObjectNames()) {
+      if (name != null && name.equalsIgnoreCase(serviceName)) {
+        return serializer.load(name);
+      }
+    }
+    return null;
+  }
+
+  private static List<DimensionalModelService> enabledDimensionalServices(
+      IHopMetadataProvider metadataProvider) throws Exception {
+    List<DimensionalModelService> enabled = new java.util.ArrayList<>();
+    for (DimensionalModelService service :
+        metadataProvider.getSerializer(DimensionalModelService.class).loadAll()) {
+      if (service != null && service.isEnabled()) {
+        enabled.add(service);
+      }
+    }
+    return enabled;
   }
 
   private static void ensureHopInit() throws Exception {
@@ -324,7 +413,7 @@ public class HopSourceModelJdbcDriver implements Driver {
     }
     if (filename.contains("${PROJECT_HOME}")) {
       throw new SQLException(
-          "Source model file path '"
+          "Model file path '"
               + filename
               + "' contains unresolved variable ${PROJECT_HOME}. Please ensure a Hop project is open or the PROJECT_HOME variable is set.");
     }

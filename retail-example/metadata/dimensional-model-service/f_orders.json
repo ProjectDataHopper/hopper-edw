@@ -1,0 +1,18 @@
+{
+  "auditEnabled": true,
+  "defaultRowLimit": 10000,
+  "maskingPolicy": "DISPLAY",
+  "maxRowLimit": 100000,
+  "description": "The orders fact table model",
+  "auditTable": "edw_dimensional_query_audit",
+  "enabled": true,
+  "allowSchemaMetadata": true,
+  "storeSqlVerbatim": true,
+  "virtualPath": "",
+  "auditSchema": "",
+  "name": "f_orders",
+  "queryTimeoutSeconds": 60,
+  "auditConnection": "OPS",
+  "user": [],
+  "modelFilename": "${PROJECT_HOME}/models/retail-f-orders.hdm"
+}

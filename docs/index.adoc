@@ -20,6 +20,9 @@ Sources are the AsciiDoc files in the repository `docs/` folder. Architecture pi
 |link:architecture.adoc[architecture]
 |Catalog in/out, resource definition group spine, build vs run, four controls
 
+|link:presentations/edw-component-explorer.html[Component explorer]
+|Clickable EDW overview: each block opens the layer, the model, screenshots, and the docs behind it
+
 |link:getting-started-edw.adoc[getting-started-edw]
 |Build an EDW: source model → catalog → Data Vault → resource definition group → load → BV/DM
 

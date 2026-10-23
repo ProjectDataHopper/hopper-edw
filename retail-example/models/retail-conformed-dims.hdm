@@ -22,56 +22,104 @@ limitations under the License.
   </coaching>
   <tables>
     <table>
-      <scdType>TYPE2</scdType>
       <natural_keys>
         <natural_key>
           <fieldName>customer_id</fieldName>
+          <maskingPatternName>customer-id</maskingPatternName>
+          <documentation>
+            <required>Y</required>
+          </documentation>
         </natural_key>
       </natural_keys>
       <attributes>
         <attribute>
           <fieldName>cust_segment</fieldName>
           <scdUpdatePolicy>TYPE2</scdUpdatePolicy>
+          <documentation>
+            <required>Y</required>
+          </documentation>
         </attribute>
         <attribute>
           <fieldName>cust_loyalty_tier</fieldName>
           <scdUpdatePolicy>TYPE2</scdUpdatePolicy>
+          <documentation>
+            <required>Y</required>
+          </documentation>
         </attribute>
         <attribute>
           <fieldName>cust_demo_score</fieldName>
           <scdUpdatePolicy>TYPE2</scdUpdatePolicy>
+          <documentation>
+            <required>Y</required>
+          </documentation>
         </attribute>
         <attribute>
           <fieldName>cust_email</fieldName>
           <scdUpdatePolicy>TYPE2</scdUpdatePolicy>
+          <maskingPatternName>email</maskingPatternName>
+          <documentation>
+            <description/>
+            <notes/>
+            <requirements/>
+            <required>Y</required>
+          </documentation>
         </attribute>
         <attribute>
           <fieldName>cust_phone</fieldName>
           <scdUpdatePolicy>TYPE2</scdUpdatePolicy>
+          <maskingPatternName>phone</maskingPatternName>
+          <documentation>
+            <description/>
+            <notes/>
+            <requirements/>
+            <required>Y</required>
+          </documentation>
         </attribute>
         <attribute>
           <fieldName>cust_address</fieldName>
           <scdUpdatePolicy>TYPE2</scdUpdatePolicy>
+          <maskingPatternName>address</maskingPatternName>
+          <documentation>
+            <description/>
+            <notes/>
+            <requirements/>
+            <required>Y</required>
+          </documentation>
         </attribute>
         <attribute>
           <fieldName>cust_city</fieldName>
           <scdUpdatePolicy>TYPE2</scdUpdatePolicy>
+          <documentation>
+            <required>Y</required>
+          </documentation>
         </attribute>
         <attribute>
           <fieldName>cust_postal_code</fieldName>
           <scdUpdatePolicy>TYPE2</scdUpdatePolicy>
+          <documentation>
+            <required>Y</required>
+          </documentation>
         </attribute>
         <attribute>
           <fieldName>cust_newsletter</fieldName>
           <scdUpdatePolicy>TYPE2</scdUpdatePolicy>
+          <documentation>
+            <required>Y</required>
+          </documentation>
         </attribute>
         <attribute>
           <fieldName>cust_channel</fieldName>
           <scdUpdatePolicy>TYPE2</scdUpdatePolicy>
+          <documentation>
+            <required>Y</required>
+          </documentation>
         </attribute>
         <attribute>
           <fieldName>cust_language</fieldName>
           <scdUpdatePolicy>TYPE2</scdUpdatePolicy>
+          <documentation>
+            <required>Y</required>
+          </documentation>
         </attribute>
       </attributes>
       <outriggers/>
@@ -90,6 +138,12 @@ FROM   hub_customer hc
 JOIN   customer_360_bv sc
   ON   hc.customer_hk = sc.customer_hk
 WHERE  sc.x_to_ts = '9999-12-31 23:59:59'</sourceSql>
+      <sourcePipelineFile/>
+      <sourcePipelineTransform/>
+      <sourcePipelineRunConfiguration/>
+      <sourceCatalogConnection/>
+      <sourceRecordNamespace/>
+      <sourceRecordName/>
       <xloc>128</xloc>
       <yloc>176</yloc>
       <name>d_customer</name>
@@ -180,6 +234,7 @@ JOIN sat_product sp ON hp.product_hk = sp.product_hk</sourceSql>
       <name>d_product</name>
     </table>
     <table>
+      <scdType>TYPE1</scdType>
       <natural_keys>
         <natural_key>
           <fieldName>warehouse_id</fieldName>
@@ -242,6 +297,7 @@ JOIN   sat_warehouse sw ON hw.warehouse_hk = sw.warehouse_hk</sourceSql>
       <name>d_warehouse</name>
     </table>
     <table>
+      <scdType>TYPE1</scdType>
       <natural_keys>
         <natural_key>
           <fieldName>date_key</fieldName>

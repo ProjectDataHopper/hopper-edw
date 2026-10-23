@@ -18,7 +18,7 @@ limitations under the License.
 
 The checklist is [screenshot-refresh.csv](screenshot-refresh.csv). Open it in a spreadsheet and sort by `session`, then `order`.
 
-126 images. 88 are marked `recapture`, 37 are marked `review`, and 1 is marked `decide`. Eight review rows were added on 2026-10-20: the Data Vault source-modeling sequence and the DBeaver driver list.
+128 images. 87 are marked `recapture`, 40 are marked `review`, and 1 is marked `decide`. Eight review rows were added on 2026-10-20: the Data Vault source-modeling sequence and the DBeaver driver list. Two review rows were added on 2026-10-23: the `f_orders` service editor and the masked `d_customer` query.
 
 Type `Y` in `done` when the file at `image_path` has been replaced. Type `drop` on the decide row if the image should go. Replacing the file updates every page in `used_in`. Captions stay as they are.
 
@@ -83,6 +83,12 @@ The four architecture pictures are Draw.io diagrams. Regenerate the retail archi
 Needs a configured provider. Rows 1–5 use `models/retail-360.hdv`. The link-satellite answer uses the prompt "Please explain what link satellites are and give an example." Leave those proposals unapplied. Skip the session and leave `done` empty when no provider is configured.
 
 Rows 6–12 are already captured from `test/ai-modeling-test.hdv`: ask for a model of the selected E2E catalog sources, then apply hubs before the links and satellites that depend on them. The last frame is the canvas after apply.
+
+## S6 — Dimensional model service (2)
+
+Open metadata **Dimensional model service** `f_orders` (model `'${PROJECT_HOME}/models/retail-f-orders.hdm'`, masking policy Display, audit on connection OPS). The editor shot is already captured.
+
+Open `models/retail-conformed-dims.hdm` and the `d_customer` Attributes tab, with patterns on email, phone, and address. In the database perspective, on connection `crm-embedded`, run `SELECT * FROM f_orders.d_customer LIMIT 5000` and leave the result grid visible. The shot is already captured.
 
 ## S0 — decide (1)
 
