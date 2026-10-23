@@ -160,7 +160,7 @@ whether the OPS overlay is on.
 facets, columns) with a **View as HTML** button, while a click on the rest of the card opens the context
 menu (**Open model**, **Open in catalog**, **Show update pipeline**, **Show build pipeline**).
 +
-image::../images/lineage-view-with-information-pane.png[A Hop Lineage View with the details pane open; structure comes from Marquez, durations from OPS,align="center"]
+image::../images/lineage-view-with-information-pane.png[A Hop Lineage View with most nodes compact and the f_orders details pane open. Structure comes from Marquez.,align="center"]
 
 . If the canvas is empty, the export has not run. Optional, with Docker: `./scripts/run-marquez.sh up`,
 then `./scripts/run-hop.sh retail-example workflows/send-lineage-to-marquez.hwf`, then **Refresh

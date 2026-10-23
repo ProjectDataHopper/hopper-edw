@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.hopper.edw.datavault.layout.ElkLayoutBox;
 import org.hopper.edw.datavault.lineageview.backend.LineageEdge;
 import org.hopper.edw.datavault.lineageview.backend.LineageGraph;
@@ -56,5 +57,37 @@ class LineageViewElkSupportTest {
     Map<String, ElkLayoutBox> boxes = LineageViewElkSupport.layout(graph);
     assertEquals(2, boxes.size());
     assertTrue(boxes.get("dataset:ns:a").x() < boxes.get("dataset:ns:b").x());
+    assertEquals(LineageViewElkSupport.EXPANDED_WIDTH, boxes.get("dataset:ns:a").width());
+    assertEquals(LineageViewElkSupport.EXPANDED_HEIGHT, boxes.get("dataset:ns:a").height());
+  }
+
+  @Test
+  void compactNodeUsesTheSmallSquare() throws Exception {
+    LineageGraph graph =
+        LineageGraph.builder()
+            .nodes(
+                List.of(
+                    LineageNode.builder()
+                        .id("dataset:ns:a")
+                        .kind(LineageNodeKind.DATASET)
+                        .name("a")
+                        .build(),
+                    LineageNode.builder()
+                        .id("dataset:ns:b")
+                        .kind(LineageNodeKind.DATASET)
+                        .name("b")
+                        .build()))
+            .edges(
+                List.of(
+                    LineageEdge.builder()
+                        .fromNodeId("dataset:ns:a")
+                        .toNodeId("dataset:ns:b")
+                        .build()))
+            .build();
+    Map<String, ElkLayoutBox> boxes = LineageViewElkSupport.layout(graph, Set.of("dataset:ns:a"));
+    assertEquals(LineageViewElkSupport.COMPACT_SIZE, boxes.get("dataset:ns:a").width());
+    assertEquals(LineageViewElkSupport.COMPACT_SIZE, boxes.get("dataset:ns:a").height());
+    assertEquals(LineageViewElkSupport.EXPANDED_WIDTH, boxes.get("dataset:ns:b").width());
+    assertEquals(LineageViewElkSupport.EXPANDED_HEIGHT, boxes.get("dataset:ns:b").height());
   }
 }

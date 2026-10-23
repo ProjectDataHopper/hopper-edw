@@ -18,8 +18,11 @@ package org.hopper.edw.datavault.hopgui.file.lineageview;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.Getter;
 import lombok.Setter;
@@ -87,10 +90,10 @@ import org.hopper.edw.datavault.lineageview.HopLineageViewDocument;
 import org.hopper.edw.datavault.lineageview.LineageViewDetailsSupport;
 import org.hopper.edw.datavault.lineageview.LineageViewElkSupport;
 import org.hopper.edw.datavault.lineageview.LineageViewNavigationSupport;
+import org.hopper.edw.datavault.lineageview.LineageViewNodeAppearance;
 import org.hopper.edw.datavault.lineageview.LineageViewOpsBadge;
 import org.hopper.edw.datavault.lineageview.LineageViewOpsOverlay;
 import org.hopper.edw.datavault.lineageview.LineageViewSeedSupport;
-import org.hopper.edw.datavault.lineageview.backend.DatasetDetails;
 import org.hopper.edw.datavault.lineageview.backend.ILineageQueryService;
 import org.hopper.edw.datavault.lineageview.backend.JobDetails;
 import org.hopper.edw.datavault.lineageview.backend.LineageGraph;
@@ -124,6 +127,10 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
   public static final String TOOLBAR_ITEM_ZOOM_FIT =
       "HopGuiLineageViewGraph-ToolBar-10040-Zoom-Fit";
   public static final String TOOLBAR_ITEM_REFRESH = "HopGuiLineageViewGraph-ToolBar-10050-Refresh";
+  public static final String TOOLBAR_ITEM_COLLAPSE_ALL =
+      "HopGuiLineageViewGraph-ToolBar-10055-Collapse-All";
+  public static final String TOOLBAR_ITEM_EXPAND_ALL =
+      "HopGuiLineageViewGraph-ToolBar-10056-Expand-All";
   public static final String TOOLBAR_ITEM_SETTINGS =
       "HopGuiLineageViewGraph-ToolBar-10060-Settings";
   public static final String TOOLBAR_ITEM_AI_HELP = "HopGuiLineageViewGraph-ToolBar-10065-AI-Help";
@@ -132,7 +139,10 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
   public static final String TOOLBAR_ITEM_UNDO = "HopGuiLineageViewGraph-ToolBar-Undo";
   public static final String TOOLBAR_ITEM_REDO = "HopGuiLineageViewGraph-ToolBar-Redo";
   public static final String ACTION_ID_OPEN_MODEL = "lineage-view-open-model";
+  public static final String ACTION_ID_OPEN_TABLE = "lineage-view-open-table";
+  public static final String ACTION_ID_OPEN_SOURCE = "lineage-view-open-source";
   public static final String ACTION_ID_OPEN_CATALOG = "lineage-view-open-catalog";
+  public static final String ACTION_ID_PREVIEW_ROWS = "lineage-view-preview-rows";
   public static final String ACTION_ID_SHOW_UPDATE_PIPELINE = "lineage-view-show-update-pipeline";
   public static final String ACTION_ID_SHOW_BUILD_PIPELINE = "lineage-view-show-build-pipeline";
 
@@ -152,12 +162,22 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
   private final List<AreaOwner> areaOwners = new ArrayList<>();
   private LineageGraph sessionGraph;
   private Map<String, ElkLayoutBox> layoutBoxes = Map.of();
+
+  /** Session-only. Not written into the {@code .hlv}. */
+  private final Set<String> compactNodeIds = new LinkedHashSet<>();
+
   private String selectedNodeId;
   private String mouseOverTableName;
   private String statusText = "";
   private String errorBanner;
   private boolean changed;
   private boolean facetsInline = true;
+
+  /**
+   * Nodes whose own facet follow-up already finished. A second click does not call Marquez again.
+   */
+  private final Set<String> followUpCompleted = new HashSet<>();
+
   private LineageViewOpsOverlay opsOverlay = LineageViewOpsOverlay.empty();
   private List<LineageSnapshot> extraSnapshots = List.of();
   private AtomicBoolean refreshCancelled = new AtomicBoolean(false);
@@ -272,6 +292,7 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
     setRefreshEnabled(false);
     setStatusText(BaseMessages.getString(PKG, "HopGuiLineageViewGraph.Status.Loading"));
     redraw();
+    Set<String> compactSnapshot = Set.copyOf(compactNodeIds);
     Thread worker =
         new Thread(
             () -> {
@@ -284,7 +305,8 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
                   LineageQuery query = LineageViewSeedSupport.toQuery(document, extraSnapshots);
                   LineageGraph raw = service.fetchGraph(query);
                   LineageGraph applied = LineageGraphOps.apply(raw, query);
-                  Map<String, ElkLayoutBox> boxes = LineageViewElkSupport.layout(applied);
+                  Map<String, ElkLayoutBox> boxes =
+                      LineageViewElkSupport.layout(applied, compactSnapshot);
                   LineageViewOpsOverlay overlay = LineageViewOpsOverlay.empty();
                   if (document.isIncludeOpsOverlay()) {
                     overlay =
@@ -299,11 +321,19 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
                       service.facetsInlineOnGraph(),
                       overlay,
                       null,
-                      cancelled);
+                      cancelled,
+                      compactSnapshot);
                 }
               } catch (Exception e) {
                 applyRefresh(
-                    null, Map.of(), null, true, LineageViewOpsOverlay.empty(), e, cancelled);
+                    null,
+                    Map.of(),
+                    null,
+                    true,
+                    LineageViewOpsOverlay.empty(),
+                    e,
+                    cancelled,
+                    compactSnapshot);
               }
             },
             "hlv-refresh");
@@ -372,7 +402,8 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
       boolean inlineFacets,
       LineageViewOpsOverlay overlay,
       Exception error,
-      AtomicBoolean cancelled) {
+      AtomicBoolean cancelled,
+      Set<String> compactSnapshot) {
     Display display = getDisplay();
     if (display == null || display.isDisposed()) {
       return;
@@ -397,10 +428,14 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
             facetsInline = inlineFacets;
             opsOverlay = overlay != null ? overlay : LineageViewOpsOverlay.empty();
             layoutBoxes = boxes != null ? boxes : Map.of();
+            if (!compactSnapshot.equals(compactNodeIds)) {
+              relayoutSession();
+            }
             maximum = computeMaximum();
             setStatusText(
                 BaseMessages.getString(
                     PKG, "HopGuiLineageViewGraph.Status.Ready", Const.NVL(structure, "")));
+            fillMissingJobExports();
           }
           updateDetails();
           refreshInProgress = false;
@@ -410,31 +445,33 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
   }
 
   public void selectNode(String nodeId) {
-    selectNode(nodeId, false);
+    this.selectedNodeId = nodeId;
+    updateDetails();
+    redraw();
   }
 
-  /** Name click: refresh the details pane only — no context dialog. */
+  /** Name click: refresh the details pane only — no context dialog and no backend read. */
   public void selectNodeName(String nodeId) {
     avoidContextDialog = true;
     pendingContextClick = null;
     wantContextAfterFollowUp = false;
     followUpContextClick = null;
-    selectNode(nodeId, true);
+    selectNode(nodeId);
   }
 
   /**
-   * Card mouse-down: select the node and start facet follow-up. Context waits for an unmoved
-   * mouse-up so Hop Web does not treat the click as a drag.
+   * Card mouse-down: select the node. The context dialog opens on mouse-up from the graph already
+   * in memory. Hop Web uses the same unmoved-click check so a click is not treated as a drag.
    */
   public void beginCardClick(String nodeId, LineageViewClickPoint click) {
     avoidContextDialog = false;
     pendingContextClick = click;
     wantContextAfterFollowUp = false;
-    followUpContextClick = click;
-    selectNode(nodeId, false);
+    followUpContextClick = null;
+    selectNode(nodeId);
   }
 
-  /** Card mouse-up that did not move: open the context dialog, or wait for facet follow-up. */
+  /** Card mouse-up that did not move: open the context dialog. Does not call Marquez. */
   public boolean finishCardClick(Point real) {
     if (!isUnmovedClick(real)) {
       cancelPendingContext();
@@ -448,17 +485,11 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
     }
     LineageViewClickPoint click = pendingContextClick;
     pendingContextClick = null;
+    wantContextAfterFollowUp = false;
     if (click == null) {
       return false;
     }
-    LineageNode node = findSessionNode(selectedNodeId);
-    if (needsFollowUp(node)) {
-      wantContextAfterFollowUp = true;
-      followUpContextClick = click;
-      return true;
-    }
-    wantContextAfterFollowUp = false;
-    showNodeContextDialog(click, node);
+    showNodeContextDialog(click, findSessionNode(selectedNodeId));
     return true;
   }
 
@@ -468,34 +499,28 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
     followUpContextClick = null;
   }
 
-  private void selectNode(String nodeId, boolean nameClick) {
-    this.selectedNodeId = nodeId;
-    updateDetails();
-    redraw();
-    if (!nameClick) {
-      startFollowUp(nodeId);
-    }
-  }
-
-  boolean needsFollowUp(LineageNode node) {
-    if (facetsInline || node == null) {
-      return false;
-    }
-    if (node.getKind() == LineageNodeKind.JOB) {
-      return node.getHopExport() == null;
-    }
-    if (node.getKind() == LineageNodeKind.DATASET) {
-      return node.getHopLocation() == null;
-    }
-    return false;
-  }
-
-  private void startFollowUp(String nodeId) {
-    followUpCancelled.set(true);
-    LineageNode node = findSessionNode(nodeId);
-    if (!needsFollowUp(node)) {
+  /**
+   * Reads {@code hop_export} for jobs that arrived without it. Uses the run id already on the
+   * graph, so this is the small run-facets document, not the dataset and not the whole job. Runs
+   * once after refresh, never on a click.
+   */
+  private void fillMissingJobExports() {
+    if (facetsInline || sessionGraph == null) {
       return;
     }
+    List<LineageNode> jobs = new ArrayList<>();
+    for (LineageNode node : sessionGraph.getNodesOrEmpty()) {
+      if (node != null
+          && node.getKind() == LineageNodeKind.JOB
+          && node.getHopExport() == null
+          && !Utils.isEmpty(node.getLatestRunId())) {
+        jobs.add(node);
+      }
+    }
+    if (jobs.isEmpty()) {
+      return;
+    }
+    followUpCancelled.set(true);
     AtomicBoolean cancelled = new AtomicBoolean(false);
     followUpCancelled = cancelled;
     Thread worker =
@@ -506,91 +531,60 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
                 try (ILineageQueryService service =
                     LineageQueryServiceFactory.open(
                         backend, variables, hopGui.getMetadataProvider(), hopGui.getLog())) {
-                  LineageNode updated = enrichNode(service, node);
-                  applyFollowUp(nodeId, updated, cancelled);
+                  List<LineageNode> updates = new ArrayList<>();
+                  for (LineageNode job : jobs) {
+                    if (cancelled.get()) {
+                      return;
+                    }
+                    JobDetails details =
+                        service
+                            .fetchJob(
+                                OpenLineageRef.builder()
+                                    .namespace(job.getNamespace())
+                                    .name(job.getName())
+                                    .build(),
+                                job.getLatestRunId())
+                            .orElse(null);
+                    if (details == null || details.getHopExport() == null) {
+                      continue;
+                    }
+                    updates.add(
+                        job.toBuilder()
+                            .hopExport(details.getHopExport())
+                            .hopOps(
+                                details.getHopOps() != null ? details.getHopOps() : job.getHopOps())
+                            .build());
+                  }
+                  applyJobExports(updates, cancelled);
                 }
               } catch (Exception ignored) {
-                applyFollowUp(nodeId, node, cancelled);
+                // The canvas already has names and layers. Actions that need a model file stay
+                // hidden when this read fails.
               }
             },
-            "hlv-follow-up");
+            "hlv-job-facets");
     worker.setDaemon(true);
     worker.start();
   }
 
-  static LineageNode enrichNode(ILineageQueryService service, LineageNode node)
-      throws HopException {
-    if (service == null || node == null) {
-      return node;
-    }
-    if (node.getKind() == LineageNodeKind.JOB) {
-      JobDetails details =
-          service
-              .fetchJob(
-                  OpenLineageRef.builder()
-                      .namespace(node.getNamespace())
-                      .name(node.getName())
-                      .build())
-              .orElse(null);
-      if (details == null) {
-        return node;
-      }
-      return node.toBuilder()
-          .hopExport(details.getHopExport() != null ? details.getHopExport() : node.getHopExport())
-          .hopOps(details.getHopOps() != null ? details.getHopOps() : node.getHopOps())
-          .latestRunId(
-              !Utils.isEmpty(details.getLatestRunId())
-                  ? details.getLatestRunId()
-                  : node.getLatestRunId())
-          .lastExportedAt(
-              !Utils.isEmpty(details.getLastExportedAt())
-                  ? details.getLastExportedAt()
-                  : node.getLastExportedAt())
-          .build();
-    }
-    if (node.getKind() == LineageNodeKind.DATASET) {
-      DatasetDetails details =
-          service
-              .fetchDataset(
-                  OpenLineageRef.builder()
-                      .namespace(node.getNamespace())
-                      .name(node.getName())
-                      .build())
-              .orElse(null);
-      if (details == null) {
-        return node;
-      }
-      return node.toBuilder()
-          .hopLocation(
-              details.getHopLocation() != null ? details.getHopLocation() : node.getHopLocation())
-          .schemaFieldNames(
-              details.getSchemaFieldNames() != null && !details.getSchemaFieldNames().isEmpty()
-                  ? details.getSchemaFieldNames()
-                  : node.getSchemaFieldNames())
-          .build();
-    }
-    return node;
-  }
-
-  private void applyFollowUp(String nodeId, LineageNode updated, AtomicBoolean cancelled) {
+  private void applyJobExports(List<LineageNode> updates, AtomicBoolean cancelled) {
     Display display = getDisplay();
-    if (display == null || display.isDisposed()) {
+    if (display == null || display.isDisposed() || updates == null || updates.isEmpty()) {
       return;
     }
     display.asyncExec(
         () -> {
-          if (cancelled.get() || isDisposed() || !nodeId.equals(selectedNodeId)) {
+          if (cancelled.get() || isDisposed()) {
             return;
           }
-          replaceSessionNode(updated);
+          for (LineageNode updated : updates) {
+            replaceSessionNode(updated);
+            if (updated.getId() != null) {
+              followUpCompleted.add(updated.getId());
+            }
+          }
           updateDetails();
           redraw();
-          if (wantContextAfterFollowUp && followUpContextClick != null && updated != null) {
-            wantContextAfterFollowUp = false;
-            LineageViewClickPoint click = followUpContextClick;
-            followUpContextClick = null;
-            showNodeContextDialog(click, updated);
-          }
         });
   }
 
@@ -618,8 +612,11 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
               PKG,
               "HopGuiLineageViewGraph.Context.Node.Message",
               Const.NVL(node.getName(), node.getId()));
+      LineageNode menuNode =
+          LineageViewNavigationSupport.withCatalogKey(
+              sessionGraph, LineageViewNodeAppearance.forActions(sessionGraph, node), variables);
       IGuiContextHandler contextHandler =
-          new HopGuiLineageViewNodeContext(document, this, node, real);
+          new HopGuiLineageViewNodeContext(document, this, menuNode, real);
       avoidContextDialog =
           openModelContextDialog(
               getShell(), message, new Point(screenPoint.x, screenPoint.y), contextHandler);
@@ -662,8 +659,73 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
     if (canvas == null || canvas.isDisposed()) {
       return;
     }
+    if (node == null) {
+      canvas.setToolTipText(null);
+      return;
+    }
+    LineageViewNodeAppearance look = LineageViewNodeAppearance.of(sessionGraph, node);
+    StringBuilder tip = new StringBuilder();
+    tip.append(Const.NVL(node.getName(), node.getId()));
+    if (!Utils.isEmpty(look.typeLabel())) {
+      tip.append('\n').append(look.typeLabel());
+    }
+    if (!Utils.isEmpty(look.layerLabel())) {
+      tip.append(" · ").append(look.layerLabel());
+    }
     LineageViewOpsBadge badge = opsBadge(node);
-    canvas.setToolTipText(badge != null ? badge.tooltip() : null);
+    if (badge != null && !Utils.isEmpty(badge.tooltip())) {
+      tip.append('\n').append(badge.tooltip());
+    }
+    canvas.setToolTipText(tip.toString());
+  }
+
+  /** Compact or expand one node. Does not mark the {@code .hlv} changed. */
+  public void toggleCompact(String nodeId) {
+    if (Utils.isEmpty(nodeId)) {
+      return;
+    }
+    if (!compactNodeIds.add(nodeId)) {
+      compactNodeIds.remove(nodeId);
+    }
+    relayoutSession();
+  }
+
+  /** Collapse every node to its logo. Does not mark the {@code .hlv} changed. */
+  public void collapseAllNodes() {
+    compactNodeIds.clear();
+    if (sessionGraph != null) {
+      for (LineageNode node : sessionGraph.getNodesOrEmpty()) {
+        if (node != null && node.getId() != null) {
+          compactNodeIds.add(node.getId());
+        }
+      }
+    }
+    relayoutSession();
+  }
+
+  /** Expand every node. Does not mark the {@code .hlv} changed. */
+  public void expandAllNodes() {
+    if (compactNodeIds.isEmpty()) {
+      return;
+    }
+    compactNodeIds.clear();
+    relayoutSession();
+  }
+
+  private void relayoutSession() {
+    if (sessionGraph == null) {
+      redraw();
+      return;
+    }
+    try {
+      layoutBoxes = LineageViewElkSupport.layout(sessionGraph, Set.copyOf(compactNodeIds));
+      maximum = computeMaximum();
+    } catch (Exception e) {
+      if (hopGui != null && hopGui.getLog() != null) {
+        hopGui.getLog().logError("Unable to lay out the lineage view", e);
+      }
+    }
+    redraw();
   }
 
   private Point computeMaximum() {
@@ -728,6 +790,7 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
       ctx.maximum = maximum;
       ctx.showingNavigationView = !propsUi.isHideViewportEnabled();
       ctx.opsOverlay = opsOverlay;
+      ctx.compactNodeIds = compactNodeIds;
       ctx.bannerText = canvasBannerText();
       ctx.bannerError = LineageViewCanvasBanner.error(errorBanner);
       ModelGraphCanvasSvgResult result = LineageViewCanvasSvgRenderer.render(ctx);
@@ -755,6 +818,7 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
       painter.setAreaOwners(areaOwners);
       painter.setShowingNavigationView(!propsUi.isHideViewportEnabled());
       painter.setMouseOverTableName(mouseOverTableName);
+      painter.setCompactNodeIds(compactNodeIds);
       painter.setBanner(canvasBannerText(), LineageViewCanvasBanner.error(errorBanner));
       painter.draw();
       captureNavigationViewGeometry(painter);
@@ -808,6 +872,24 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
 
   @GuiToolbarElement(
       root = GUI_PLUGIN_TOOLBAR_PARENT_ID,
+      id = TOOLBAR_ITEM_COLLAPSE_ALL,
+      toolTip = "i18n::HopGuiLineageViewGraph.Toolbar.CollapseAll",
+      image = "ui/images/collapse-all.svg")
+  public void toolbarCollapseAll() {
+    collapseAllNodes();
+  }
+
+  @GuiToolbarElement(
+      root = GUI_PLUGIN_TOOLBAR_PARENT_ID,
+      id = TOOLBAR_ITEM_EXPAND_ALL,
+      toolTip = "i18n::HopGuiLineageViewGraph.Toolbar.ExpandAll",
+      image = "ui/images/expand-all.svg")
+  public void toolbarExpandAll() {
+    expandAllNodes();
+  }
+
+  @GuiToolbarElement(
+      root = GUI_PLUGIN_TOOLBAR_PARENT_ID,
       id = TOOLBAR_ITEM_SETTINGS,
       toolTip = "i18n::HopGuiLineageViewGraph.Toolbar.Settings",
       image = "ui/images/settings.svg")
@@ -854,7 +936,8 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
     }
     try {
       String svgXml =
-          LineageViewSvgPainter.generateSvg(sessionGraph, layoutBoxes, variables, opsOverlay);
+          LineageViewSvgPainter.generateSvg(
+              sessionGraph, layoutBoxes, variables, opsOverlay, compactNodeIds);
       String proposedName = Const.NVL(getName(), "lineage") + ".svg";
       String proposedFilename = variables.getVariable("user.home") + File.separator + proposedName;
       String filenameFromUser =
@@ -897,8 +980,17 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
     if (ACTION_ID_OPEN_MODEL.equals(contextActionId)) {
       return LineageViewNavigationSupport.canOpenModel(node, variables);
     }
+    if (ACTION_ID_OPEN_TABLE.equals(contextActionId)) {
+      return LineageViewNavigationSupport.canOpenTable(node, variables);
+    }
+    if (ACTION_ID_OPEN_SOURCE.equals(contextActionId)) {
+      return LineageViewNavigationSupport.canOfferOpenSource(node, variables);
+    }
     if (ACTION_ID_OPEN_CATALOG.equals(contextActionId)) {
       return LineageViewNavigationSupport.canOpenCatalog(node);
+    }
+    if (ACTION_ID_PREVIEW_ROWS.equals(contextActionId)) {
+      return LineageViewNavigationSupport.canOfferPreviewRows(node);
     }
     if (ACTION_ID_SHOW_UPDATE_PIPELINE.equals(contextActionId)) {
       return LineageViewNavigationSupport.canOpenUpdatePipeline(node, variables);
@@ -911,11 +1003,32 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
 
   public void openModelFromContext(HopGuiLineageViewNodeContext context) {
     runNavigation(
-        () -> LineageViewNavigationSupport.openModel(hopGui, variables, context.getNode()));
+        () ->
+            LineageViewNavigationSupport.openModel(
+                hopGui, variables, hopGui.getMetadataProvider(), context.getNode()));
+  }
+
+  public void openTableFromContext(HopGuiLineageViewNodeContext context) {
+    runNavigation(
+        () -> LineageViewNavigationSupport.openTable(hopGui, variables, context.getNode()));
+  }
+
+  public void openSourceFromContext(HopGuiLineageViewNodeContext context) {
+    runNavigation(
+        () ->
+            LineageViewNavigationSupport.openSource(
+                hopGui, variables, hopGui.getMetadataProvider(), context.getNode()));
   }
 
   public void openCatalogFromContext(HopGuiLineageViewNodeContext context) {
     runNavigation(() -> LineageViewNavigationSupport.openCatalog(hopGui, context.getNode()));
+  }
+
+  public void previewRowsFromContext(HopGuiLineageViewNodeContext context) {
+    runNavigation(
+        () ->
+            LineageViewNavigationSupport.previewRows(
+                hopGui, variables, hopGui.getMetadataProvider(), context.getNode()));
   }
 
   public void showUpdatePipelineFromContext(HopGuiLineageViewNodeContext context) {
@@ -1195,7 +1308,8 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
     if (sessionGraph == null) {
       throw new HopException("No lineage graph is loaded in this Lineage View.");
     }
-    return LineageViewSvgPainter.generateSvg(sessionGraph, layoutBoxes, variables, opsOverlay);
+    return LineageViewSvgPainter.generateSvg(
+        sessionGraph, layoutBoxes, variables, opsOverlay, compactNodeIds);
   }
 
   @Override

@@ -240,7 +240,7 @@ image::images/lineage-view-model-context-action.png[Show lineage on dimensional 
 . Duration badges (when **Overlay OPS load times** is on) come from the Hop OPS database. Marquez “latest run” is the last *export*, not the last *load*.
 . Click a node **name** to fill the right-hand Markdown details pane (**View as HTML** opens the same document in a browser).
 
-image::images/lineage-view-with-information-pane.png[Hop Lineage View — lineage-f-order-lines with OPS badges and details for dm/retail-f-inventory/d_product,align="center"]
+image::images/lineage-view-with-information-pane.png[Hop Lineage View — f_orders expanded as the seed, other nodes compact, details pane open,align="center"]
 
 Backend `Marquez-Localhost` uses `${MARQUEZ_API}` (suffix stripped to the host). Prefer `${MARQUEZ_BASE_URL}` = `http://localhost:5001` on new backends. Namespaces must match the export (`${MARQUEZ_NAMESPACE_JOB}` / `${MARQUEZ_NAMESPACE_DATASET}`).
 

@@ -20,7 +20,7 @@ import lombok.Value;
 
 /** Parsed {@code hop_location} dataset facet. */
 @Value
-@Builder
+@Builder(toBuilder = true)
 public class HopLocationFacet {
   /** {@code DATABASE} / {@code CSV} / {@code PARQUET} / {@code ICEBERG} / {@code STAGING}. */
   String kind;

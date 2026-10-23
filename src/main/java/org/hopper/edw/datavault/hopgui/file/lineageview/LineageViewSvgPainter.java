@@ -17,6 +17,7 @@ package org.hopper.edw.datavault.hopgui.file.lineageview;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Set;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.DPoint;
 import org.apache.hop.core.gui.Point;
@@ -46,6 +47,16 @@ public final class LineageViewSvgPainter {
       IVariables variables,
       org.hopper.edw.datavault.lineageview.LineageViewOpsOverlay opsOverlay)
       throws HopException {
+    return generateSvg(graph, boxes, variables, opsOverlay, Set.of());
+  }
+
+  public static String generateSvg(
+      LineageGraph graph,
+      Map<String, ElkLayoutBox> boxes,
+      IVariables variables,
+      org.hopper.edw.datavault.lineageview.LineageViewOpsOverlay opsOverlay,
+      Set<String> compactNodeIds)
+      throws HopException {
     if (graph == null) {
       throw new HopException("Cannot generate SVG for an empty lineage graph.");
     }
@@ -58,6 +69,7 @@ public final class LineageViewSvgPainter {
           new LineageViewPainter(
               graph, boxes, null, gc, variables, svgSize.x, svgSize.y, opsOverlay);
       painter.setMagnification(1.0f);
+      painter.setCompactNodeIds(compactNodeIds);
       painter.setAreaOwners(new ArrayList<>());
       painter.setZoomFactor(1.0f);
       painter.setOffset(new DPoint(0, 0));

@@ -75,6 +75,9 @@ class LineageViewSvgPainterTest {
     assertFalse(svg.isBlank());
     assertTrue(svg.contains("<svg"));
     assertTrue(svg.contains("a") || svg.contains("b"));
+    // Expanded cards use arc 20, which Batik writes as rx="10".
+    assertTrue(svg.contains("rx=\"10\""), svg);
+    assertEquals(2, svg.split("Source database", -1).length - 1);
   }
 
   @Test
@@ -105,8 +108,13 @@ class LineageViewSvgPainterTest {
         owners.stream().filter(a -> a.getAreaType() == AreaOwner.AreaType.TRANSFORM_NAME).count();
     long icons =
         owners.stream().filter(a -> a.getAreaType() == AreaOwner.AreaType.TRANSFORM_ICON).count();
+    long toggles =
+        owners.stream()
+            .filter(a -> a.getAreaType() == AreaOwner.AreaType.TRANSFORM_INFO_ICON)
+            .count();
     assertEquals(1, names);
     assertEquals(1, icons);
+    assertEquals(1, toggles);
     assertTrue(
         owners.get(owners.size() - 1).getAreaType() == AreaOwner.AreaType.TRANSFORM_NAME
             || owners.stream().anyMatch(a -> a.getAreaType() == AreaOwner.AreaType.TRANSFORM_NAME));

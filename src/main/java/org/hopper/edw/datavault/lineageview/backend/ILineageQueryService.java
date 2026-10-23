@@ -42,6 +42,15 @@ public interface ILineageQueryService extends AutoCloseable {
 
   Optional<JobDetails> fetchJob(OpenLineageRef job) throws HopException;
 
+  /**
+   * Same as {@link #fetchJob(OpenLineageRef)}. When {@code latestRunId} is already known, an
+   * implementation may read only that run's facets instead of the whole job document.
+   */
+  default Optional<JobDetails> fetchJob(OpenLineageRef job, String latestRunId)
+      throws HopException {
+    return fetchJob(job);
+  }
+
   Optional<DatasetDetails> fetchDataset(OpenLineageRef dataset) throws HopException;
 
   List<OpenLineageRef> searchDatasets(String nameHint) throws HopException;

@@ -45,7 +45,11 @@ public class LineageViewReadOnlyInteractions implements ModelGraphMouseInteracti
     if (e.button != 1 || hit == null || !(hit.canvasObject() instanceof LineageNode node)) {
       return false;
     }
-    if (hit.areaType() == AreaOwner.AreaType.TRANSFORM_NAME) {
+    if (hit.areaType() == AreaOwner.AreaType.TRANSFORM_INFO_ICON) {
+      graph.cancelPendingContext();
+      graph.toggleCompact(node.getId());
+      graph.selectNodeName(node.getId());
+    } else if (hit.areaType() == AreaOwner.AreaType.TRANSFORM_NAME) {
       graph.selectNodeName(node.getId());
     } else {
       graph.beginCardClick(node.getId(), LineageViewClickPoint.of(e));

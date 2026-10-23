@@ -110,6 +110,17 @@ public final class MarquezLineageQueryService implements ILineageQueryService {
   }
 
   @Override
+  public Optional<JobDetails> fetchJob(OpenLineageRef job, String latestRunId) throws HopException {
+    if (!Utils.isEmpty(latestRunId)) {
+      Optional<JobDetails> fromRun = jobDetailsFromRun(job, latestRunId);
+      if (fromRun.isPresent()) {
+        return fromRun;
+      }
+    }
+    return fetchJob(job);
+  }
+
+  @Override
   public Optional<JobDetails> fetchJob(OpenLineageRef job) throws HopException {
     if (job == null || !job.isComplete()) {
       return Optional.empty();
@@ -138,6 +149,28 @@ public final class MarquezLineageQueryService implements ILineageQueryService {
             .hopOps(hopOps)
             .latestRunId(latestRunId)
             .lastExportedAt(lastExportedAt)
+            .build());
+  }
+
+  /** Run facets only. Skips the job document, which repeats inputs, outputs, and column lineage. */
+  private Optional<JobDetails> jobDetailsFromRun(OpenLineageRef job, String latestRunId)
+      throws HopException {
+    JsonNode facets = getJson(MarquezUrls.runFacetsUrl(baseUrl, latestRunId));
+    if (facets == null) {
+      return Optional.empty();
+    }
+    JsonNode facetRoot = facets.has("facets") ? facets.path("facets") : facets;
+    HopExportFacet hopExport = MarquezFacetParser.hopExport(facetRoot);
+    HopOpsFacet hopOps = MarquezFacetParser.hopOps(facetRoot);
+    if (hopExport == null && hopOps == null) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        JobDetails.builder()
+            .ref(job)
+            .hopExport(hopExport)
+            .hopOps(hopOps)
+            .latestRunId(latestRunId)
             .build());
   }
 

@@ -50,7 +50,7 @@ While it runs, capture Open execution on the Data Vault Update action in `workfl
 
 After the load, capture duration bars on `models/retail-360.hdv` and the workflow load-overview HTML under `work/reports` (summary, then the dimensional pipeline section).
 
-The lineage view `test/lineage-f-order-lines.hlv` needs Marquez after `workflows/send-lineage-to-marquez.hwf`. Select `dm/retail-f-inventory/d_product`.
+The stored lineage shot is `models/f_orders-upstream.hlv` after `workflows/send-lineage-to-marquez.hwf`. The seed `f_orders` is expanded. The other nodes are compact.
 
 Harvest history, the customer_id length change, the blocked validation, and the remediation dialogs are a second pass. They show a provoked drift (address_line1 / E2E-customer-contact), not the happy path. The generated workflow lands under `workflows/schema-remediation/`. The PASS and CRITICAL BLOCKED pictures are the HTML reports in a browser.
 

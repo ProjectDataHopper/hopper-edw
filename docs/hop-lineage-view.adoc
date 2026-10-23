@@ -85,9 +85,11 @@ For **Local models**, set the same job/dataset namespace variables as the export
 . Choose backend, seed, direction (default **upstream**), depth (default **6**), whether to include jobs, optional layer chips, and **Overlay OPS load times**.
 . Save. The tab name is the filename without `.hlv`. There is no separate name field.
 
-Toolbar: **Refresh lineage** (background query), **View settings**, zoom, **Export SVG** of the *session* graph (not a substitute for `hop svg`). The right-hand pane shows the selected node as Markdown (identity, `hop_export` / `hop_location`, columns) with a **View as HTML** button.
+Toolbar: **Refresh lineage** (background query), **Collapse all**, **Expand all**, **View settings**, zoom, **Export SVG** of the *session* graph (not a substitute for `hop svg`). The right-hand pane shows the selected node as Markdown (identity, `hop_export` / `hop_location`, columns) with a **View as HTML** button.
 
-image::images/lineage-view-with-information-pane.png[Hop Lineage View of retail f_order_lines — upstream jobs and datasets with OPS duration badges and the Markdown details pane for dm/retail-f-inventory/d_product,align="center"]
+Cards are round. A job shows the pipeline logo. A dataset shows the hub, link, satellite, dimension, fact, or source logo. On a Marquez graph the table type usually sits on the job, so the output dataset borrows that type when the names match. A chevron at the top-right compacts that card to the logo alone. Hover the circle for the name, type, layer, and load time. Compact choices stay in the session. They are not stored in the `.hlv`. The exported SVG uses the cards as they are on screen.
+
+image::images/lineage-view-with-information-pane.png[Hop Lineage View of retail f_orders. Other nodes are compact circles. The seed card is expanded, and the details pane shows f_orders.,align="center"]
 
 Project search matches backend name, logical table, dataset/job names, and model file on `.hlv` files.
 
@@ -135,14 +137,17 @@ Save the tab if you want the question in the project tree.
 
 == Navigate from a node
 
-Hover a node name to underline it; click the name to select it and refresh the right-hand details pane only. That pane renders Markdown (same viewer as dialog Help) with a **View as HTML** button. Click the rest of the card for the context menu (same split as the other modelers). Marquez nodes fetch missing run/dataset facets in the background before the menu appears (graph payloads often omit custom facets).
+Hover a node name to underline it. Click the name on a source, dimension, fact, job, or any other card to refresh the right-hand details pane only. That pane renders Markdown (same viewer as dialog Help) with a **View as HTML** button. Click the icon or the rest of the card for the action dialog. A compact circle has no name, so that click opens the dialog. The dialog does not call Marquez. It uses the node already on the canvas. A dataset such as `d_date` borrows `hop_export` from the job that writes it when that job is already in the graph. After the view loads, each job that has a run id and no `hop_export` is filled from that run's facets once, in the background. A click does not download the dataset document.
 
 |===
 | Action | When it appears
-| **Open model** | `hop_export` (or job-name fallback) identifies a `.hdv` / `.hbv` / `.hdm` table
-| **Open in catalog** | `hop_location` has a catalog key / connection
-| **Show update pipeline** | DV or DM table with a generated update pipeline
-| **Show build pipeline** | BV SCD2 or PIT table with a generated build pipeline (BV has no update-pipeline opener)
+| **Open model** | A `.hsm`, `.hdv`, `.hbv`, or `.hdm` can be opened and this table or source selected
+| **Open table** | Data Vault, Business Vault, or dimensional table dialog
+| **Open source** | Source card on a source model, from the catalog origin
+| **Open in catalog** | `hop_location` has a catalog key and connection
+| **Preview rows** | Database table on `hop_location`, a catalog key already on the node, or a key built from the job path (`dm/retail-f-orders/d_order` → `hop/{project}/dimensional/retail-f-orders/d_order`)
+| **Show update pipeline** | DV or DM table, or the job that loads it
+| **Show build pipeline** | BV SCD2 or PIT table
 |===
 
 Actions are hidden when the identity is missing. Models remain the source of truth; the view does not edit mappings.

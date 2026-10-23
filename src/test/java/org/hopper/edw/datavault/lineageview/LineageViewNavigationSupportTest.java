@@ -22,12 +22,15 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Path;
+import java.util.List;
 import org.apache.hop.core.variables.Variables;
 import org.hopper.edw.catalog.hopgui.navigation.RecordOriginNavigationSupport;
 import org.hopper.edw.catalog.model.RecordDefinitionKey;
 import org.hopper.edw.catalog.model.RecordOrigin;
 import org.hopper.edw.datavault.lineageview.backend.HopExportFacet;
 import org.hopper.edw.datavault.lineageview.backend.HopLocationFacet;
+import org.hopper.edw.datavault.lineageview.backend.LineageEdge;
+import org.hopper.edw.datavault.lineageview.backend.LineageGraph;
 import org.hopper.edw.datavault.lineageview.backend.LineageNode;
 import org.hopper.edw.datavault.lineageview.backend.LineageNodeKind;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
@@ -147,6 +150,114 @@ class LineageViewNavigationSupportTest {
     assertEquals(hub, LineageViewNavigationSupport.findDvTable(model, "hub_customer", null));
     assertEquals(hub, LineageViewNavigationSupport.findDvTable(model, "missing", "HUB_CUSTOMER"));
     assertNull(LineageViewNavigationSupport.findDvTable(model, "missing", "other"));
+  }
+
+  @Test
+  void databaseLocationCanPreviewRowsAndOpenTable() {
+    Variables variables = new Variables();
+    variables.setVariable(
+        "PROJECT_HOME", Path.of("retail-example").toAbsolutePath().toString().replace('\\', '/'));
+    LineageNode fact =
+        LineageNode.builder()
+            .id("dataset:retail-dataset:f_orders")
+            .kind(LineageNodeKind.DATASET)
+            .name("f_orders")
+            .hopExport(
+                HopExportFacet.builder()
+                    .modelLayer("DM")
+                    .logicalName("f_orders")
+                    .modelFilename("${PROJECT_HOME}/models/retail-f-orders.hdm")
+                    .build())
+            .hopLocation(
+                HopLocationFacet.builder()
+                    .kind("DATABASE")
+                    .connectionName("Vault")
+                    .tableName("f_orders")
+                    .build())
+            .build();
+    assertTrue(LineageViewNavigationSupport.canOpenTable(fact, variables));
+    assertTrue(LineageViewNavigationSupport.canOfferPreviewRows(fact));
+    assertFalse(LineageViewNavigationSupport.canOfferOpenSource(fact, variables));
+    assertTrue(LineageViewNavigationSupport.canPreviewRows(fact, variables, null));
+    LineageNode withoutLocation = fact.toBuilder().hopLocation(null).build();
+    assertFalse(LineageViewNavigationSupport.canOfferPreviewRows(withoutLocation));
+    assertFalse(LineageViewNavigationSupport.canPreviewRows(withoutLocation, variables, null));
+    assertFalse(LineageViewNavigationSupport.canOpenSource(fact, variables, null));
+  }
+
+  @Test
+  void catalogKeyComesFromTheLinkedJobPath() {
+    Variables variables = new Variables();
+    variables.setVariable("PROJECT_HOME", "/work/retail-example");
+    LineageNode factJob =
+        LineageNode.builder()
+            .id("job:retail-job:dm/retail-f-orders/f_orders")
+            .kind(LineageNodeKind.JOB)
+            .name("dm/retail-f-orders/f_orders")
+            .hopExport(
+                HopExportFacet.builder()
+                    .modelLayer("DM")
+                    .modelName("retail-f-orders")
+                    .projectKey("retail-example")
+                    .catalogConnection("local-catalog")
+                    .logicalName("f_orders")
+                    .build())
+            .build();
+    LineageNode dimensionJob =
+        LineageNode.builder()
+            .id("job:retail-job:dm/retail-conformed-dims/d_customer")
+            .kind(LineageNodeKind.JOB)
+            .name("dm/retail-conformed-dims/d_customer")
+            .build();
+    LineageNode order =
+        LineageNode.builder()
+            .id("dataset:retail-dataset:d_order")
+            .kind(LineageNodeKind.DATASET)
+            .name("d_order")
+            .build();
+    LineageNode customer =
+        LineageNode.builder()
+            .id("dataset:retail-dataset:d_customer")
+            .kind(LineageNodeKind.DATASET)
+            .name("d_customer")
+            .build();
+    LineageGraph graph =
+        LineageGraph.builder()
+            .nodes(List.of(factJob, dimensionJob, order, customer))
+            .edges(
+                List.of(
+                    LineageEdge.builder()
+                        .fromNodeId(order.getId())
+                        .toNodeId(factJob.getId())
+                        .build(),
+                    LineageEdge.builder()
+                        .fromNodeId(dimensionJob.getId())
+                        .toNodeId(customer.getId())
+                        .build(),
+                    LineageEdge.builder()
+                        .fromNodeId(customer.getId())
+                        .toNodeId(factJob.getId())
+                        .build()))
+            .build();
+
+    LineageNode orderKey = LineageViewNavigationSupport.withCatalogKey(graph, order, variables);
+    assertEquals(
+        "hop/retail-example/dimensional/retail-f-orders/d_order",
+        orderKey.getHopLocation().getCatalogKey());
+    assertEquals("local-catalog", orderKey.getHopLocation().getCatalogConnection());
+    assertTrue(LineageViewNavigationSupport.canOfferPreviewRows(orderKey));
+
+    LineageNode customerKey =
+        LineageViewNavigationSupport.withCatalogKey(graph, customer, variables);
+    assertEquals(
+        "hop/retail-example/dimensional/retail-conformed-dims/d_customer",
+        customerKey.getHopLocation().getCatalogKey());
+
+    LineageNode jobKey =
+        LineageViewNavigationSupport.withCatalogKey(graph, dimensionJob, variables);
+    assertEquals(
+        "hop/retail-example/dimensional/retail-conformed-dims/d_customer",
+        jobKey.getHopLocation().getCatalogKey());
   }
 
   @Test

@@ -61,6 +61,38 @@ public class LineageViewContextGuiPlugin {
   }
 
   @GuiContextAction(
+      id = HopGuiLineageViewGraph.ACTION_ID_OPEN_TABLE,
+      parentId = HopGuiLineageViewNodeContext.CONTEXT_ID,
+      type = GuiActionType.Modify,
+      name = "i18n::LineageViewContextGuiPlugin.OpenTable.Name",
+      tooltip = "i18n::LineageViewContextGuiPlugin.OpenTable.Tooltip",
+      image = "ui/images/edit.svg",
+      category = "Lineage",
+      categoryOrder = "2")
+  public void openTableFromContext(HopGuiLineageViewNodeContext context) {
+    HopGuiLineageViewGraph graph = graph(context);
+    if (graph != null) {
+      graph.openTableFromContext(context);
+    }
+  }
+
+  @GuiContextAction(
+      id = HopGuiLineageViewGraph.ACTION_ID_OPEN_SOURCE,
+      parentId = HopGuiLineageViewNodeContext.CONTEXT_ID,
+      type = GuiActionType.Modify,
+      name = "i18n::LineageViewContextGuiPlugin.OpenSource.Name",
+      tooltip = "i18n::LineageViewContextGuiPlugin.OpenSource.Tooltip",
+      image = "source-model.svg",
+      category = "Lineage",
+      categoryOrder = "3")
+  public void openSourceFromContext(HopGuiLineageViewNodeContext context) {
+    HopGuiLineageViewGraph graph = graph(context);
+    if (graph != null) {
+      graph.openSourceFromContext(context);
+    }
+  }
+
+  @GuiContextAction(
       id = HopGuiLineageViewGraph.ACTION_ID_OPEN_CATALOG,
       parentId = HopGuiLineageViewNodeContext.CONTEXT_ID,
       type = GuiActionType.Modify,
@@ -68,11 +100,27 @@ public class LineageViewContextGuiPlugin {
       tooltip = "i18n::LineageViewContextGuiPlugin.OpenCatalog.Tooltip",
       image = "data-catalog.svg",
       category = "Lineage",
-      categoryOrder = "2")
+      categoryOrder = "4")
   public void openCatalogFromContext(HopGuiLineageViewNodeContext context) {
     HopGuiLineageViewGraph graph = graph(context);
     if (graph != null) {
       graph.openCatalogFromContext(context);
+    }
+  }
+
+  @GuiContextAction(
+      id = HopGuiLineageViewGraph.ACTION_ID_PREVIEW_ROWS,
+      parentId = HopGuiLineageViewNodeContext.CONTEXT_ID,
+      type = GuiActionType.Info,
+      name = "i18n::LineageViewContextGuiPlugin.PreviewRows.Name",
+      tooltip = "i18n::LineageViewContextGuiPlugin.PreviewRows.Tooltip",
+      image = "ui/images/preview.svg",
+      category = "Lineage",
+      categoryOrder = "5")
+  public void previewRowsFromContext(HopGuiLineageViewNodeContext context) {
+    HopGuiLineageViewGraph graph = graph(context);
+    if (graph != null) {
+      graph.previewRowsFromContext(context);
     }
   }
 
@@ -84,7 +132,7 @@ public class LineageViewContextGuiPlugin {
       tooltip = "i18n::LineageViewContextGuiPlugin.ShowUpdatePipeline.Tooltip",
       image = "ui/images/pipeline.svg",
       category = "Lineage",
-      categoryOrder = "3")
+      categoryOrder = "6")
   public void showUpdatePipelineFromContext(HopGuiLineageViewNodeContext context) {
     HopGuiLineageViewGraph graph = graph(context);
     if (graph != null) {
@@ -100,7 +148,7 @@ public class LineageViewContextGuiPlugin {
       tooltip = "i18n::LineageViewContextGuiPlugin.ShowBuildPipeline.Tooltip",
       image = "ui/images/pipeline.svg",
       category = "Lineage",
-      categoryOrder = "4")
+      categoryOrder = "7")
   public void showBuildPipelineFromContext(HopGuiLineageViewNodeContext context) {
     HopGuiLineageViewGraph graph = graph(context);
     if (graph != null) {

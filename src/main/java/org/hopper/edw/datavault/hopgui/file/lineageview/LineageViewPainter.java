@@ -18,6 +18,7 @@ package org.hopper.edw.datavault.hopgui.file.lineageview;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.apache.hop.core.gui.AreaOwner;
 import org.apache.hop.core.gui.AreaOwner.AreaType;
 import org.apache.hop.core.gui.DPoint;
@@ -32,29 +33,34 @@ import org.apache.hop.core.variables.Variables;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphConnectionGeometry;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphConnectionGeometry.Bounds;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphConnectionGeometry.ConnectionAnchors;
+import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphSvgIconCache;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelGraphTableNameHitArea;
 import org.hopper.edw.datavault.hopgui.file.vault.BasePainter;
 import org.hopper.edw.datavault.layout.ElkLayoutBox;
 import org.hopper.edw.datavault.lineageview.LineageViewElkSupport;
 import org.hopper.edw.datavault.lineageview.LineageViewLabelFit;
+import org.hopper.edw.datavault.lineageview.LineageViewNodeAppearance;
 import org.hopper.edw.datavault.lineageview.LineageViewOpsBadge;
 import org.hopper.edw.datavault.lineageview.LineageViewOpsOverlay;
 import org.hopper.edw.datavault.lineageview.backend.LineageEdge;
 import org.hopper.edw.datavault.lineageview.backend.LineageGraph;
-import org.hopper.edw.datavault.lineageview.backend.LineageGraphLayer;
 import org.hopper.edw.datavault.lineageview.backend.LineageNode;
-import org.hopper.edw.datavault.lineageview.backend.LineageNodeKind;
 
 /** Paints a table-level lineage graph. */
 public class LineageViewPainter extends BasePainter {
 
-  private static final int TEXT_PAD = 8;
+  private static final int ICON_SIZE = 32;
+  private static final int CARD_MARGIN = 8;
+  private static final int CORNER_ARC = 20;
+  private static final int CHEVRON = 14;
+  private static final int TOGGLE_HIT = 16;
   private static final int CONNECTOR_SIZE = 6;
 
   private final LineageGraph graph;
   private final Map<String, ElkLayoutBox> boxes;
   private final String selectedNodeId;
   private final LineageViewOpsOverlay opsOverlay;
+  private Set<String> compactNodeIds = Set.of();
   private String bannerText;
   private boolean bannerError;
 
@@ -96,6 +102,10 @@ public class LineageViewPainter extends BasePainter {
     this.bannerError = bannerError;
   }
 
+  public void setCompactNodeIds(Set<String> compactNodeIds) {
+    this.compactNodeIds = compactNodeIds != null ? compactNodeIds : Set.of();
+  }
+
   public void draw() {
     if (gc == null) {
       return;
@@ -132,9 +142,7 @@ public class LineageViewPainter extends BasePainter {
           ModelGraphConnectionGeometry.borderAnchorsBetween(boundsOf(from), boundsOf(to));
       Point fromPt = real2screen(anchors.from().x, anchors.from().y);
       Point toPt = real2screen(anchors.to().x, anchors.to().y);
-      gc.drawLine(fromPt.x, fromPt.y, toPt.x, toPt.y);
-      connectors.add(fromPt);
-      connectors.add(toPt);
+      drawElbow(fromPt, toPt, connectors);
     }
     for (LineageNode node : graph.getNodesOrEmpty()) {
       ElkLayoutBox box = boxes.get(node.getId());
@@ -165,66 +173,176 @@ public class LineageViewPainter extends BasePainter {
       int h = Math.max(4, (int) Math.ceil(box.height() * scaleY));
       int x = (int) (graphX + box.x() * scaleX);
       int y = (int) (graphY + box.y() * scaleY);
-      gc.setBackground(colorFor(node));
+      LineageViewNodeAppearance look = LineageViewNodeAppearance.of(graph, node);
+      boolean compact = isCompact(node);
+      int arc = compact ? Math.min(w, h) : Math.max(2, (int) Math.round(CORNER_ARC * scaleX));
+      gc.setBackground(look.fill());
       gc.setForeground(EColor.DARKGRAY);
-      gc.fillRectangle(x, y, w, h);
-      gc.drawRectangle(x, y, w, h);
+      gc.fillRoundRectangle(x, y, w, h, arc, arc);
+      gc.drawRoundRectangle(x, y, w, h, arc, arc);
     }
   }
 
   private void drawNode(LineageNode node, ElkLayoutBox box) {
     boolean seed = node.getId() != null && node.getId().equals(graph.getSeedNodeId());
     boolean selected = node.getId() != null && node.getId().equals(selectedNodeId);
+    boolean compact = isCompact(node);
+    LineageViewNodeAppearance look = LineageViewNodeAppearance.of(graph, node);
     Point loc = real2screen(box.x(), box.y());
     int x = loc.x;
     int y = loc.y;
     int width = box.width();
     int height = box.height();
-    gc.setBackground(colorFor(node));
-    gc.setForeground(selected || seed ? EColor.BLUE : EColor.BLACK);
-    gc.setLineWidth(seed || selected ? 2 : 1);
-    gc.fillRoundRectangle(x, y, width, height, 8, 8);
-    gc.drawRoundRectangle(x, y, width, height, 8, 8);
-    gc.setForeground(EColor.BLACK);
-    gc.setFont(EFont.GRAPH);
-    int textWidth = Math.max(0, width - TEXT_PAD * 2);
-    String rawTitle = node.getName() != null ? node.getName() : node.getId();
-    String title = fitLabel(rawTitle, textWidth);
-    String subtitle =
-        (node.getKind() != null ? node.getKind().getCode() : "")
-            + (node.getLayer() != null ? " · " + node.getLayer().getCode() : "");
-    int nameX = x + TEXT_PAD;
-    int nameY = y + TEXT_PAD;
-    gc.drawText(title, nameX, nameY);
-    Point nameExtent = gc.textExtent(title);
-    boolean underline = node.getId() != null && node.getId().equals(mouseOverTableName);
-    if (underline && nameExtent != null) {
-      gc.drawLine(nameX, nameY + nameExtent.y, nameX + nameExtent.x, nameY + nameExtent.y);
+    int arc = compact ? Math.min(width, height) : CORNER_ARC;
+    gc.setBackground(look.fill());
+    gc.setForeground(seed || selected ? EColor.BLUE : EColor.BLACK);
+    gc.setLineWidth(selected ? 3 : seed ? 2 : 1);
+    gc.fillRoundRectangle(x, y, width, height, arc, arc);
+    gc.drawRoundRectangle(x, y, width, height, arc, arc);
+    gc.setLineWidth(1);
+
+    int iconX = compact ? x + (width - ICON_SIZE) / 2 : x + CARD_MARGIN;
+    int iconY = compact ? y + (height - ICON_SIZE) / 2 : y + CARD_MARGIN;
+    drawLogo(look, iconX, iconY);
+
+    String title = null;
+    int nameX = 0;
+    int nameY = 0;
+    Point nameExtent = null;
+    if (!compact) {
+      gc.setForeground(EColor.BLACK);
+      gc.setFont(EFont.GRAPH);
+      int textX = x + CARD_MARGIN + ICON_SIZE + CARD_MARGIN;
+      int textRight = x + width - CARD_MARGIN - TOGGLE_HIT;
+      int textWidth = Math.max(0, textRight - textX);
+      String rawTitle = node.getName() != null ? node.getName() : node.getId();
+      title = fitLabel(rawTitle, textWidth);
+      nameX = textX;
+      nameY = y + CARD_MARGIN;
+      gc.drawText(title, nameX, nameY, true);
+      nameExtent = gc.textExtent(title);
+      boolean underline = node.getId() != null && node.getId().equals(mouseOverTableName);
+      if (underline && nameExtent != null) {
+        gc.drawLine(nameX, nameY + nameExtent.y, nameX + nameExtent.x, nameY + nameExtent.y);
+      }
+      drawSecondaryLine(node, look, textX, textRight, nameY, nameExtent);
+      gc.setFont(EFont.SMALL);
+      gc.setForeground(EColor.BLACK);
+      String typeLabel = fitLabel(look.typeLabel(), Math.max(0, textRight - (x + CARD_MARGIN)));
+      gc.drawText(typeLabel, x + CARD_MARGIN, iconY + ICON_SIZE + 2, true);
+      gc.setFont(EFont.GRAPH);
     }
-    gc.drawText(fitLabel(subtitle, textWidth), x + TEXT_PAD, y + 28);
-    LineageViewOpsBadge badge = opsOverlay.badgeFor(node);
-    if (badge != null && !Utils.isEmpty(badge.label())) {
-      gc.setForeground(badge.slow() ? EColor.RED : badge.stale() ? EColor.DARKGRAY : EColor.BLUE);
-      gc.drawText(fitLabel(badge.label(), textWidth), x + TEXT_PAD, y + 44);
-    }
+
+    int toggleX = x + width - TOGGLE_HIT;
+    int toggleY = y;
+    drawChevron(toggleX + (TOGGLE_HIT - CHEVRON) / 2, toggleY + 1, compact);
+
     if (areaOwners != null) {
       // String owner → Hop Web AreaOwner JSON kind=label; LineageNode stays in parent for hit
-      // tests.
+      // tests. The chevron is added last so it wins over the card body.
       areaOwners.add(
           new AreaOwner(AreaType.TRANSFORM_ICON, x, y, width, height, offset, node, node.getId()));
-      ModelGraphTableNameHitArea.Bounds nameHit =
-          ModelGraphTableNameHitArea.bounds(nameX, nameY, nameExtent);
+      if (!compact && nameExtent != null) {
+        ModelGraphTableNameHitArea.Bounds nameHit =
+            ModelGraphTableNameHitArea.bounds(nameX, nameY, nameExtent);
+        areaOwners.add(
+            new AreaOwner(
+                AreaType.TRANSFORM_NAME,
+                nameHit.x(),
+                nameHit.y(),
+                nameHit.width(),
+                nameHit.height(),
+                offset,
+                node,
+                title));
+      }
       areaOwners.add(
           new AreaOwner(
-              AreaType.TRANSFORM_NAME,
-              nameHit.x(),
-              nameHit.y(),
-              nameHit.width(),
-              nameHit.height(),
+              AreaType.TRANSFORM_INFO_ICON,
+              toggleX,
+              toggleY,
+              TOGGLE_HIT,
+              TOGGLE_HIT,
               offset,
               node,
-              title));
+              node.getId()));
     }
+  }
+
+  private void drawSecondaryLine(
+      LineageNode node,
+      LineageViewNodeAppearance look,
+      int textX,
+      int textRight,
+      int nameY,
+      Point nameExtent) {
+    int secondaryY = nameY + (nameExtent != null ? nameExtent.y : 0) + 2;
+    LineageViewOpsBadge badge = opsOverlay.badgeFor(node);
+    String duration = badge != null ? badge.label() : null;
+    gc.setFont(EFont.SMALL);
+    int durationWidth = 0;
+    if (!Utils.isEmpty(duration)) {
+      Point durationExtent = gc.textExtent(duration);
+      durationWidth = durationExtent != null ? durationExtent.x : 0;
+    }
+    int layerMax = Math.max(0, textRight - textX - durationWidth - (durationWidth > 0 ? 6 : 0));
+    gc.setForeground(EColor.DARKGRAY);
+    gc.drawText(fitLabel(look.layerLabel(), layerMax), textX, secondaryY, true);
+    if (!Utils.isEmpty(duration)) {
+      gc.setForeground(badge.slow() ? EColor.RED : badge.stale() ? EColor.DARKGRAY : EColor.BLUE);
+      gc.drawText(duration, textRight - durationWidth, secondaryY, true);
+    }
+    gc.setFont(EFont.GRAPH);
+  }
+
+  private void drawLogo(LineageViewNodeAppearance look, int iconX, int iconY) {
+    boolean drawn =
+        ModelGraphSvgIconCache.drawIcon(
+            gc,
+            look.iconClassLoader(),
+            look.iconPath(),
+            iconX,
+            iconY,
+            ICON_SIZE,
+            ICON_SIZE,
+            magnification);
+    if (!drawn) {
+      gc.setBackground(EColor.BLUE);
+      gc.fillRectangle(iconX, iconY, ICON_SIZE, ICON_SIZE);
+    }
+  }
+
+  /** Inward chevron on an expanded card, outward chevron on a compact card. */
+  private void drawChevron(int x, int y, boolean compact) {
+    gc.setForeground(EColor.DARKGRAY);
+    gc.setLineWidth(2);
+    int midY = y + CHEVRON / 2;
+    if (compact) {
+      gc.drawPolyline(new int[] {x + 2, y + 2, x + CHEVRON - 2, midY, x + 2, y + CHEVRON - 2});
+    } else {
+      gc.drawPolyline(
+          new int[] {x + CHEVRON - 2, y + 2, x + 2, midY, x + CHEVRON - 2, y + CHEVRON - 2});
+    }
+    gc.setLineWidth(1);
+  }
+
+  private void drawElbow(Point fromPt, Point toPt, List<Point> joints) {
+    if (fromPt == null || toPt == null) {
+      return;
+    }
+    int midX = (fromPt.x + toPt.x) / 2;
+    boolean straight = Math.abs(fromPt.x - toPt.x) < 4 || Math.abs(fromPt.y - toPt.y) < 4;
+    if (straight) {
+      gc.drawLine(fromPt.x, fromPt.y, toPt.x, toPt.y);
+      joints.add(fromPt);
+      joints.add(toPt);
+      return;
+    }
+    gc.drawPolyline(new int[] {fromPt.x, fromPt.y, midX, fromPt.y, midX, toPt.y, toPt.x, toPt.y});
+    joints.add(fromPt);
+    joints.add(new Point(midX, fromPt.y));
+    joints.add(new Point(midX, toPt.y));
+    joints.add(toPt);
   }
 
   private void drawConnector(Point p) {
@@ -235,7 +353,11 @@ public class LineageViewPainter extends BasePainter {
     int y = p.y - CONNECTOR_SIZE / 2;
     gc.setBackground(EColor.DARKGRAY);
     gc.setForeground(EColor.DARKGRAY);
-    gc.fillRectangle(x, y, CONNECTOR_SIZE, CONNECTOR_SIZE);
+    gc.fillRoundRectangle(x, y, CONNECTOR_SIZE, CONNECTOR_SIZE, CONNECTOR_SIZE, CONNECTOR_SIZE);
+  }
+
+  private boolean isCompact(LineageNode node) {
+    return node != null && node.getId() != null && compactNodeIds.contains(node.getId());
   }
 
   private static Bounds boundsOf(ElkLayoutBox box) {
@@ -250,16 +372,6 @@ public class LineageViewPainter extends BasePainter {
           Point extent = gc.textExtent(value);
           return extent != null ? extent.x : 0;
         });
-  }
-
-  private static EColor colorFor(LineageNode node) {
-    if (node.getKind() == LineageNodeKind.JOB) {
-      return EColor.LIGHTBLUE;
-    }
-    if (node.getLayer() == LineageGraphLayer.SOURCE) {
-      return EColor.LIGHTGRAY;
-    }
-    return EColor.BACKGROUND;
   }
 
   public Point computeMaximum() {

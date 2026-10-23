@@ -18,6 +18,7 @@ package org.hopper.edw.datavault.hopgui.file.lineageview;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.AreaOwner;
 import org.apache.hop.core.gui.CanvasSvgRenderResult;
@@ -53,6 +54,7 @@ public final class LineageViewCanvasSvgRenderer {
     public org.hopper.edw.datavault.lineageview.LineageViewOpsOverlay opsOverlay;
     public String bannerText;
     public boolean bannerError;
+    public Set<String> compactNodeIds;
   }
 
   public static ModelGraphCanvasSvgResult render(Context ctx) throws HopException {
@@ -85,6 +87,7 @@ public final class LineageViewCanvasSvgRenderer {
       painter.setAreaOwners(areaOwners);
       painter.setShowingNavigationView(ctx.showingNavigationView);
       painter.setMouseOverTableName(ctx.mouseOverTableName);
+      painter.setCompactNodeIds(ctx.compactNodeIds);
       painter.setBanner(ctx.bannerText, ctx.bannerError);
       painter.draw();
       CanvasSvgRenderResult canvasResult =

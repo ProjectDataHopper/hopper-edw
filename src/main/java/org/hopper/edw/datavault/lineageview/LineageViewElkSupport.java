@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.apache.hop.core.exception.HopException;
 import org.hopper.edw.datavault.layout.ElkGraphLayout;
 import org.hopper.edw.datavault.layout.ElkLayout;
@@ -34,22 +35,38 @@ import org.hopper.edw.datavault.lineageview.backend.LineageNode;
 /** ELK layered RIGHT layout for a lineage graph. */
 public final class LineageViewElkSupport {
 
-  public static final int NODE_WIDTH = 180;
-  public static final int NODE_HEIGHT = 66;
+  public static final int EXPANDED_WIDTH = 208;
+  public static final int EXPANDED_HEIGHT = 72;
+  public static final int COMPACT_SIZE = 56;
+
+  /** Expanded card width. Compact nodes use {@link #COMPACT_SIZE}. */
+  public static final int NODE_WIDTH = EXPANDED_WIDTH;
+
+  /** Expanded card height. Compact nodes use {@link #COMPACT_SIZE}. */
+  public static final int NODE_HEIGHT = EXPANDED_HEIGHT;
 
   private LineageViewElkSupport() {}
 
   public static Map<String, ElkLayoutBox> layout(LineageGraph graph) throws HopException {
+    return layout(graph, Set.of());
+  }
+
+  public static Map<String, ElkLayoutBox> layout(LineageGraph graph, Set<String> compactNodeIds)
+      throws HopException {
     if (graph == null || graph.getNodesOrEmpty().isEmpty()) {
       return new LinkedHashMap<>();
     }
+    Set<String> compact = compactNodeIds != null ? compactNodeIds : Set.of();
     List<ElkLayoutNode> nodes = new ArrayList<>();
     for (LineageNode node : graph.getNodesOrEmpty()) {
       if (node == null || node.getId() == null) {
         continue;
       }
       String label = node.getName() != null ? node.getName() : node.getId();
-      nodes.add(new ElkLayoutNode(node.getId(), label, NODE_WIDTH, NODE_HEIGHT, null));
+      boolean collapsed = compact.contains(node.getId());
+      int width = collapsed ? COMPACT_SIZE : EXPANDED_WIDTH;
+      int height = collapsed ? COMPACT_SIZE : EXPANDED_HEIGHT;
+      nodes.add(new ElkLayoutNode(node.getId(), label, width, height, null));
     }
     List<ElkLayoutEdge> edges = new ArrayList<>();
     for (LineageEdge edge : graph.getEdgesOrEmpty()) {
@@ -61,8 +78,8 @@ public final class LineageViewElkSupport {
     ElkLayout layout = ElkLayout.createDefault();
     layout.setAlgorithm(ElkLayoutAlgorithm.LAYERED);
     layout.setDirection(ElkLayoutDirection.RIGHT);
-    layout.setMinNodeWidth(NODE_WIDTH);
-    layout.setNodeHeight(NODE_HEIGHT);
+    layout.setMinNodeWidth(COMPACT_SIZE);
+    layout.setNodeHeight(COMPACT_SIZE);
     return ElkGraphLayout.fromLayoutGraph("lineage-view", nodes, edges).layoutToBoxes(layout);
   }
 }

@@ -4,6 +4,11 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## Unreleased
 
+### Lineage view cards (issue #217)
+
+- Lineage cards have rounder corners and a logo for the job or the table type (hub, link, satellite, dimension, fact, source, and the other modeled types). A dataset with no table type of its own uses the producing job's type when the names match, so **Open model** is available on that card. A chevron on the card compacts it to the logo. **Collapse all** and **Expand all** on the toolbar do that for every node. Those choices are kept for the session and are not written into the `.hlv`.
+- Clicking a node name refreshes the details pane for every card. Clicking the icon or the rest of the card opens the same action dialog: **Open model**, **Open table** or **Open source**, **Open in catalog**, **Preview rows**, and **Show update pipeline** when that action applies to the node. A job and the dataset it writes share those actions. The dialog does not call Marquez on the click. A dataset borrows the writing job's `hop_export` from the graph already on screen. Job facets that were missing are read once, in the background, from the run id that came with the graph. A click does not download the dataset document.
+
 ### Crosstab dimension values (issue #222)
 
 - A crosstab can omit dimension combinations that have no data. **Only available dimension values?** on the crosstab component drops a row such as 2025-03 when that month has no facts, even if March exists for another year. The same rule applies to columns. Presentations from the semantic layer and the fact crosstab editor turn the option on. A hand-authored crosstab keeps the full grid until the option is checked.
