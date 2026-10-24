@@ -38,6 +38,16 @@ speak_as:
     say: hop, retail example, models
   - pattern: run-retail-update-models.hwf
     say: run retail update models
+  - pattern: run-retail-update-models
+    say: run retail update models
+  - pattern: f_orders-upstream.hlv
+    say: f orders upstream dot H L V
+  - pattern: hop_executions
+    say: hop executions
+  - pattern: ops-analytics
+    say: ops analytics
+  - pattern: dv_ops
+    say: d v ops
   - pattern: retail-f-orders.hsl
     say: retail f orders dot H S L
   - pattern: retail-f-orders.hdm
@@ -140,6 +150,8 @@ speak_as:
     say: dot H S L
   - pattern: ".hlv"
     say: dot H L V
+  - pattern: ".hem"
+    say: dot H E M
 
 # Sent to the TTS API as replace. The written narration and the subtitles
 # stay as they are. A value in slashes is IPA. GUI is "gooey", not G-U-I.

@@ -1,0 +1,166 @@
+#
+# Copyright 2026 i-Bridge bv
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# Narration for video 10. English is the source.
+# Add the other locales after this cut has been heard.
+video:
+  id: 10-metrics-and-analytics
+  title: "Metrics and analytics operations"
+  issue: 234
+  width: 1920
+  height: 1080
+  fps: 30
+  transition: fade
+  transition_ms: 400
+  padding_after_sec: 0.4
+  voice_id: ara
+  links:
+    - label: Getting started
+      url: https://github.com/ProjectDataHopper/hopper-edw/blob/main/docs/getting-started-edw.adoc
+    - label: Operational analytics
+      url: https://github.com/ProjectDataHopper/hopper-edw/blob/main/docs/ops-analytics.adoc
+    - label: Training
+      url: https://github.com/ProjectDataHopper/hopper-edw/blob/main/docs/training/index.adoc
+    - label: Data Hopper
+      url: https://data-hopper.com/
+
+scenes:
+  - id: welcome
+    title: Welcome
+    visual: images/welcome.png
+    visual_type: still
+    card_title: Metrics and analytics operations
+    card_subtitle: The warehouse of the warehouse
+    shot: >
+      Title card. Title "Metrics and analytics operations". Subtitle
+      "The warehouse of the warehouse". No GUI. Last video in the series.
+    narration:
+      en: |
+        This is the last video. A load writes timings into the OPS
+        database. You will open This run and History for a retail-sources
+        wave, then see Create operational analytics turn that database
+        into a small warehouse of its own. You will also see the path of
+        f_orders back to the source files, and the picture of one run.
+        retail-sources stays the warehouse. The new models go in a second
+        resource definition group.
+
+  - id: metrics
+    title: This run and History
+    visual: images/metrics.png
+    visual_type: still
+    shot: >
+      Resource group load metrics. Tabs This run and History, status line
+      retail-sources running, models 5 of 8, 0m 43s. Wave status phase
+      UPDATING, current model retail-f-orders, table f_orders. Composed
+      from docs/images/action-update-resource-group-load-metrics-dialog.png.
+      The model-path table and the staging folder are not in the frame.
+    narration:
+      en: |
+        Resource group load metrics has two tabs. This run is the wave in
+        front of you. The line reads retail-sources, running, models 5 of
+        8, at 43 seconds. History is the other tab. It lists earlier waves
+        of this same resource definition group, read back from OPS. The
+        lower pane is the wave status. The phase is updating. The current
+        model is retail-f-orders, and the current table is f_orders. This
+        video does not wait for model 8.
+
+  - id: create
+    title: Create operational analytics
+    visual: images/create.png
+    visual_type: still
+    shot: >
+      Create operational analytics dialog. OPS connection OPS, schema
+      dv_ops, three targets Vault, folder ${PROJECT_HOME}/models/ops-analytics,
+      group ops-analytics, Include hop_executions on, Replace off. The
+      committed still is docs/images/create-operational-analytics-dialog.png,
+      padded to 16:9. No personal path.
+    narration:
+      en: |
+        Create operational analytics is that same path, with OPS as the
+        source. The connection is OPS. The schema is dv_ops. The Data
+        Vault target, the Business Vault target, and the dimensional
+        target are all Vault. The folder is
+        ${PROJECT_HOME}/models/ops-analytics. The resource definition
+        group is ops-analytics, and it stays separate from retail-sources.
+        Include hop_executions is on. Replace existing models is off. OK
+        writes a source model, a raw Data Vault, a small Business Vault,
+        a dimensional model, a semantic layer, and two load workflows.
+        This video does not open those tables.
+
+  - id: lineage
+    title: Where f_orders came from
+    visual: images/lineage.png
+    visual_type: still
+    shot: >
+      Hop Lineage View seeded on f_orders. Header reads structure from
+      Marquez with an OPS overlay. Details pane is open. Do not narrate
+      the JDBC URL. The committed still is
+      docs/images/lineage-view-with-information-pane.png, padded to 16:9.
+      The retail file is models/f_orders-upstream.hlv. Do not teach a
+      Marquez install.
+    narration:
+      en: |
+        The selected node is the fact f_orders. The graph is the path
+        back to the source files on the left. The header says the
+        structure comes from Marquez, and that an OPS overlay is on. The
+        retail file is f_orders-upstream.hlv. It stores which backend to
+        ask, and which table is the seed. The graph itself is not in the
+        file. This video does not install Marquez. Open the file when
+        that backend is already running.
+
+  - id: map
+    title: The picture of one run
+    visual: images/map.png
+    visual_type: still
+    shot: >
+      Execution map. The node in the middle is the workflow
+      run-retail-update-models. Model nodes to the right include the
+      Data Vault, Business Vault models, and dimensional models, with
+      retail-f-orders at the bottom. Paths on the canvas are
+      ${PROJECT_HOME}, truncated. The committed still is
+      docs/images/execution-map-in-hop-gui-simulate-six-months.png. Do
+      not teach the .hem file name as a lesson of its own.
+    narration:
+      en: |
+        An execution map is a different picture. It shows how one run is
+        wired, not how fields map. The node in the middle is the workflow
+        run-retail-update-models. To the right are the models that update
+        covers: the Data Vault, the Business Vault models, and the
+        dimensional models, with retail-f-orders at the bottom. A .hem
+        file stores this graph. A Hop Lineage View does not. You open the
+        map to see the batch. You do not start the load again.
+
+  - id: where-next
+    title: Where next
+    visual: images/where-next.png
+    visual_type: still
+    card_title: Where next
+    card_subtitle: The guide, the training, the longer tutorials
+    shot: >
+      Title card. Title "Where next". Subtitle "The guide, the training,
+      the longer tutorials". No GUI. Close the series. Point at Getting
+      started, the training modules, and docs/video-tutorials/.
+    narration:
+      en: |
+        That is the series. You described sources, built a Data Vault,
+        put the models in a resource definition group, loaded them,
+        shaped a Business Vault, and published a dimensional model.
+        Metrics tell you what the load did. Operational analytics turns
+        those timings into a warehouse you can query. Lineage shows where
+        a table came from. The execution map shows how the batch is
+        wired. The written path is Getting started, building an EDW, at
+        data-hopper.com. The training modules go further, and the longer
+        tutorials stay in the documentation.
