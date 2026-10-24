@@ -118,14 +118,14 @@ scenes:
     visual: images/options.png
     visual_type: still
     shot: >
-      Hop configuration perspective, Plugins, Data Vault 2.0. The hash-key
+      Hop configuration perspective, Plugins, Hopper EDW. The hash-key
       and Unicode checks are readable. The committed still is
       docs/images/hopgui-configuration-perspecive-data-vault-options.png,
       padded to 16:9.
     narration:
       en: |
         A few choices apply to every model. Open the configuration
-        perspective and select Data Vault 2.0 under Plugins. Draw hash keys
+        perspective and select Hopper EDW under Plugins. Draw hash keys
         in model controls whether those columns appear on the canvas.
         Enforce Unicode-capable target databases is on, and it should stay
         on. These settings live in Hop GUI, not inside the model files.
