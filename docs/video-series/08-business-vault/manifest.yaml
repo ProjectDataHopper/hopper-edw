@@ -1,0 +1,127 @@
+#
+# Copyright 2026 i-Bridge bv
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# Narration for video 08. English is the source.
+# Add the other locales after this cut has been heard.
+video:
+  id: 08-business-vault
+  title: "Business Vault"
+  issue: 232
+  width: 1920
+  height: 1080
+  fps: 30
+  transition: fade
+  transition_ms: 400
+  padding_after_sec: 0.4
+  voice_id: ara
+  links:
+    - label: Getting started
+      url: https://github.com/ProjectDataHopper/hopper-edw/blob/main/docs/getting-started-edw.adoc
+    - label: Business Vault
+      url: https://github.com/ProjectDataHopper/hopper-edw/blob/main/docs/business-vault-overview.adoc
+    - label: Data Hopper
+      url: https://data-hopper.com/
+
+scenes:
+  - id: welcome
+    title: Welcome
+    visual: images/welcome.png
+    visual_type: still
+    card_title: Business Vault
+    card_subtitle: Rules as their own tables
+    shot: >
+      Title card. Title "Business Vault". Subtitle "Rules as their own
+      tables". No GUI.
+    narration:
+      en: |
+        The raw Data Vault keeps source history. The Business Vault stores
+        business rules as their own tables, so every report does not
+        rebuild them. A Business Vault file ends in .hbv, and it points at
+        a raw vault, a .hdv. In retail-example that file is retail-360.hbv.
+        It reads hub_customer and the customer satellites you generated in
+        the last videos. The rules live here. The history stays in the raw
+        vault.
+
+  - id: canvas
+    title: Customer 360
+    visual: images/canvas.png
+    visual_type: still
+    shot: >
+      Business Vault canvas. customer_360_bv SCD2 in the center, hub_customer
+      on the right, four raw satellites around it. The committed still is
+      docs/images/business-vault-model-customer-360.png, padded to 16:9.
+    narration:
+      en: |
+        This is that canvas. The blue card is customer_360_bv, an SCD2
+        table. It is a historized business view of the customer. On the
+        right is hub_customer. Around it are the raw satellites:
+        sat_customer_demo, sat_customer_contact, sat_customer_address, and
+        sat_customer_prefs. The SCD2 reads those satellites and writes one
+        timeline. A PIT is a different table: one row per hub key, with the
+        load dates of the related satellites. A bridge is a relationship,
+        with an optional weight. Neither is on this picture.
+
+  - id: scd2
+    title: The SCD2 table
+    visual: images/scd2.png
+    visual_type: still
+    shot: >
+      Edit Business Vault SCD2 table for customer_360_bv. General tab.
+      Parent hub hub_customer. Build mode Full rebuild. Description says
+      the view is merged from four satellites. No personal paths.
+    narration:
+      en: |
+        Open the card and the General tab names the table customer_360_bv.
+        The description says it is a functional customer 360 view, merged
+        from four satellites. The parent hub is hub_customer. Build mode is
+        full rebuild, so each run rebuilds the timeline from the raw
+        satellite history. You do not write that load by hand. Check
+        model and the Business Vault update generate it. The Derivatives
+        tab is where those four satellites are listed.
+
+  - id: group
+    title: Same group
+    visual: images/group.png
+    visual_type: still
+    shot: >
+      Update resource definition group dialog from the previous episode.
+      Include Business Vault models is checked. Group retail-sources.
+    narration:
+      en: |
+        Add retail-360.hbv to the same resource definition group,
+        retail-sources. Do not create a second group. A second group is a
+        different warehouse. On the update action, Include Business Vault
+        models is the box for this layer. The load still runs every Data
+        Vault model first, then every Business Vault model. The raw history
+        is loaded before the rules that read it.
+
+  - id: where-next
+    title: Where next
+    visual: images/where-next.png
+    visual_type: still
+    card_title: Where next
+    card_subtitle: Facts and dimensions
+    shot: >
+      Title card. Title "Where next". Subtitle "Facts and dimensions". No
+      GUI. The next episode is the dimensional model.
+    narration:
+      en: |
+        The next video opens the dimensional model. Facts and dimensions
+        are what a report reads, usually fed from this Business Vault or
+        from the raw vault. You add the .hdm to retail-sources as well. The
+        written guide for this video is Getting started, building an EDW,
+        chapter 5, at data-hopper.com. If customer_360_bv is missing, open
+        retail-360.hbv and look for the blue SCD2 card.

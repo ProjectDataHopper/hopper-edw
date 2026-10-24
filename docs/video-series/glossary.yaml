@@ -46,6 +46,14 @@ speak_as:
     say: hop, retail example, sources
   - pattern: source-tables-crm.hsm
     say: source tables C R M dot h s m
+  - pattern: retail-360.hbv
+    say: retail three sixty dot H B V
+  - pattern: customer_360_bv
+    say: customer three sixty B V
+  - pattern: sat_customer_contact
+    say: sat customer contact
+  - pattern: sat_customer_address
+    say: sat customer address
   - pattern: retail-360.hdv
     say: retail three sixty dot H D V
   - pattern: sat_customer_demo
@@ -121,6 +129,7 @@ pronounce:
   GUI: "/ˈɡuːi/"
   EDW: "E D W"
   JDBC: "J D B C"
+  "rules live": "/ruːlz lɪv/"
   "rows live": "/roʊz lɪv/"
   "feeds live": "/fiːdz lɪv/"
   "settings live": "/ˈsɛtɪŋz lɪv/"
