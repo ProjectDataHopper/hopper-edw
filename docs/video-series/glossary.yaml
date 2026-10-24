@@ -38,6 +38,24 @@ speak_as:
     say: hop, retail example, models
   - pattern: run-retail-update-models.hwf
     say: run retail update models
+  - pattern: retail-f-orders.hsl
+    say: retail f orders dot H S L
+  - pattern: retail-f-orders.hdm
+    say: retail f orders dot H D M
+  - pattern: retail-conformed-dims
+    say: retail conformed dims
+  - pattern: d_shipping_date
+    say: d shipping date
+  - pattern: d_delivery_date
+    say: d delivery date
+  - pattern: d_order_date
+    say: d order date
+  - pattern: d_orders_junk
+    say: d orders junk
+  - pattern: d_date
+    say: d date
+  - pattern: d_customer
+    say: d customer
   - pattern: retail-f-orders
     say: retail f orders
   - pattern: f_orders

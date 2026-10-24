@@ -1,0 +1,133 @@
+#
+# Copyright 2026 i-Bridge bv
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# Narration for video 09. English is the source.
+# Add the other locales after this cut has been heard.
+video:
+  id: 09-dimensional-model
+  title: "Dimensional model"
+  issue: 233
+  width: 1920
+  height: 1080
+  fps: 30
+  transition: fade
+  transition_ms: 400
+  padding_after_sec: 0.4
+  voice_id: ara
+  links:
+    - label: Getting started
+      url: https://github.com/ProjectDataHopper/hopper-edw/blob/main/docs/getting-started-edw.adoc
+    - label: Dimensional modeler
+      url: https://github.com/ProjectDataHopper/hopper-edw/blob/main/docs/dimensional-modeler-overview.adoc
+    - label: Data Hopper
+      url: https://data-hopper.com/
+
+scenes:
+  - id: welcome
+    title: Welcome
+    visual: images/welcome.png
+    visual_type: still
+    card_title: Dimensional model
+    card_subtitle: Facts and dimensions for a report
+    shot: >
+      Title card. Title "Dimensional model". Subtitle "Facts and dimensions
+      for a report". No GUI.
+    narration:
+      en: |
+        A dimensional model is facts and dimensions. A report reads the
+        fact. The fact is loaded from the Business Vault, the raw Data
+        Vault, or both. The file ends in .hdm. In retail-example the orders
+        fact is retail-f-orders.hdm. Shared dimensions live in a second
+        file, retail-conformed-dims, and several facts point at them. You
+        add the .hdm to the same group, retail-sources. The update loads
+        every Data Vault model, then every Business Vault model, then every
+        dimensional model.
+
+  - id: fact
+    title: The orders fact
+    visual: images/fact.png
+    visual_type: still
+    shot: >
+      Dimensional canvas for f_orders. Role-playing dates and conformed
+      dimension aliases are readable. The committed still is
+      docs/images/dimensional-model-f-orders.png, padded to 16:9.
+    narration:
+      en: |
+        The orange card is the fact f_orders. Around it are dimension
+        aliases from retail-conformed-dims. d_customer is the customer.
+        d_order is the order. Three dates point at one calendar:
+        d_order_date, d_shipping_date, and d_delivery_date. That is role
+        playing. One date dimension, three roles on this fact. d_orders_junk
+        is a junk dimension for the small flags that do not deserve a
+        dimension of their own. The grain of this fact is one order.
+
+  - id: bus
+    title: The bus matrix
+    visual: images/bus.png
+    visual_type: still
+    shot: >
+      Bus matrix for retail-sources. The Orders row is f_orders. d_date
+      shows 3. No personal paths. The committed still is
+      docs/images/bus-matrix-of-the-retail-example.png, padded to 16:9.
+    narration:
+      en: |
+        The bus matrix is where that fact and dimension list is planned.
+        This one is already built for retail-sources. You do not build a
+        new one in this video. The Orders row is the fact f_orders. The
+        mark under d_customer, d_order, and d_orders_junk is a plain X. The
+        mark under d_date is 3. That 3 is the three date roles you just saw
+        on the canvas. Order lines are the next row, a finer grain, reusing
+        the same conformed dimensions.
+
+  - id: page
+    title: A page on the fact
+    visual: images/page.png
+    visual_type: still
+    card_title: A page on the fact
+    card_subtitle: retail-f-orders.hsl
+    shot: >
+      Title card. Title "A page on the fact". Subtitle
+      "retail-f-orders.hsl". No captured presentation page is in the docs
+      yet. Do not open the crosstab editor.
+    narration:
+      en: |
+        The semantic layer is consumption metadata on top of the fact. The
+        retail file is retail-f-orders.hsl. It holds formats and a saved
+        selection: which attributes and measures a page shows. Create
+        presentation builds that page from the layer. It is a report, not
+        another model editor. This video does not open the crosstab. The
+        point is that the .hdm is what you load, and the .hsl is how a page
+        reads it.
+
+  - id: where-next
+    title: Where next
+    visual: images/where-next.png
+    visual_type: still
+    card_title: Where next
+    card_subtitle: Metrics and the warehouse of the warehouse
+    shot: >
+      Title card. Title "Where next". Subtitle "Metrics and the warehouse
+      of the warehouse". No GUI. The next episode is metrics and analytics
+      operations.
+    narration:
+      en: |
+        The next video is the last one. A load writes timings into the OPS
+        database. You will open the metrics for a retail-sources run, then
+        see Create operational analytics turn that database into a small
+        warehouse of its own. The written guide for this video is Getting
+        started, building an EDW, chapter 5, at data-hopper.com. If the
+        fact is missing, open retail-f-orders.hdm and look for the orange
+        card.

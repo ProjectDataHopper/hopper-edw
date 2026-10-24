@@ -1,0 +1,48 @@
+#
+# Copyright 2026 i-Bridge bv
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+series:
+  en: Part of the Data Hopper EDW getting started series.
+chapters_label:
+  en: Chapters
+issue_label:
+  en: Issue
+title:
+  en: Dimensional model
+summary:
+  en: >
+    A dimensional model is facts and dimensions for a report. Open
+    retail-f-orders.hdm, see the role-playing dates, and the bus matrix
+    that planned them. The semantic layer retail-f-orders.hsl is how a
+    page reads the fact.
+link_labels:
+  Getting started:
+    en: Getting started
+  Dimensional modeler:
+    en: Dimensional modeler
+  Data Hopper:
+    en: Data Hopper
+chapters:
+  welcome:
+    en: Welcome
+  fact:
+    en: The orders fact
+  bus:
+    en: The bus matrix
+  page:
+    en: A page on the fact
+  where-next:
+    en: Where next
