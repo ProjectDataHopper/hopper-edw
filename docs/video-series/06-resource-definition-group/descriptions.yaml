@@ -14,34 +14,129 @@
 # limitations under the License.
 #
 
+# Product words stay in English. The first line of each rendered description is the title.
 series:
   en: Part of the Data Hopper EDW getting started series.
+  zh-CN: Data Hopper EDW 入门系列的一部分。
+  es-ES: Parte de la serie de introducción a Data Hopper EDW.
+  pt-PT: Parte da série de introdução ao Data Hopper EDW.
+  fr-FR: Fait partie de la série de prise en main de Data Hopper EDW.
+  de-DE: Teil der Einführungsreihe zu Data Hopper EDW.
+  it-IT: Parte della serie introduttiva a Data Hopper EDW.
 chapters_label:
   en: Chapters
+  zh-CN: 章节
+  es-ES: Capítulos
+  pt-PT: Capítulos
+  fr-FR: Chapitres
+  de-DE: Kapitel
+  it-IT: Capitoli
 issue_label:
   en: Issue
+  zh-CN: 议题
+  es-ES: Incidencia
+  pt-PT: Incidência
+  fr-FR: Ticket
+  de-DE: Ticket
+  it-IT: Segnalazione
 title:
   en: The resource definition group
+  zh-CN: resource definition group
+  es-ES: El resource definition group
+  pt-PT: O resource definition group
+  fr-FR: Le resource definition group
+  de-DE: Die resource definition group
+  it-IT: Il resource definition group
 summary:
   en: >
     A resource definition group is the list of models in one warehouse.
     Open retail-sources, see retail-360.hdv on the Data Vault tab, and open
     the same group on the EDW Journey.
+  zh-CN: >
+    resource definition group 是一个仓库里的模型清单。打开 retail-sources，在 Data Vault 页看到 retail-360.hdv，并在 EDW Journey 上打开同一个组。
+  es-ES: >
+    Un resource definition group es la lista de modelos de un almacén. Abre
+    retail-sources, mira retail-360.hdv en la pestaña Data Vault y abre el
+    mismo grupo en el EDW Journey.
+  pt-PT: >
+    Um resource definition group é a lista de modelos de um armazém. Abre
+    retail-sources, vê retail-360.hdv no separador Data Vault e abre o mesmo
+    grupo no EDW Journey.
+  fr-FR: >
+    Un resource definition group est la liste des modèles d'un entrepôt. Ouvre
+    retail-sources, vois retail-360.hdv dans l'onglet Data Vault et ouvre le
+    même groupe dans l'EDW Journey.
+  de-DE: >
+    Eine resource definition group ist die Liste der Modelle eines Warehouse.
+    Öffne retail-sources, sieh retail-360.hdv auf dem Data Vault Reiter und
+    öffne dieselbe Gruppe in der EDW Journey.
+  it-IT: >
+    Un resource definition group è l'elenco dei modelli di un warehouse. Apri
+    retail-sources, vedi retail-360.hdv nella scheda Data Vault e apri lo
+    stesso gruppo nell'EDW Journey.
 link_labels:
   Getting started:
     en: Getting started
+    zh-CN: 入门
+    es-ES: Primeros pasos
+    pt-PT: Primeiros passos
+    fr-FR: Prise en main
+    de-DE: Erste Schritte
+    it-IT: Per iniziare
   The group:
     en: The group
+    zh-CN: 这个组
+    es-ES: El grupo
+    pt-PT: O grupo
+    fr-FR: Le groupe
+    de-DE: Die Gruppe
+    it-IT: Il gruppo
   Data Hopper:
     en: Data Hopper
+    zh-CN: Data Hopper
+    es-ES: Data Hopper
+    pt-PT: Data Hopper
+    fr-FR: Data Hopper
+    de-DE: Data Hopper
+    it-IT: Data Hopper
 chapters:
   welcome:
     en: Welcome
+    zh-CN: 欢迎
+    es-ES: Bienvenida
+    pt-PT: Boas-vindas
+    fr-FR: Bienvenue
+    de-DE: Willkommen
+    it-IT: Benvenuto
   editor:
     en: The group editor
+    zh-CN: 组编辑器
+    es-ES: El editor del grupo
+    pt-PT: O editor do grupo
+    fr-FR: L'éditeur du groupe
+    de-DE: Der Gruppeneditor
+    it-IT: L'editor del gruppo
   buttons:
     en: What the group can run
+    zh-CN: 这个组能运行什么
+    es-ES: Qué puede ejecutar el grupo
+    pt-PT: O que o grupo pode correr
+    fr-FR: Ce que le groupe peut lancer
+    de-DE: Was die Gruppe starten kann
+    it-IT: Che cosa può eseguire il gruppo
   journey:
     en: The Journey
+    zh-CN: Journey
+    es-ES: El Journey
+    pt-PT: O Journey
+    fr-FR: Le Journey
+    de-DE: Die Journey
+    it-IT: Il Journey
   where-next:
     en: Where next
+    zh-CN: 接下来
+    es-ES: Qué sigue
+    pt-PT: O que vem a seguir
+    fr-FR: Et ensuite
+    de-DE: Wie es weitergeht
+    it-IT: Che cosa viene dopo

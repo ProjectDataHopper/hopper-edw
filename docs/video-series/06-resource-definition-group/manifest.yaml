@@ -15,7 +15,7 @@
 #
 
 # Narration for video 06. English is the source.
-# Add the other locales after this cut has been heard.
+# Product words stay in English. See docs/video-series/glossary.yaml.
 video:
   id: 06-resource-definition-group
   title: "The resource definition group"
@@ -27,6 +27,14 @@ video:
   transition_ms: 400
   padding_after_sec: 0.4
   voice_id: ara
+  locales:
+    - en
+    - zh-CN
+    - es-ES
+    - pt-PT
+    - fr-FR
+    - de-DE
+    - it-IT
   links:
     - label: Getting started
       url: https://github.com/ProjectDataHopper/hopper-edw/blob/main/docs/getting-started-edw.adoc
@@ -55,6 +63,18 @@ scenes:
         different warehouse, not for the next layer. It is not a folder of
         catalog feeds. The feeds stay in the catalog. The group points at
         the model files. The retail group is named retail-sources.
+      zh-CN: |
+        resource definition group 是组成一个仓库的模型清单。采集、校验和加载都以这份清单为范围。当 .hdv 存在并且 Check model 干净时就创建它。不要等 Business Vault 或维度模型。那些文件以后加入同一个组。第二个组是另一个仓库，不是下一层。它不是目录供给的文件夹。供给留在目录里。这个组指向模型文件。Retail 的组名叫 retail-sources。
+      es-ES: |
+        Un resource definition group es la lista de modelos que forman un almacén. La cosecha, la validación y la carga toman esta lista como alcance. Créalo cuando el .hdv existe y Check model está limpio. No esperes a un Business Vault ni a un modelo dimensional. Esos archivos se unen al mismo grupo más tarde. Un segundo grupo es para otro almacén, no para la capa siguiente. No es una carpeta de feeds del catálogo. Los feeds se quedan en el catálogo. El grupo apunta a los archivos de modelo. El grupo de retail se llama retail-sources.
+      pt-PT: |
+        Um resource definition group é a lista de modelos que formam um armazém. A colheita, a validação e a carga usam essa lista como âmbito. Cria-o quando o .hdv existe e o Check model está limpo. Não esperes por um Business Vault nem por um modelo dimensional. Esses ficheiros juntam-se ao mesmo grupo mais tarde. Um segundo grupo é para outro armazém, não para a camada seguinte. Não é uma pasta de feeds do catálogo. Os feeds ficam no catálogo. O grupo aponta para os ficheiros de modelo. O grupo retail chama-se retail-sources.
+      fr-FR: |
+        Un resource definition group est la liste des modèles qui font un entrepôt. La récolte, la validation et le chargement prennent cette liste comme périmètre. Crée-le quand le .hdv existe et que Check model est propre. N'attends pas un Business Vault ni un modèle dimensionnel. Ces fichiers rejoignent le même groupe plus tard. Un second groupe est pour un autre entrepôt, pas pour la couche suivante. Ce n'est pas un dossier de flux du catalogue. Les flux restent dans le catalogue. Le groupe pointe vers les fichiers de modèle. Le groupe retail s'appelle retail-sources.
+      de-DE: |
+        Eine resource definition group ist die Liste der Modelle, die ein Warehouse ausmachen. Ernte, Prüfung und der Ladevorgang nehmen diese Liste als Umfang. Lege sie an, wenn die .hdv existiert und Check model sauber ist. Warte nicht auf einen Business Vault oder ein dimensionales Modell. Diese Dateien kommen später in dieselbe Gruppe. Eine zweite Gruppe ist für ein anderes Warehouse, nicht für die nächste Schicht. Sie ist kein Ordner von Katalog-Feeds. Die Feeds bleiben im Katalog. Die Gruppe zeigt auf die Modelldateien. Die Retail-Gruppe heißt retail-sources.
+      it-IT: |
+        Un resource definition group è l'elenco dei modelli che formano un warehouse. Il harvest, la validazione e il caricamento usano quell'elenco come ambito. Crealo quando il .hdv esiste e Check model è pulito. Non aspettare un Business Vault o un modello dimensionale. Quei file si uniscono allo stesso gruppo più tardi. Un secondo gruppo è per un altro warehouse, non per lo strato successivo. Non è una cartella di feed del catalogo. I feed restano nel catalogo. Il gruppo punta ai file dei modelli. Il gruppo retail si chiama retail-sources.
 
   - id: editor
     title: The group editor
@@ -76,6 +96,18 @@ scenes:
         models tab are on this same editor. A first group leaves them empty.
         Add models is how the file got onto the list. A path from the
         project home still opens on another machine.
+      zh-CN: |
+        从元数据透视图的 EDW 下面打开它。名称是 retail-sources。默认目录连接是 local-catalog。那是 Configure EDW setup 创建的文件目录。Data Vault 模型页列出一个文件，${PROJECT_HOME}/models/retail-360.hdv。这份清单里的顺序就是 Data Vault 层内部的加载顺序。Business Vault 模型页和维度模型页在同一个编辑器上。第一个组让它们空着。Add models 是文件进入清单的方式。从项目主目录开始的路径在另一台机器上仍能打开。
+      es-ES: |
+        Ábrelo desde la perspectiva de metadatos, bajo EDW. El nombre es retail-sources. La conexión de catálogo por defecto es local-catalog. Es el catálogo de archivos de Configure EDW setup. La pestaña de modelos Data Vault lista un archivo, ${PROJECT_HOME}/models/retail-360.hdv. El orden de esta lista es el orden de la carga dentro de la capa Data Vault. Las pestañas de modelos Business Vault y de modelos dimensionales están en este mismo editor. Un primer grupo las deja vacías. Add models es como el archivo entró en la lista. Una ruta desde el inicio del proyecto sigue abriéndose en otra máquina.
+      pt-PT: |
+        Abre-o a partir da perspetiva de metadados, sob EDW. O nome é retail-sources. A ligação de catálogo por omissão é local-catalog. É o catálogo de ficheiros do Configure EDW setup. O separador de modelos Data Vault lista um ficheiro, ${PROJECT_HOME}/models/retail-360.hdv. A ordem desta lista é a ordem da carga dentro da camada Data Vault. Os separadores de modelos Business Vault e de modelos dimensionais estão neste mesmo editor. Um primeiro grupo deixa-os vazios. Add models é como o ficheiro entrou na lista. Um caminho a partir da pasta do projeto continua a abrir noutra máquina.
+      fr-FR: |
+        Ouvre-le depuis la perspective des métadonnées, sous EDW. Le nom est retail-sources. La connexion de catalogue par défaut est local-catalog. C'est le catalogue de fichiers de Configure EDW setup. L'onglet des modèles Data Vault liste un fichier, ${PROJECT_HOME}/models/retail-360.hdv. L'ordre de cette liste est l'ordre du chargement dans la couche Data Vault. Les onglets des modèles Business Vault et des modèles dimensionnels sont sur ce même éditeur. Un premier groupe les laisse vides. Add models est la façon dont le fichier est entré dans la liste. Un chemin depuis le dossier du projet s'ouvre encore sur une autre machine.
+      de-DE: |
+        Öffne sie in der Metadatenperspektive, unter EDW. Der Name ist retail-sources. Die Standard-Katalogverbindung ist local-catalog. Das ist der Dateikatalog aus Configure EDW setup. Der Reiter Data Vault Modelle listet eine Datei, ${PROJECT_HOME}/models/retail-360.hdv. Die Reihenfolge in dieser Liste ist die Ladereihenfolge innerhalb der Data Vault Schicht. Die Reiter Business Vault Modelle und dimensionale Modelle sind in demselben Editor. Eine erste Gruppe lässt sie leer. Add models ist der Weg, wie die Datei auf die Liste kam. Ein Pfad vom Projektordner öffnet sich auch auf einem anderen Rechner.
+      it-IT: |
+        Aprilo dalla prospettiva dei metadati, sotto EDW. Il nome è retail-sources. La connessione di catalogo predefinita è local-catalog. È il catalogo di file di Configure EDW setup. La scheda dei modelli Data Vault elenca un file, ${PROJECT_HOME}/models/retail-360.hdv. L'ordine di questo elenco è l'ordine di caricamento dentro lo strato Data Vault. Le schede dei modelli Business Vault e dei modelli dimensionali sono in questo stesso editor. Un primo gruppo le lascia vuote. Add models è il modo in cui il file è entrato nell'elenco. Un percorso dalla cartella del progetto si apre ancora su un'altra macchina.
 
   - id: buttons
     title: What the group can run
@@ -93,6 +125,18 @@ scenes:
         metadata. None of those buttons is the load. The load is a workflow
         action, Update resource definition group, and it is the next video.
         For now, notice that one saved group is the scope for all of them.
+      zh-CN: |
+        底部的按钮是这份清单使能的工作。Open in EDW Journey 切换到这个组的地图。Validate sources 把模型与目录比较。Harvest 读取源元数据。这些按钮都不是加载。加载是一个 Workflow 动作，Update resource definition group，它是下一集。现在请注意，一个已保存的组就是它们全部的范围。
+      es-ES: |
+        Los botones de abajo son el trabajo que esta lista hace posible. Open in EDW Journey cambia al mapa de este grupo. Validate sources compara los modelos con el catálogo. Harvest lee los metadatos de origen. Ninguno de esos botones es la carga. La carga es una acción de Workflow, Update resource definition group, y es el siguiente vídeo. Por ahora, fíjate en que un grupo guardado es el alcance de todos ellos.
+      pt-PT: |
+        Os botões em baixo são o trabalho que esta lista torna possível. Open in EDW Journey muda para o mapa deste grupo. Validate sources compara os modelos com o catálogo. Harvest lê os metadados de origem. Nenhum desses botões é a carga. A carga é uma ação de Workflow, Update resource definition group, e é o vídeo seguinte. Por agora, repara que um grupo gravado é o âmbito de todos eles.
+      fr-FR: |
+        Les boutons en bas sont le travail que cette liste rend possible. Open in EDW Journey passe à la carte de ce groupe. Validate sources compare les modèles au catalogue. Harvest lit les métadonnées source. Aucun de ces boutons n'est le chargement. Le chargement est une action de Workflow, Update resource definition group, et c'est la vidéo suivante. Pour l'instant, retiens qu'un groupe enregistré est le périmètre de tous.
+      de-DE: |
+        Die Schaltflächen unten sind die Arbeit, die diese Liste möglich macht. Open in EDW Journey wechselt zur Karte dieser Gruppe. Validate sources vergleicht die Modelle mit dem Katalog. Harvest liest die Quell-Metadaten. Keine dieser Schaltflächen ist der Ladevorgang. Der Ladevorgang ist eine Workflow-Aktion, Update resource definition group, und das ist das nächste Video. Merke dir vorerst, dass eine gespeicherte Gruppe der Umfang für alle ist.
+      it-IT: |
+        I pulsanti in basso sono il lavoro che questo elenco rende possibile. Open in EDW Journey passa alla mappa di questo gruppo. Validate sources confronta i modelli con il catalogo. Harvest legge i metadati di origine. Nessuno di quei pulsanti è il caricamento. Il caricamento è un'azione di Workflow, Update resource definition group, ed è il video successivo. Per ora nota che un gruppo salvato è l'ambito di tutti.
 
   - id: journey
     title: The Journey
@@ -110,6 +154,18 @@ scenes:
         load of this group. You will use that board when you run the
         update. This video only shows that the Journey and the group are
         the same warehouse.
+      zh-CN: |
+        Open in EDW Journey 之后，你回到第一集的海报，现在为 retail-sources 填好了。左边是源，然后是原始 vault、Business Vault 和维度模型。目录在下面。海报下面的板是这个组一次已完成的加载。运行更新时你会用到那块板。这一集只说明 Journey 和这个组是同一个仓库。
+      es-ES: |
+        Open in EDW Journey y vuelves al póster del primer vídeo, ahora relleno para retail-sources. Fuentes a la izquierda, luego el vault en bruto, el Business Vault y el modelo dimensional. El catálogo queda debajo. El tablero bajo el póster es una carga terminada de este grupo. Usarás ese tablero cuando ejecutes la actualización. Este vídeo solo muestra que el Journey y el grupo son el mismo almacén.
+      pt-PT: |
+        Open in EDW Journey e voltas ao cartaz do primeiro vídeo, agora preenchido para retail-sources. Origens à esquerda, depois o vault em bruto, o Business Vault e o modelo dimensional. O catálogo fica por baixo. O quadro sob o cartaz é uma carga concluída deste grupo. Vais usar esse quadro quando correres a atualização. Este vídeo só mostra que o Journey e o grupo são o mesmo armazém.
+      fr-FR: |
+        Open in EDW Journey et tu retrouves l'affiche de la première vidéo, maintenant remplie pour retail-sources. Les sources à gauche, puis le vault brut, le Business Vault et le modèle dimensionnel. Le catalogue est en dessous. Le tableau sous l'affiche est un chargement terminé de ce groupe. Tu utiliseras ce tableau quand tu lanceras la mise à jour. Cette vidéo montre seulement que le Journey et le groupe sont le même entrepôt.
+      de-DE: |
+        Open in EDW Journey und du bist wieder auf dem Poster aus dem ersten Video, jetzt gefüllt für retail-sources. Quellen links, dann der rohe Vault, der Business Vault und das dimensionale Modell. Der Katalog liegt darunter. Die Tafel unter dem Poster ist ein fertiger Ladevorgang dieser Gruppe. Diese Tafel benutzt du, wenn du die Aktualisierung startest. Dieses Video zeigt nur, dass die Journey und die Gruppe dasselbe Warehouse sind.
+      it-IT: |
+        Open in EDW Journey e torni al poster del primo video, ora compilato per retail-sources. Le sorgenti a sinistra, poi il vault grezzo, il Business Vault e il modello dimensionale. Il catalogo sta sotto. La scheda sotto il poster è un carico finito di questo gruppo. Userai quella scheda quando esegui l'aggiornamento. Questo video mostra solo che il Journey e il gruppo sono lo stesso warehouse.
 
   - id: where-next
     title: Where next
@@ -129,3 +185,15 @@ scenes:
         If you cannot find the group, look under metadata, EDW, resource
         definition group, and open retail-sources. The action will ask for
         this same group.
+      zh-CN: |
+        下一集运行 Update resource definition group。那个动作在第一次加载时创建 vault 表，并把目标布局发布回目录。这一集的书面指南是 Getting started, building an EDW 的第 3 章，在 data-hopper.com。如果找不到这个组，到元数据、EDW、resource definition group 下面，打开 retail-sources。那个动作会要求这同一个组。
+      es-ES: |
+        El siguiente vídeo ejecuta Update resource definition group. Esa acción crea las tablas del vault en la primera carga y publica los diseños de destino de vuelta en el catálogo. La guía escrita de este vídeo es Getting started, building an EDW, capítulo 3, en data-hopper.com. Si no encuentras el grupo, mira en metadatos, EDW, resource definition group, y abre retail-sources. La acción pedirá este mismo grupo.
+      pt-PT: |
+        O vídeo seguinte corre Update resource definition group. Essa ação cria as tabelas do vault na primeira carga e publica os layouts de destino de volta no catálogo. O guia escrito deste vídeo é Getting started, building an EDW, capítulo 3, em data-hopper.com. Se não encontrares o grupo, procura em metadados, EDW, resource definition group, e abre retail-sources. A ação vai pedir este mesmo grupo.
+      fr-FR: |
+        La vidéo suivante lance Update resource definition group. Cette action crée les tables du vault au premier chargement et publie les dispositions cibles dans le catalogue. Le guide écrit de cette vidéo est Getting started, building an EDW, chapitre 3, sur data-hopper.com. Si tu ne trouves pas le groupe, regarde sous métadonnées, EDW, resource definition group, et ouvre retail-sources. L'action demandera ce même groupe.
+      de-DE: |
+        Das nächste Video startet Update resource definition group. Diese Aktion legt beim ersten Laden die Vault-Tabellen an und veröffentlicht die Ziel-Layouts zurück in den Katalog. Die schriftliche Anleitung für dieses Video ist Getting started, building an EDW, Kapitel 3, unter data-hopper.com. Wenn du die Gruppe nicht findest, schau unter Metadaten, EDW, resource definition group, und öffne retail-sources. Die Aktion fragt nach derselben Gruppe.
+      it-IT: |
+        Il prossimo video esegue Update resource definition group. Quell'azione crea le tabelle del vault al primo carico e pubblica i layout di destinazione nel catalogo. La guida scritta di questo video è Getting started, building an EDW, capitolo 3, su data-hopper.com. Se non trovi il gruppo, guarda sotto metadati, EDW, resource definition group, e apri retail-sources. L'azione chiederà questo stesso gruppo.
