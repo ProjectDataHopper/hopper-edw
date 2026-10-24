@@ -1,0 +1,265 @@
+#
+# Copyright 2026 i-Bridge bv
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# Narration for video 01. English is the source.
+# Product words stay in English. See docs/video-series/glossary.yaml.
+video:
+  id: 01-orientation
+  title: "What Data Hopper EDW is"
+  issue: 225
+  width: 1920
+  height: 1080
+  fps: 30
+  transition: fade
+  transition_ms: 400
+  padding_after_sec: 0.4
+  voice_id: ara
+  locales:
+    - en
+    - zh-CN
+    - es-ES
+    - pt-PT
+    - fr-FR
+    - de-DE
+    - it-IT
+  links:
+    - label: Getting started
+      url: https://github.com/ProjectDataHopper/hopper-edw/blob/main/docs/getting-started-edw.adoc
+    - label: Training
+      url: https://github.com/ProjectDataHopper/hopper-edw/blob/main/docs/training/index.adoc
+    - label: Data Hopper
+      url: https://data-hopper.com/
+
+scenes:
+  - id: welcome
+    title: Welcome
+    visual: images/welcome.png
+    visual_type: still
+    card_title: Getting started
+    card_subtitle: A short series on Data Hopper EDW
+    shot: >
+      Title card. Kicker "Data Hopper", title "Getting started", subtitle
+      "A short series on Data Hopper EDW". No GUI.
+    narration:
+      en: |
+        Data Hopper EDW is a set of Apache Hop plugins for an enterprise data
+        warehouse. This is the first video in a short series that gets you
+        started. You already know Hop GUI. In the next few minutes you will
+        see what the warehouse is made of, who it is for, and where this
+        series goes. The written guide is Getting started, building an EDW,
+        at data-hopper.com.
+      zh-CN: |
+        Data Hopper EDW 是一组 Apache Hop 插件，用来搭建企业数据仓库。这是一套入门短片的第一集。你已经会用 Hop GUI。接下来几分钟，你会看到仓库由什么组成、面向谁，以及这一系列接下来讲什么。书面指南是 Getting started, building an EDW，网址是 data-hopper.com。
+      es-ES: |
+        Data Hopper EDW es un conjunto de plugins de Apache Hop para un almacén de datos empresarial. Este es el primer vídeo de una serie corta para empezar. Ya conoces Hop GUI. En los próximos minutos verás de qué está hecho el almacén, para quién es y hacia dónde va esta serie. La guía escrita es Getting started, building an EDW, en data-hopper.com.
+      pt-PT: |
+        Data Hopper EDW é um conjunto de plugins do Apache Hop para um armazém de dados empresarial. Este é o primeiro vídeo de uma série curta para começar. Já conheces o Hop GUI. Nos próximos minutos vês do que é feito o armazém, para quem é e para onde vai esta série. O guia escrito é Getting started, building an EDW, em data-hopper.com.
+      fr-FR: |
+        Data Hopper EDW est un ensemble de plugins Apache Hop pour un entrepôt de données d'entreprise. C'est la première vidéo d'une courte série pour commencer. Tu connais déjà Hop GUI. Dans les prochaines minutes, tu vois de quoi l'entrepôt est fait, à qui il s'adresse et où va cette série. Le guide écrit est Getting started, building an EDW, sur data-hopper.com.
+      de-DE: |
+        Data Hopper EDW ist eine Gruppe von Apache Hop Plugins für ein Enterprise Data Warehouse. Dies ist das erste Video einer kurzen Reihe zum Einstieg. Du kennst Hop GUI bereits. In den nächsten Minuten siehst du, woraus das Warehouse besteht, für wen es ist und wohin diese Reihe geht. Die schriftliche Anleitung heißt Getting started, building an EDW, unter data-hopper.com.
+      it-IT: |
+        Data Hopper EDW è un insieme di plugin di Apache Hop per un data warehouse aziendale. Questo è il primo video di una breve serie per iniziare. Conosci già Hop GUI. Nei prossimi minuti vedi di che cosa è fatto il warehouse, per chi è e dove va questa serie. La guida scritta è Getting started, building an EDW, su data-hopper.com.
+
+  - id: what-it-is
+    title: What it is
+    visual: images/what-it-is.png
+    visual_type: still
+    shot: >
+      The EDW overview poster, full frame, labels readable: landing sources,
+      source model, Data Vault, Business Vault, dimensional model, and the
+      catalog underneath. The committed picture is the raster of
+      docs/images/diagrams/edw-overview.svg. A live Journey capture of the
+      same poster can replace it.
+    narration:
+      en: |
+        The picture on screen is the whole product. Landing databases, files,
+        and events come in on the left. A source model describes them. Hop then
+        loads three databases: the raw Data Vault, the Business Vault, and
+        the dimensional model. The catalog sits under every model.
+        Documentation, the EDW Journey, and lineage sit on that catalog. You
+        describe the warehouse once. Hop generates the pipelines that build it.
+      zh-CN: |
+        画面上是整个产品。左边进来的是落地数据库、文件和事件。源模型描述它们。然后 Hop 加载三个数据库：原始 Data Vault、Business Vault 和维度模型。目录位于每个模型之下。文档、EDW Journey 和血缘都在这个目录上。你把仓库描述一次。Hop 生成用来构建它的 Pipeline。
+      es-ES: |
+        La imagen en pantalla es el producto entero. A la izquierda entran bases de datos de aterrizaje, archivos y eventos. Un modelo de origen los describe. Hop carga entonces tres bases de datos: el Data Vault en bruto, el Business Vault y el modelo dimensional. El catálogo está debajo de cada modelo. La documentación, el EDW Journey y el linaje se apoyan en ese catálogo. Describes el almacén una vez. Hop genera los Pipeline que lo construyen.
+      pt-PT: |
+        A imagem no ecrã é o produto inteiro. À esquerda entram bases de dados de chegada, ficheiros e eventos. Um modelo de origem descreve-os. O Hop carrega então três bases de dados: o Data Vault em bruto, o Business Vault e o modelo dimensional. O catálogo fica por baixo de cada modelo. A documentação, o EDW Journey e a linhagem assentam nesse catálogo. Describes o armazém uma vez. O Hop gera os Pipeline que o constroem.
+      fr-FR: |
+        L'image à l'écran est le produit entier. À gauche arrivent des bases d'atterrissage, des fichiers et des événements. Un modèle source les décrit. Hop charge ensuite trois bases : le Data Vault brut, le Business Vault et le modèle dimensionnel. Le catalogue est sous chaque modèle. La documentation, l'EDW Journey et le lignage reposent sur ce catalogue. Tu décris l'entrepôt une fois. Hop génère les Pipeline qui le construisent.
+      de-DE: |
+        Das Bild ist das ganze Produkt. Links kommen Lande-Datenbanken, Dateien und Ereignisse herein. Ein Quellenmodell beschreibt sie. Hop lädt dann drei Datenbanken: den rohen Data Vault, den Business Vault und das dimensionale Modell. Der Katalog liegt unter jedem Modell. Dokumentation, EDW Journey und Herkunft liegen auf diesem Katalog. Du beschreibst das Warehouse einmal. Hop erzeugt die Pipeline, die es aufbauen.
+      it-IT: |
+        L'immagine sullo schermo è l'intero prodotto. A sinistra arrivano database di atterraggio, file ed eventi. Un modello di origine li descrive. Hop carica poi tre database: il Data Vault grezzo, il Business Vault e il modello dimensionale. Il catalogo sta sotto ogni modello. Documentazione, EDW Journey e lignaggio poggiano su quel catalogo. Descrivi il warehouse una volta. Hop genera le Pipeline che lo costruiscono.
+
+  - id: four-files
+    title: Four model files
+    visual: images/four-files.png
+    visual_type: still
+    card_title: Four model files
+    card_subtitle: ".hsm    .hdv    .hbv    .hdm"
+    shot: >
+      Title card. Title "Four model files". Subtitle lists .hsm, .hdv, .hbv,
+      and .hdm. No GUI. A later pass can show the four retail files on the
+      project tree if the names stay readable.
+    narration:
+      en: |
+        Four files, and each one has one job. The source model ends in .hsm.
+        It holds the tables, keys, and relationships from one source system.
+        The raw Data Vault ends in .hdv. It keeps history: new keys, and new
+        versions of descriptive data. The Business Vault ends in .hbv. It
+        stores business rules as their own tables. The dimensional model ends
+        in .hdm. It is facts and dimensions for reporting. Later videos open
+        these files in the retail example, one at a time.
+      zh-CN: |
+        四个文件，各做一件事。源模型以 .hsm 结尾。它保存一个源系统的表、键和关系。原始 Data Vault 以 .hdv 结尾。它保留历史：新的键，以及描述数据的新版本。Business Vault 以 .hbv 结尾。它把业务规则存成自己的表。维度模型以 .hdm 结尾。它是用于报表的事实和维度。后面的视频会在 retail-example 里逐个打开这些文件。
+      es-ES: |
+        Cuatro archivos, y cada uno tiene un trabajo. El modelo de origen termina en .hsm. Guarda las tablas, las claves y las relaciones de un sistema de origen. El Data Vault en bruto termina en .hdv. Conserva la historia: claves nuevas y nuevas versiones de los datos descriptivos. El Business Vault termina en .hbv. Guarda las reglas de negocio como tablas propias. El modelo dimensional termina en .hdm. Son hechos y dimensiones para los informes. Los vídeos siguientes abren estos archivos en retail-example, de uno en uno.
+      pt-PT: |
+        Quatro ficheiros, e cada um tem uma função. O modelo de origem termina em .hsm. Guarda as tabelas, as chaves e as relações de um sistema de origem. O Data Vault em bruto termina em .hdv. Guarda a história: chaves novas e novas versões dos dados descritivos. O Business Vault termina em .hbv. Guarda as regras de negócio como tabelas próprias. O modelo dimensional termina em .hdm. São factos e dimensões para os relatórios. Os vídeos seguintes abrem estes ficheiros no retail-example, um de cada vez.
+      fr-FR: |
+        Quatre fichiers, et chacun a un rôle. Le modèle source se termine par .hsm. Il contient les tables, les clés et les relations d'un système source. Le Data Vault brut se termine par .hdv. Il garde l'historique : de nouvelles clés, et de nouvelles versions des données descriptives. Le Business Vault se termine par .hbv. Il range les règles métier dans leurs propres tables. Le modèle dimensionnel se termine par .hdm. Ce sont des faits et des dimensions pour les rapports. Les vidéos suivantes ouvrent ces fichiers dans retail-example, un par un.
+      de-DE: |
+        Vier Dateien, und jede hat eine Aufgabe. Das Quellenmodell endet auf .hsm. Es hält die Tabellen, Schlüssel und Beziehungen eines Quellsystems. Der rohe Data Vault endet auf .hdv. Er bewahrt die Historie: neue Schlüssel und neue Versionen der beschreibenden Daten. Der Business Vault endet auf .hbv. Er speichert Geschäftsregeln als eigene Tabellen. Das dimensionale Modell endet auf .hdm. Es sind Fakten und Dimensionen für Berichte. Spätere Videos öffnen diese Dateien in retail-example, eine nach der anderen.
+      it-IT: |
+        Quattro file, e ognuno ha un compito. Il modello di origine finisce con .hsm. Contiene le tabelle, le chiavi e le relazioni di un sistema di origine. Il Data Vault grezzo finisce con .hdv. Conserva la storia: chiavi nuove e nuove versioni dei dati descrittivi. Il Business Vault finisce con .hbv. Mette le regole di business in tabelle proprie. Il modello dimensionale finisce con .hdm. Sono fatti e dimensioni per i report. I video successivi aprono questi file in retail-example, uno alla volta.
+
+  - id: catalog-and-group
+    title: Catalog and the group
+    visual: images/catalog-and-group.png
+    visual_type: still
+    card_title: Catalog and the group
+    card_subtitle: The contract, and the list you load
+    shot: >
+      Title card. Title "Catalog and the group". Subtitle "The contract, and
+      the list you load". Replace with the Data Catalog on a retail feed, or
+      the retail-sources group editor, when that screen is the one you want
+      the viewer to read.
+    narration:
+      en: |
+        Two ideas hold those files together. The data catalog is the contract.
+        A source publishes a feed by name, and later models bind to that name.
+        The JDBC URL stays on the connection. The resource definition group
+        is the list of models that make one warehouse. Harvest, validation,
+        and the load all use that list as their scope. You create the group
+        when the raw vault exists, and you add the Business Vault and the
+        dimensional model to that same group.
+      zh-CN: |
+        有两个想法把这些文件连在一起。Data Catalog 是契约。源发布一个带名字的供给，后面的模型绑定这个名字。JDBC 的 URL 留在连接上。resource definition group 是组成一个仓库的模型清单。采集、校验和加载都以这份清单为范围。原始 Data Vault 存在之后，你就创建这个组，并把 Business Vault 和维度模型加进同一个组。
+      es-ES: |
+        Dos ideas mantienen esos archivos juntos. El Data Catalog es el contrato. Un origen publica un feed por nombre, y los modelos posteriores se enlazan a ese nombre. La URL JDBC permanece en la conexión. El resource definition group es la lista de modelos que forman un almacén. La cosecha, la validación y la carga usan esa lista como alcance. Creas el grupo cuando existe el Data Vault en bruto, y añades el Business Vault y el modelo dimensional a ese mismo grupo.
+      pt-PT: |
+        Duas ideias mantêm esses ficheiros juntos. O Data Catalog é o contrato. Uma origem publica um feed pelo nome, e os modelos seguintes ligam-se a esse nome. O URL JDBC fica na ligação. O resource definition group é a lista de modelos que formam um armazém. A colheita, a validação e a carga usam essa lista como âmbito. Crias o grupo quando o Data Vault em bruto existe, e acrescentas o Business Vault e o modelo dimensional a esse mesmo grupo.
+      fr-FR: |
+        Deux idées tiennent ces fichiers ensemble. Le Data Catalog est le contrat. Une source publie un flux par son nom, et les modèles suivants se lient à ce nom. L'URL JDBC reste sur la connexion. Le resource definition group est la liste des modèles qui font un entrepôt. La récolte, la validation et le chargement prennent cette liste comme périmètre. Tu crées le groupe quand le Data Vault brut existe, et tu ajoutes le Business Vault et le modèle dimensionnel à ce même groupe.
+      de-DE: |
+        Zwei Ideen halten diese Dateien zusammen. Der Data Catalog ist der Vertrag. Eine Quelle veröffentlicht einen Feed unter einem Namen, und spätere Modelle binden sich an diesen Namen. Die JDBC URL bleibt an der Verbindung. Die resource definition group ist die Liste der Modelle, die ein Warehouse ausmachen. Ernte, Prüfung und der Ladevorgang nutzen diese Liste als Umfang. Du legst die Gruppe an, wenn der rohe Data Vault da ist, und du fügst den Business Vault und das dimensionale Modell derselben Gruppe hinzu.
+      it-IT: |
+        Due idee tengono insieme questi file. Il Data Catalog è il contratto. Una sorgente pubblica un feed per nome, e i modelli successivi si legano a quel nome. L'URL JDBC resta sulla connessione. Il resource definition group è l'elenco dei modelli che formano un warehouse. Il harvest, la validazione e il caricamento usano quell'elenco come ambito. Crei il gruppo quando il Data Vault grezzo esiste, e aggiungi il Business Vault e il modello dimensionale a quello stesso gruppo.
+
+  - id: journey
+    title: EDW Journey
+    visual: images/journey.png
+    visual_type: still
+    shot: >
+      Hop GUI, EDW Journey, group retail-sources. The architecture poster is
+      on screen. The template still is docs/images/edw-journey-run-selection.png,
+      which also shows the wave board under the poster. A tighter capture that
+      keeps the poster large can replace it. Hide bookmarks and popups.
+    narration:
+      en: |
+        The EDW Journey is that map inside Hop GUI. Open the retail example,
+        choose the group retail-sources, and the Journey shows the architecture
+        poster. Under the poster, this sample already has a run board from a
+        finished load. You will use that board in the last video. For now, the
+        poster is the series: sources, the raw vault, the business vault, and
+        the dimensional model, with the catalog underneath. When a later video
+        says open the Journey, this is the screen.
+      zh-CN: |
+        EDW Journey 就是 Hop GUI 里的那张地图。打开 retail-example，选中组 retail-sources，Journey 会显示架构海报。海报下面，这个示例已经有一块来自已完成加载的运行板。最后一集会用到那块板。现在，海报就是这一系列：源、原始 vault、Business Vault 和维度模型，目录在下面。后面的视频说打开 Journey 时，就是这个画面。
+      es-ES: |
+        El EDW Journey es ese mapa dentro de Hop GUI. Abre retail-example, elige el grupo retail-sources, y el Journey muestra el póster de arquitectura. Bajo el póster, este ejemplo ya tiene un tablero de ejecución de una carga terminada. Usarás ese tablero en el último vídeo. Por ahora, el póster es la serie: orígenes, el vault en bruto, el Business Vault y el modelo dimensional, con el catálogo debajo. Cuando un vídeo posterior diga que abras el Journey, esta es la pantalla.
+      pt-PT: |
+        O EDW Journey é esse mapa dentro do Hop GUI. Abre o retail-example, escolhe o grupo retail-sources, e o Journey mostra o cartaz de arquitetura. Por baixo do cartaz, este exemplo já tem um quadro de execução de uma carga concluída. Vais usar esse quadro no último vídeo. Por agora, o cartaz é a série: origens, o vault em bruto, o Business Vault e o modelo dimensional, com o catálogo por baixo. Quando um vídeo seguinte disser para abrires o Journey, este é o ecrã.
+      fr-FR: |
+        L'EDW Journey est cette carte dans Hop GUI. Ouvre retail-example, choisis le groupe retail-sources, et le Journey affiche l'affiche d'architecture. Sous l'affiche, cet exemple a déjà un tableau d'exécution d'un chargement terminé. Tu utiliseras ce tableau dans la dernière vidéo. Pour l'instant, l'affiche est la série : les sources, le vault brut, le Business Vault et le modèle dimensionnel, avec le catalogue en dessous. Quand une vidéo suivante dit d'ouvrir le Journey, c'est cet écran.
+      de-DE: |
+        Die EDW Journey ist diese Karte in Hop GUI. Öffne retail-example, wähle die Gruppe retail-sources, und die Journey zeigt das Architekturposter. Unter dem Poster hat dieses Beispiel schon eine Laufübersicht aus einem fertigen Ladevorgang. Diese Übersicht kommt im letzten Video. Vorerst ist das Poster die Reihe: Quellen, der rohe Vault, der Business Vault und das dimensionale Modell, mit dem Katalog darunter. Wenn ein späteres Video sagt, öffne die Journey, ist dies der Bildschirm.
+      it-IT: |
+        L'EDW Journey è quella mappa dentro Hop GUI. Apri retail-example, scegli il gruppo retail-sources, e il Journey mostra il poster dell'architettura. Sotto il poster, questo esempio ha già una scheda di esecuzione di un carico finito. Userai quella scheda nell'ultimo video. Per ora il poster è la serie: le sorgenti, il vault grezzo, il Business Vault e il modello dimensionale, con il catalogo sotto. Quando un video successivo dice di aprire il Journey, questa è la schermata.
+
+  - id: who-it-is-for
+    title: Who it is for
+    visual: images/who-it-is-for.png
+    visual_type: still
+    card_title: Who it is for
+    card_subtitle: One project, in Hop GUI
+    shot: >
+      Title card. Title "Who it is for". Subtitle "One project, in Hop GUI".
+      No GUI.
+    narration:
+      en: |
+        This series is for two people who share one project. The modeler draws
+        the files. The person who runs the load starts the group update and
+        reads the timings. Analysts come in at the dimensional model, and at
+        the pages built from it. You both work in Hop GUI. If pipelines and
+        workflows are still new, watch the Apache Hop getting started series
+        first, then come back. This series assumes the canvas already feels
+        familiar.
+      zh-CN: |
+        这个系列给共享同一个项目的两个人。建模的人画这些文件。跑加载的人启动组更新，并阅读计时。分析人员从维度模型进入，也从它上面的页面进入。你们都在 Hop GUI 里工作。如果 Pipeline 和 Workflow 对你还新，先看 Apache Hop 的入门系列，再回来。这个系列假定画布已经熟悉。
+      es-ES: |
+        Esta serie es para dos personas que comparten un proyecto. Quien modela dibuja los archivos. Quien ejecuta la carga arranca la actualización del grupo y lee los tiempos. Quien analiza entra en el modelo dimensional y en las páginas construidas sobre él. Los dos trabajáis en Hop GUI. Si Pipeline y Workflow aún son nuevos, mira primero la serie de inicio de Apache Hop y vuelve. Esta serie supone que el lienzo ya te resulta familiar.
+      pt-PT: |
+        Esta série é para duas pessoas que partilham um projeto. Quem modela desenha os ficheiros. Quem corre a carga inicia a atualização do grupo e lê os tempos. Quem analisa entra no modelo dimensional e nas páginas construídas sobre ele. Os dois trabalham no Hop GUI. Se Pipeline e Workflow ainda são novos, vê primeiro a série de início do Apache Hop e volta. Esta série assume que a tela já te é familiar.
+      fr-FR: |
+        Cette série est pour deux personnes qui partagent un projet. La personne qui modélise dessine les fichiers. La personne qui lance le chargement démarre la mise à jour du groupe et lit les durées. L'analyse arrive au modèle dimensionnel, et aux pages construites dessus. Vous travaillez tous les deux dans Hop GUI. Si Pipeline et Workflow sont encore nouveaux, regarde d'abord la série de prise en main d'Apache Hop, puis reviens. Cette série suppose que le canevas est déjà familier.
+      de-DE: |
+        Diese Reihe ist für zwei Menschen, die sich ein Projekt teilen. Wer modelliert, zeichnet die Dateien. Wer den Ladevorgang fährt, startet die Gruppenaktualisierung und liest die Zeiten. Die Analyse kommt beim dimensionalen Modell dazu, und bei den Seiten darüber. Ihr arbeitet beide in Hop GUI. Wenn Pipeline und Workflow noch neu sind, sieh zuerst die Einstiegsserie von Apache Hop und komm zurück. Diese Reihe setzt voraus, dass die Zeichenfläche schon vertraut ist.
+      it-IT: |
+        Questa serie è per due persone che condividono un progetto. Chi modella disegna i file. Chi esegue il carico avvia l'aggiornamento del gruppo e legge i tempi. L'analisi arriva al modello dimensionale e alle pagine costruite sopra. Lavorate entrambi in Hop GUI. Se Pipeline e Workflow sono ancora nuovi, guarda prima la serie introduttiva di Apache Hop e poi torna. Questa serie presume che l'area di disegno ti sia già familiare.
+
+  - id: where-next
+    title: Where next
+    visual: images/where-next.png
+    visual_type: still
+    card_title: Where next
+    card_subtitle: Install, then build the warehouse
+    shot: >
+      Title card. Title "Where next". Subtitle "Install, then build the
+      warehouse". No GUI. The next episode is installation and configuration.
+    narration:
+      en: |
+        The next video installs the plugin and opens Configure EDW setup. That
+        dialog creates the catalog connection and four shared configurations.
+        The resource definition group comes later, in its own video. After
+        that, the series walks sources, source models, a generated Data Vault,
+        the group, the update, the Business Vault, the dimensional model, and
+        metrics with analytics operations. AI help is a later stop, in
+        training module 8. The longer how-to tutorials stay in the
+        documentation. This series is the map.
+      zh-CN: |
+        下一集安装插件，并打开 Configure EDW setup。那个对话框创建目录连接和四个共享配置。resource definition group 留到它自己的一集。之后，这一系列会走过源、源模型、生成的 Data Vault、这个组、更新、Business Vault、维度模型，以及指标和分析运维。AI 帮助是后面的一站，在培训模块 8。更长的操作教程留在文档里。这个系列是地图。
+      es-ES: |
+        El siguiente vídeo instala el plugin y abre Configure EDW setup. Ese diálogo crea la conexión del catálogo y cuatro configuraciones compartidas. El resource definition group llega más tarde, en su propio vídeo. Después, la serie recorre los orígenes, los modelos de origen, un Data Vault generado, el grupo, la actualización, el Business Vault, el modelo dimensional, y las métricas con las operaciones de analítica. La ayuda de IA es una parada posterior, en el módulo de formación 8. Los tutoriales más largos siguen en la documentación. Esta serie es el mapa.
+      pt-PT: |
+        O vídeo seguinte instala o plugin e abre Configure EDW setup. Esse diálogo cria a ligação do catálogo e quatro configurações partilhadas. O resource definition group chega mais tarde, no seu próprio vídeo. Depois, a série percorre as origens, os modelos de origem, um Data Vault gerado, o grupo, a atualização, o Business Vault, o modelo dimensional, e as métricas com as operações de analítica. A ajuda de IA é uma paragem posterior, no módulo de formação 8. Os tutoriais mais longos ficam na documentação. Esta série é o mapa.
+      fr-FR: |
+        La vidéo suivante installe le plugin et ouvre Configure EDW setup. Cette boîte de dialogue crée la connexion du catalogue et quatre configurations partagées. Le resource definition group vient plus tard, dans sa propre vidéo. Ensuite, la série parcourt les sources, les modèles source, un Data Vault généré, le groupe, la mise à jour, le Business Vault, le modèle dimensionnel, puis les métriques et les opérations d'analytique. L'aide IA est une étape plus tard, dans le module de formation 8. Les tutoriels plus longs restent dans la documentation. Cette série est la carte.
+      de-DE: |
+        Das nächste Video installiert das Plugin und öffnet Configure EDW setup. Dieser Dialog legt die Katalogverbindung und vier gemeinsame Konfigurationen an. Die resource definition group kommt später, in ihrem eigenen Video. Danach geht die Reihe durch Quellen, Quellenmodelle, einen erzeugten Data Vault, die Gruppe, die Aktualisierung, den Business Vault, das dimensionale Modell und Metriken mit Analysebetrieb. Die KI-Hilfe ist ein späterer Halt, in Trainingsmodul 8. Die längeren Anleitungen bleiben in der Dokumentation. Diese Reihe ist die Karte.
+      it-IT: |
+        Il video successivo installa il plugin e apre Configure EDW setup. Quella finestra crea la connessione del catalogo e quattro configurazioni condivise. Il resource definition group arriva più tardi, nel suo video. Poi la serie attraversa le sorgenti, i modelli di origine, un Data Vault generato, il gruppo, l'aggiornamento, il Business Vault, il modello dimensionale, e le metriche con le operazioni di analitica. L'aiuto IA è una tappa successiva, nel modulo di formazione 8. I tutorial più lunghi restano nella documentazione. Questa serie è la mappa.

@@ -1,0 +1,59 @@
+#
+# Copyright 2026 i-Bridge bv
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# Product words stay in English in every spoken language, because the GUI
+# in the picture uses these words. Gloss a word the first time, then keep it.
+keep_english:
+  - Pipeline
+  - Workflow
+  - Transform
+  - Action
+  - Hop GUI
+  - Hop
+  - Data Vault
+  - Business Vault
+  - resource definition group
+  - Data Catalog
+  - EDW Journey
+
+# Literal replacements applied to the text before text-to-speech.
+# Subtitles keep the narration as written. Longer patterns win.
+speak_as:
+  - pattern: data-hopper.com
+    say: data hopper dot com
+  - pattern: retail-example
+    say: retail example
+  - pattern: retail-sources
+    say: retail sources
+  - pattern: ".hsm"
+    say: dot H S M
+  - pattern: ".hdv"
+    say: dot H D V
+  - pattern: ".hbv"
+    say: dot H B V
+  - pattern: ".hdm"
+    say: dot H D M
+  - pattern: ".hsl"
+    say: dot H S L
+  - pattern: ".hlv"
+    say: dot H L V
+
+# Sent to the TTS API as replace. The written narration and the subtitles
+# stay as they are. A value in slashes is IPA. GUI is "gooey", not G-U-I.
+pronounce:
+  GUI: "/ˈɡuːi/"
+  EDW: "E D W"
+  JDBC: "J D B C"

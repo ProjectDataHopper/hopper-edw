@@ -1,0 +1,162 @@
+#
+# Copyright 2026 i-Bridge bv
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# Product words stay in English. The first line of each rendered description is the title.
+series:
+  en: Part of the Data Hopper EDW getting started series.
+  zh-CN: Data Hopper EDW 入门系列的一部分。
+  es-ES: Parte de la serie de introducción a Data Hopper EDW.
+  pt-PT: Parte da série de introdução ao Data Hopper EDW.
+  fr-FR: Fait partie de la série de prise en main de Data Hopper EDW.
+  de-DE: Teil der Einführungsreihe zu Data Hopper EDW.
+  it-IT: Parte della serie introduttiva a Data Hopper EDW.
+chapters_label:
+  en: Chapters
+  zh-CN: 章节
+  es-ES: Capítulos
+  pt-PT: Capítulos
+  fr-FR: Chapitres
+  de-DE: Kapitel
+  it-IT: Capitoli
+issue_label:
+  en: Issue
+  zh-CN: 议题
+  es-ES: Incidencia
+  pt-PT: Incidência
+  fr-FR: Ticket
+  de-DE: Ticket
+  it-IT: Segnalazione
+title:
+  en: What Data Hopper EDW is
+  zh-CN: Data Hopper EDW 是什么
+  es-ES: Qué es Data Hopper EDW
+  pt-PT: O que é o Data Hopper EDW
+  fr-FR: Qu'est-ce que Data Hopper EDW
+  de-DE: Was Data Hopper EDW ist
+  it-IT: Che cos'è Data Hopper EDW
+summary:
+  en: >
+    Data Hopper EDW is a set of Apache Hop plugins for an enterprise data
+    warehouse. This short video explains the four model files, the catalog,
+    the resource definition group, and where the rest of the series goes.
+  zh-CN: >
+    Data Hopper EDW 是一组 Apache Hop 插件，用来搭建企业数据仓库。这段短片说明四个模型文件、Data Catalog、resource definition group，以及这一系列接下来去哪里。
+  es-ES: >
+    Data Hopper EDW es un conjunto de plugins de Apache Hop para un almacén
+    de datos empresarial. Este vídeo corto explica los cuatro archivos de
+    modelo, el Data Catalog, el resource definition group y hacia dónde va
+    el resto de la serie.
+  pt-PT: >
+    Data Hopper EDW é um conjunto de plugins do Apache Hop para um armazém
+    de dados empresarial. Este vídeo curto explica os quatro ficheiros de
+    modelo, o Data Catalog, o resource definition group e para onde vai o
+    resto da série.
+  fr-FR: >
+    Data Hopper EDW est un ensemble de plugins Apache Hop pour un entrepôt
+    de données d'entreprise. Cette courte vidéo explique les quatre fichiers
+    de modèle, le Data Catalog, le resource definition group, et la suite
+    de la série.
+  de-DE: >
+    Data Hopper EDW ist eine Gruppe von Apache Hop Plugins für ein Enterprise
+    Data Warehouse. Dieses kurze Video erklärt die vier Modelldateien, den
+    Data Catalog, die resource definition group und den weiteren Verlauf
+    der Reihe.
+  it-IT: >
+    Data Hopper EDW è un insieme di plugin di Apache Hop per un data warehouse
+    aziendale. Questo breve video spiega i quattro file di modello, il Data
+    Catalog, il resource definition group e dove va il resto della serie.
+link_labels:
+  Getting started:
+    en: Getting started
+    zh-CN: 入门
+    es-ES: Primeros pasos
+    pt-PT: Primeiros passos
+    fr-FR: Prise en main
+    de-DE: Erste Schritte
+    it-IT: Per iniziare
+  Training:
+    en: Training
+    zh-CN: 培训
+    es-ES: Formación
+    pt-PT: Formação
+    fr-FR: Formation
+    de-DE: Training
+    it-IT: Formazione
+  Data Hopper:
+    en: Data Hopper
+    zh-CN: Data Hopper
+    es-ES: Data Hopper
+    pt-PT: Data Hopper
+    fr-FR: Data Hopper
+    de-DE: Data Hopper
+    it-IT: Data Hopper
+chapters:
+  welcome:
+    en: Welcome
+    zh-CN: 欢迎
+    es-ES: Bienvenida
+    pt-PT: Boas-vindas
+    fr-FR: Bienvenue
+    de-DE: Willkommen
+    it-IT: Benvenuto
+  what-it-is:
+    en: What it is
+    zh-CN: 它是什么
+    es-ES: Qué es
+    pt-PT: O que é
+    fr-FR: De quoi il s'agit
+    de-DE: Worum es geht
+    it-IT: Che cos'è
+  four-files:
+    en: Four model files
+    zh-CN: 四个模型文件
+    es-ES: Cuatro archivos de modelo
+    pt-PT: Quatro ficheiros de modelo
+    fr-FR: Quatre fichiers de modèle
+    de-DE: Vier Modelldateien
+    it-IT: Quattro file di modello
+  catalog-and-group:
+    en: Catalog and the group
+    zh-CN: 目录和分组
+    es-ES: El catálogo y el grupo
+    pt-PT: O catálogo e o grupo
+    fr-FR: Le catalogue et le groupe
+    de-DE: Katalog und Gruppe
+    it-IT: Il catalogo e il gruppo
+  journey:
+    en: EDW Journey
+    zh-CN: EDW Journey
+    es-ES: EDW Journey
+    pt-PT: EDW Journey
+    fr-FR: EDW Journey
+    de-DE: EDW Journey
+    it-IT: EDW Journey
+  who-it-is-for:
+    en: Who it is for
+    zh-CN: 面向谁
+    es-ES: Para quién es
+    pt-PT: Para quem é
+    fr-FR: À qui cela s'adresse
+    de-DE: Für wen es ist
+    it-IT: A chi è rivolto
+  where-next:
+    en: Where next
+    zh-CN: 接下来
+    es-ES: Qué sigue
+    pt-PT: O que vem a seguir
+    fr-FR: Et ensuite
+    de-DE: Wie es weitergeht
+    it-IT: Che cosa viene dopo

@@ -42,6 +42,7 @@ Architecture pictures are **committed SVGs** (`docs/images/diagrams/`) generated
 | [search.adoc](search.adoc) | **Search Everywhere**: models (`.hsm`/`.hdv`/`.hbv`/`.hdm`/`.hlv`) and plugin metadata |
 | [help/index.adoc](help/index.adoc) | **Dialog help**: HTML opened from Hop GUI Help buttons |
 | [training/index.adoc](training/index.adoc) | **Guided training modules** (walkthrough + questionnaire) — start with module 0 |
+| [video-series/SERIES.md](video-series/SERIES.md) | **Getting started videos** (issue #224). Short episodes on `retail-example`. Episode 1 is the template |
 | [ai-file-schemas/README.md](ai-file-schemas/README.md) | **AI context pack**: XSD/JSON Schema + purpose markdown for models and metadata (Gemini/external AIs) |
 
 ## Managers and architects
