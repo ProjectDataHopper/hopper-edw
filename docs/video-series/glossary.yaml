@@ -32,6 +32,8 @@ keep_english:
 # Literal replacements applied to the text before text-to-speech.
 # Subtitles keep the narration as written. Longer patterns win.
 speak_as:
+  - pattern: "${PROJECT_HOME}"
+    say: project home
   - pattern: hop/retail-example/sources
     say: hop, retail example, sources
   - pattern: source-tables-crm.hsm

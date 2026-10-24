@@ -1,0 +1,131 @@
+#
+# Copyright 2026 i-Bridge bv
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# Narration for video 06. English is the source.
+# Add the other locales after this cut has been heard.
+video:
+  id: 06-resource-definition-group
+  title: "The resource definition group"
+  issue: 230
+  width: 1920
+  height: 1080
+  fps: 30
+  transition: fade
+  transition_ms: 400
+  padding_after_sec: 0.4
+  voice_id: ara
+  links:
+    - label: Getting started
+      url: https://github.com/ProjectDataHopper/hopper-edw/blob/main/docs/getting-started-edw.adoc
+    - label: The group
+      url: https://github.com/ProjectDataHopper/hopper-edw/blob/main/docs/resource-definition-group.adoc
+    - label: Data Hopper
+      url: https://data-hopper.com/
+
+scenes:
+  - id: welcome
+    title: Welcome
+    visual: images/welcome.png
+    visual_type: still
+    card_title: The resource definition group
+    card_subtitle: The list of models in one warehouse
+    shot: >
+      Title card. Title "The resource definition group". Subtitle "The list
+      of models in one warehouse". No GUI.
+    narration:
+      en: |
+        A resource definition group is the list of models that make one
+        warehouse. Harvest, validation, and the load all take this list as
+        their scope. Create it when the .hdv exists and Check model is
+        clean. Do not wait for a Business Vault or a dimensional model.
+        Those files join the same group later. A second group is for a
+        different warehouse, not for the next layer. It is not a folder of
+        catalog feeds. The feeds stay in the catalog. The group points at
+        the model files. The retail group is named retail-sources.
+
+  - id: editor
+    title: The group editor
+    visual: images/editor.png
+    visual_type: still
+    shot: >
+      Resource definition group editor for retail-sources. Name,
+      local-catalog, and the Data Vault models tab with retail-360.hdv are
+      readable. The committed still is
+      docs/images/resource-definition-group-editor.png, padded to 16:9.
+    narration:
+      en: |
+        Open it from the metadata perspective, under EDW. The name is
+        retail-sources. The default catalog connection is local-catalog.
+        That is the file catalog from Configure EDW setup. The Data Vault
+        models tab lists one file, ${PROJECT_HOME}/models/retail-360.hdv.
+        The order in this list is the order of the load inside the Data
+        Vault layer. The Business Vault models tab and the Dimensional
+        models tab are on this same editor. A first group leaves them empty.
+        Add models is how the file got onto the list. A path from the
+        project home still opens on another machine.
+
+  - id: buttons
+    title: What the group can run
+    visual: images/editor.png
+    visual_type: still
+    shot: >
+      Same group editor. The bottom button bar is the point: Open in EDW
+      Journey, Validate sources, harvest, and catalog versions. Do not
+      click through them in this video.
+    narration:
+      en: |
+        The buttons along the bottom are the work this list makes possible.
+        Open in EDW Journey switches to the map for this group. Validate
+        sources compares the models with the catalog. Harvest reads source
+        metadata. None of those buttons is the load. The load is a workflow
+        action, Update resource definition group, and it is the next video.
+        For now, notice that one saved group is the scope for all of them.
+
+  - id: journey
+    title: The Journey
+    visual: images/journey.png
+    visual_type: still
+    shot: >
+      EDW Journey on retail-sources. The architecture poster is above the
+      wave board. Same still as episode 1.
+    narration:
+      en: |
+        Open in EDW Journey and you are back on the poster from the first
+        video, now filled in for retail-sources. Sources on the left, then
+        the raw vault, the Business Vault, and the dimensional model. The
+        catalog sits underneath. The board under the poster is a finished
+        load of this group. You will use that board when you run the
+        update. This video only shows that the Journey and the group are
+        the same warehouse.
+
+  - id: where-next
+    title: Where next
+    visual: images/where-next.png
+    visual_type: still
+    card_title: Where next
+    card_subtitle: Run the group update
+    shot: >
+      Title card. Title "Where next". Subtitle "Run the group update". No
+      GUI. The next episode is updating a resource definition group.
+    narration:
+      en: |
+        The next video runs Update resource definition group. That action
+        creates the vault tables on the first load and publishes the target
+        layouts back to the catalog. The written guide for this video is
+        Getting started, building an EDW, chapter 3, at data-hopper.com.
+        If you cannot find the group, look under metadata, EDW, resource
+        definition group, and open retail-sources. The action will ask for
+        this same group.
