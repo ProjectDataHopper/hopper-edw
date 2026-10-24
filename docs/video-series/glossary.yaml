@@ -44,6 +44,8 @@ speak_as:
     say: sat customer prefs
   - pattern: order_shipment_event
     say: order shipment event
+  - pattern: customer_hub
+    say: customer hub
   - pattern: hub_customer
     say: hub customer
   - pattern: hub_order

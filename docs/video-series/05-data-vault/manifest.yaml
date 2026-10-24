@@ -15,7 +15,7 @@
 #
 
 # Narration for video 05. English is the source.
-# Add the other locales after this cut has been heard.
+# Product words stay in English. See docs/video-series/glossary.yaml.
 video:
   id: 05-data-vault
   title: "Building a Data Vault"
@@ -27,6 +27,14 @@ video:
   transition_ms: 400
   padding_after_sec: 0.4
   voice_id: ara
+  locales:
+    - en
+    - zh-CN
+    - es-ES
+    - pt-PT
+    - fr-FR
+    - de-DE
+    - it-IT
   links:
     - label: Getting started
       url: https://github.com/ProjectDataHopper/hopper-edw/blob/main/docs/getting-started-edw.adoc
@@ -54,6 +62,18 @@ scenes:
         the canvas. That path is for a few tables, drawn by hand. Here we
         let Generate propose the model. In retail-example the file is
         retail-360.hdv.
+      zh-CN: |
+        Generate Data Vault 读取源模型，并提出一个原始 Data Vault。包括枢纽、链接、卫星和参考表。这一集在 source-tables-crm.hsm 上走这条路。你也可以从一个空的 .hdv 开始，打开教练面板，把目录源拖到画布上。那条路适合亲手画几张表。这里让 Generate 提出模型。在 retail-example 里，文件是 retail-360.hdv。
+      es-ES: |
+        Generate Data Vault lee el modelo de origen y propone un Data Vault en bruto. Hubs, enlaces, satélites y tablas de referencia. Este vídeo usa ese camino sobre source-tables-crm.hsm. También puedes empezar desde un .hdv vacío, abrir el panel de ayuda y arrastrar un origen del catálogo al lienzo. Ese camino es para unas pocas tablas, dibujadas a mano. Aquí dejamos que Generate proponga el modelo. En retail-example el archivo es retail-360.hdv.
+      pt-PT: |
+        Generate Data Vault lê o modelo de origem e propõe um Data Vault em bruto. Hubs, ligações, satélites e tabelas de referência. Este vídeo usa esse caminho sobre source-tables-crm.hsm. Também podes começar num .hdv vazio, abrir o painel de ajuda e arrastar uma origem do catálogo para a tela. Esse caminho é para poucas tabelas, desenhadas à mão. Aqui deixamos o Generate propor o modelo. No retail-example o ficheiro é retail-360.hdv.
+      fr-FR: |
+        Generate Data Vault lit le modèle source et propose un Data Vault brut. Des hubs, des liens, des satellites et des tables de référence. Cette vidéo suit ce chemin sur source-tables-crm.hsm. Tu peux aussi partir d'un .hdv vide, ouvrir le panneau d'aide et glisser une source du catalogue sur le canevas. Ce chemin vaut pour quelques tables, dessinées à la main. Ici, Generate propose le modèle. Dans retail-example le fichier est retail-360.hdv.
+      de-DE: |
+        Generate Data Vault liest das Quellenmodell und schlägt einen rohen Data Vault vor. Hubs, Links, Satellites und Referenztabellen. Dieses Video geht diesen Weg auf source-tables-crm.hsm. Du kannst auch mit einer leeren .hdv anfangen, das Hilfe-Panel öffnen und eine Katalogquelle auf die Zeichenfläche ziehen. Dieser Weg ist für ein paar Tabellen, von Hand gezeichnet. Hier lässt Generate das Modell vorschlagen. In retail-example heißt die Datei retail-360.hdv.
+      it-IT: |
+        Generate Data Vault legge il modello di origine e propone un Data Vault grezzo. Hub, link, satelliti e tabelle di riferimento. Questo video usa quella strada su source-tables-crm.hsm. Puoi anche partire da un .hdv vuoto, aprire il pannello di aiuto e trascinare una sorgente del catalogo sull'area. Quella strada è per poche tabelle, disegnate a mano. Qui lasciamo che Generate proponga il modello. In retail-example il file è retail-360.hdv.
 
   - id: options
     title: What Generate decides
@@ -71,6 +91,18 @@ scenes:
         query cards, the JSON cards, and the pipeline cards. Leave those
         defaults for this pass. The list under the choices is what you
         review before Apply.
+      zh-CN: |
+        对话框从 Generate 将要应用的选择开始。为剩余的外键创建链接。从描述列创建枢纽卫星。把查找表分成参考表。包括查询卡片、JSON 卡片和 Pipeline 卡片。这一遍保留这些默认值。选择下面的清单是你在 Apply 之前要复查的内容。
+      es-ES: |
+        El diálogo empieza con las decisiones que Generate aplicará. Crea enlaces para las claves ajenas que sobran. Crea satélites de hub a partir de las columnas descriptivas. Clasifica las tablas de búsqueda como tablas de referencia. Incluye las tarjetas de consulta, las tarjetas JSON y las tarjetas Pipeline. Deja esos valores por defecto en esta pasada. La lista bajo las decisiones es lo que revisas antes de Apply.
+      pt-PT: |
+        O diálogo começa com as escolhas que o Generate vai aplicar. Cria ligações para as chaves estrangeiras que sobram. Cria satélites de hub a partir das colunas descritivas. Classifica as tabelas de pesquisa como tabelas de referência. Inclui os cartões de consulta, os cartões JSON e os cartões Pipeline. Deixa esses valores por omissão nesta passagem. A lista por baixo das escolhas é o que revês antes de Apply.
+      fr-FR: |
+        La boîte de dialogue commence par les choix que Generate va appliquer. Crée des liens pour les clés étrangères restantes. Crée des satellites de hub à partir des colonnes descriptives. Classe les tables de recherche comme tables de référence. Inclus les cartes de requête, les cartes JSON et les cartes Pipeline. Laisse ces valeurs par défaut pour cette passe. La liste sous les choix est ce que tu relis avant Apply.
+      de-DE: |
+        Der Dialog beginnt mit den Entscheidungen, die Generate anwendet. Erzeuge Links für übrige Fremdschlüssel. Erzeuge Hub-Satellites aus den beschreibenden Spalten. Ordne Nachschlagetabellen als Referenztabellen ein. Nimm die Abfragekarten, die JSON-Karten und die Pipeline-Karten auf. Lass diese Vorgaben für diesen Durchgang stehen. Die Liste unter den Entscheidungen ist das, was du vor Apply prüfst.
+      it-IT: |
+        La finestra inizia con le scelte che Generate applica. Crea link per le chiavi esterne rimaste. Crea satelliti di hub dalle colonne descrittive. Classifica le tabelle di lookup come tabelle di riferimento. Includi le schede di query, le schede JSON e le schede Pipeline. Lascia questi valori predefiniti per questo passaggio. L'elenco sotto le scelte è ciò che rivedi prima di Apply.
 
   - id: review
     title: The review
@@ -90,6 +122,18 @@ scenes:
         order_header becomes hub_order, and the same source also proposes
         the link lnk_order between hub_order and hub_customer.
         order_shipment_event is skipped. Apply selected writes the model.
+      zh-CN: |
+        这是复查。取消勾选一行就跳过它，并在应用之前改 vault 名称。customer_hub 变成枢纽 hub_customer。它的业务键是 customer_id。customer_address、customer_contact、customer_demo 和 customer_prefs 变成这个枢纽的卫星。order_header 变成 hub_order，同一来源还提出链接 lnk_order，连接 hub_order 和 hub_customer。order_shipment_event 被跳过。Apply selected 写出模型。
+      es-ES: |
+        Esta es la revisión. Quita la marca de una fila para omitirla, y edita el nombre del vault antes de aplicar. customer_hub se convierte en el hub hub_customer. Su clave de negocio es customer_id. customer_address, customer_contact, customer_demo y customer_prefs se vuelven satélites de ese hub. order_header se convierte en hub_order, y la misma fuente también propone el enlace lnk_order entre hub_order y hub_customer. order_shipment_event se omite. Apply selected escribe el modelo.
+      pt-PT: |
+        Esta é a revisão. Desmarca uma linha para a omitir, e edita o nome do vault antes de aplicar. customer_hub torna-se o hub hub_customer. A sua chave de negócio é customer_id. customer_address, customer_contact, customer_demo e customer_prefs tornam-se satélites desse hub. order_header torna-se hub_order, e a mesma origem também propõe a ligação lnk_order entre hub_order e hub_customer. order_shipment_event é omitido. Apply selected escreve o modelo.
+      fr-FR: |
+        Voici la relecture. Décoche une ligne pour la passer, et modifie le nom du vault avant d'appliquer. customer_hub devient le hub hub_customer. Sa clé métier est customer_id. customer_address, customer_contact, customer_demo et customer_prefs deviennent des satellites de ce hub. order_header devient hub_order, et la même source propose aussi le lien lnk_order entre hub_order et hub_customer. order_shipment_event est ignoré. Apply selected écrit le modèle.
+      de-DE: |
+        Das ist die Prüfung. Nimm das Häkchen einer Zeile weg, um sie zu überspringen, und ändere den Vault-Namen vor dem Anwenden. customer_hub wird der Hub hub_customer. Sein Geschäftsschlüssel ist customer_id. customer_address, customer_contact, customer_demo und customer_prefs werden Satellites dieses Hubs. order_header wird hub_order, und dieselbe Quelle schlägt auch den Link lnk_order zwischen hub_order und hub_customer vor. order_shipment_event wird übersprungen. Apply selected schreibt das Modell.
+      it-IT: |
+        Questa è la revisione. Togli il segno a una riga per saltarla, e modifica il nome del vault prima di applicare. customer_hub diventa l'hub hub_customer. La sua chiave di business è customer_id. customer_address, customer_contact, customer_demo e customer_prefs diventano satelliti di quell'hub. order_header diventa hub_order, e la stessa sorgente propone anche il link lnk_order tra hub_order e hub_customer. order_shipment_event viene saltato. Apply selected scrive il modello.
 
   - id: result
     title: Hubs, links, and satellites
@@ -109,6 +153,18 @@ scenes:
         tables were created in the model, and the source tables that were
         not yet in the catalog were published. The rows are still not in
         the Vault database. This is a drawing.
+      zh-CN: |
+        Apply 打开生成的画布。枢纽保存业务键。hub_customer 就是这个枢纽。链接保存枢纽之间的关系。卫星保存描述性历史。sat_customer_demo 和 sat_customer_prefs 挂在 hub_customer 上。消息说模型里创建了 24 张表，尚未进入目录的源表也已发布。行仍然不在 Vault 数据库里。这是一张图。
+      es-ES: |
+        Apply abre el lienzo generado. Un hub guarda la clave de negocio. hub_customer es ese hub. Un enlace guarda la relación entre hubs. Un satélite guarda la historia descriptiva. sat_customer_demo y sat_customer_prefs cuelgan de hub_customer. El mensaje dice que se crearon 24 tablas en el modelo, y que se publicaron las tablas de origen que aún no estaban en el catálogo. Las filas siguen sin estar en la base Vault. Esto es un dibujo.
+      pt-PT: |
+        Apply abre a tela gerada. Um hub guarda a chave de negócio. hub_customer é esse hub. Uma ligação guarda a relação entre hubs. Um satélite guarda a história descritiva. sat_customer_demo e sat_customer_prefs pendem de hub_customer. A mensagem diz que foram criadas 24 tabelas no modelo, e que as tabelas de origem que ainda não estavam no catálogo foram publicadas. As linhas continuam fora da base Vault. Isto é um desenho.
+      fr-FR: |
+        Apply ouvre le canevas généré. Un hub porte la clé métier. hub_customer est ce hub. Un lien porte la relation entre les hubs. Un satellite porte l'historique descriptif. sat_customer_demo et sat_customer_prefs sont accrochés à hub_customer. Le message dit que 24 tables ont été créées dans le modèle, et que les tables source qui n'étaient pas encore dans le catalogue ont été publiées. Les lignes ne sont toujours pas dans la base Vault. C'est un dessin.
+      de-DE: |
+        Apply öffnet die erzeugte Zeichenfläche. Ein Hub hält den Geschäftsschlüssel. hub_customer ist dieser Hub. Ein Link hält die Beziehung zwischen Hubs. Ein Satellite hält die beschreibende Historie. sat_customer_demo und sat_customer_prefs hängen an hub_customer. Die Meldung sagt, dass 24 Tabellen im Modell angelegt wurden und dass die Quelltabellen veröffentlicht wurden, die noch nicht im Katalog waren. Die Zeilen sind noch nicht in der Vault-Datenbank. Das ist eine Zeichnung.
+      it-IT: |
+        Apply apre l'area generata. Un hub tiene la chiave di business. hub_customer è quell'hub. Un link tiene la relazione tra gli hub. Un satellite tiene la storia descrittiva. sat_customer_demo e sat_customer_prefs pendono da hub_customer. Il messaggio dice che sono state create 24 tabelle nel modello, e che le tabelle di origine non ancora nel catalogo sono state pubblicate. Le righe non sono ancora nel database Vault. Questo è un disegno.
 
   - id: check
     title: Check the model
@@ -127,6 +183,18 @@ scenes:
         create database tables and does not create pipelines. Those appear
         when you update the resource definition group. Until that update,
         retail-360.hdv is only the drawing you just reviewed.
+      zh-CN: |
+        Edit model 把 .hdv 指向配置 data-vault 和目标数据库 Vault。然后运行 Check model。一次干净的检查表示每份供给都在，每个键都已映射。生成不会创建数据库表，也不会创建加载流程。那些要等你更新 resource definition group 时才出现。在那次更新之前，retail-360.hdv 只是你刚复查过的那张图。
+      es-ES: |
+        Edit model apunta el .hdv a la configuración data-vault y a la base de destino Vault. Luego ejecuta Check model. Una comprobación limpia significa que cada feed está presente y cada clave está mapeada. La generación no crea tablas de base de datos ni crea flujos de carga. Esos aparecen cuando actualizas el resource definition group. Hasta esa actualización, retail-360.hdv es solo el dibujo que acabas de revisar.
+      pt-PT: |
+        Edit model aponta o .hdv para a configuração data-vault e para a base de destino Vault. Depois corre Check model. Uma verificação limpa significa que cada feed está presente e cada chave está mapeada. A geração não cria tabelas de base de dados nem cria fluxos de carga. Esses aparecem quando atualizas o resource definition group. Até essa atualização, retail-360.hdv é só o desenho que acabaste de rever.
+      fr-FR: |
+        Edit model pointe le .hdv vers la configuration data-vault et vers la base cible Vault. Lance ensuite Check model. Un contrôle propre signifie que chaque flux est présent et que chaque clé est mappée. La génération ne crée pas de tables de base de données et ne crée pas de traitements de chargement. Ceux-ci apparaissent quand tu mets à jour le resource definition group. Jusque-là, retail-360.hdv n'est que le dessin que tu viens de relire.
+      de-DE: |
+        Edit model zeigt die .hdv auf die Konfiguration data-vault und auf die Zieldatenbank Vault. Dann starte Check model. Eine saubere Prüfung bedeutet, dass jeder Feed da ist und jeder Schlüssel zugeordnet ist. Die Erzeugung legt keine Datenbanktabellen an und legt keine Ladeabläufe an. Die erscheinen, wenn du die resource definition group aktualisierst. Bis zu dieser Aktualisierung ist retail-360.hdv nur die Zeichnung, die du gerade geprüft hast.
+      it-IT: |
+        Edit model punta il .hdv alla configurazione data-vault e al database di destinazione Vault. Poi esegui Check model. Un controllo pulito significa che ogni feed è presente e ogni chiave è mappata. La generazione non crea tabelle di database e non crea flussi di caricamento. Quelli compaiono quando aggiorni il resource definition group. Fino a quell'aggiornamento, retail-360.hdv è solo il disegno che hai appena rivisto.
 
   - id: where-next
     title: Where next
@@ -145,3 +213,15 @@ scenes:
         Getting started, building an EDW, chapter 2, at data-hopper.com.
         If the review is empty, open source-tables-crm.hsm and run Generate
         Data Vault again. Bring the .hdv with you.
+      zh-CN: |
+        下一集创建 resource definition group，并把 retail-360.hdv 放进去。采集、校验和加载都以这份清单为范围。这一集的书面指南是 Getting started, building an EDW 的第 2 章，在 data-hopper.com。如果复查是空的，打开 source-tables-crm.hsm，再运行一次 Generate Data Vault。带上这个 .hdv。
+      es-ES: |
+        El siguiente vídeo crea el resource definition group y pone retail-360.hdv en él. La cosecha, la validación y la carga toman esa lista como alcance. La guía escrita de este vídeo es Getting started, building an EDW, capítulo 2, en data-hopper.com. Si la revisión está vacía, abre source-tables-crm.hsm y ejecuta Generate Data Vault otra vez. Trae el .hdv contigo.
+      pt-PT: |
+        O vídeo seguinte cria o resource definition group e põe retail-360.hdv nele. A colheita, a validação e a carga usam essa lista como âmbito. O guia escrito deste vídeo é Getting started, building an EDW, capítulo 2, em data-hopper.com. Se a revisão estiver vazia, abre source-tables-crm.hsm e corre Generate Data Vault outra vez. Traz o .hdv contigo.
+      fr-FR: |
+        La vidéo suivante crée le resource definition group et y place retail-360.hdv. La récolte, la validation et le chargement prennent cette liste comme périmètre. Le guide écrit de cette vidéo est Getting started, building an EDW, chapitre 2, sur data-hopper.com. Si la relecture est vide, ouvre source-tables-crm.hsm et lance Generate Data Vault à nouveau. Emporte le .hdv.
+      de-DE: |
+        Das nächste Video erzeugt die resource definition group und setzt retail-360.hdv darauf. Ernte, Prüfung und der Ladevorgang nehmen diese Liste als Umfang. Die schriftliche Anleitung für dieses Video ist Getting started, building an EDW, Kapitel 2, unter data-hopper.com. Wenn die Prüfung leer ist, öffne source-tables-crm.hsm und starte Generate Data Vault erneut. Nimm die .hdv mit.
+      it-IT: |
+        Il prossimo video crea il resource definition group e ci mette retail-360.hdv. Il harvest, la validazione e il caricamento usano quell'elenco come ambito. La guida scritta di questo video è Getting started, building an EDW, capitolo 2, su data-hopper.com. Se la revisione è vuota, apri source-tables-crm.hsm ed esegui di nuovo Generate Data Vault. Porta con te il .hdv.
