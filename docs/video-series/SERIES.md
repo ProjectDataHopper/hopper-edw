@@ -34,7 +34,7 @@ The voice for this series is `ara`. The Apache Hop series uses `orion`. Set `voi
 | `04-source-models` | 228 | Source models | English and six translations, voice `ara` |
 | `05-data-vault` | 229 | Building a Data Vault | English and six translations, voice `ara` |
 | `06-resource-definition-group` | 230 | The resource definition group | English and six translations, voice `ara` |
-| `07-updating-a-group` | 231 | Updating a resource definition group | Not started |
+| `07-updating-a-group` | 231 | Updating a resource definition group | English script, voice `ara`. Translations after the cut is heard |
 | `08-business-vault` | 232 | Business Vault | Not started |
 | `09-dimensional-model` | 233 | Dimensional model | Not started |
 | `10-metrics-and-analytics` | 234 | Metrics and analytics operations | Not started |

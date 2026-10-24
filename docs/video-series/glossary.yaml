@@ -34,6 +34,14 @@ keep_english:
 speak_as:
   - pattern: "${PROJECT_HOME}"
     say: project home
+  - pattern: hop/retail-example/models
+    say: hop, retail example, models
+  - pattern: run-retail-update-models.hwf
+    say: run retail update models
+  - pattern: retail-f-orders
+    say: retail f orders
+  - pattern: f_orders
+    say: f orders
   - pattern: hop/retail-example/sources
     say: hop, retail example, sources
   - pattern: source-tables-crm.hsm

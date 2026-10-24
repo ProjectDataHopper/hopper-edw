@@ -1,0 +1,151 @@
+#
+# Copyright 2026 i-Bridge bv
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# Narration for video 07. English is the source.
+# Add the other locales after this cut has been heard.
+video:
+  id: 07-updating-a-group
+  title: "Updating a resource definition group"
+  issue: 231
+  width: 1920
+  height: 1080
+  fps: 30
+  transition: fade
+  transition_ms: 400
+  padding_after_sec: 0.4
+  voice_id: ara
+  links:
+    - label: Getting started
+      url: https://github.com/ProjectDataHopper/hopper-edw/blob/main/docs/getting-started-edw.adoc
+    - label: The update
+      url: https://github.com/ProjectDataHopper/hopper-edw/blob/main/docs/update-resource-definition-group-action.adoc
+    - label: Data Hopper
+      url: https://data-hopper.com/
+
+scenes:
+  - id: welcome
+    title: Welcome
+    visual: images/welcome.png
+    visual_type: still
+    card_title: Update the group
+    card_subtitle: The load for every model on the list
+    shot: >
+      Title card. Title "Update the group". Subtitle "The load for every
+      model on the list". No GUI.
+    narration:
+      en: |
+        Update resource definition group is the load, once the group
+        exists. It is a Workflow action. The retail workflow that already
+        contains it is run-retail-update-models.hwf. The action walks every
+        model on the group: all Data Vault models, then all Business Vault
+        models, then all dimensional models. A single-model Data Vault
+        Update action still exists. Prefer the group action. One list, one
+        run.
+
+  - id: selection
+    title: What the action loads
+    visual: images/selection.png
+    visual_type: still
+    shot: >
+      Update resource definition group dialog, Selection tab. Group
+      retail-sources. Include Data Vault, Business Vault, and dimensional
+      models are checked. The committed still is
+      docs/images/update-resource-definition-group-action-dialog.png,
+      padded to 16:9.
+    narration:
+      en: |
+        The Selection tab names the resource definition group. Here it is
+        retail-sources. Include Data Vault models, Include Business Vault
+        models, and Include dimensional models are all on, because this
+        sample group already lists the later layers. A first load can leave
+        the Business Vault and dimensional boxes off and load only the
+        .hdv. The order does not change. Data Vault finishes before
+        Business Vault starts, and Business Vault finishes before the
+        dimensional models start.
+
+  - id: operations
+    title: Tables and the catalog
+    visual: images/selection.png
+    visual_type: still
+    shot: >
+      Same dialog. The Operations and Data catalog tabs are visible. Do not
+      imply the checkboxes on those tabs are on this still.
+    narration:
+      en: |
+        Two more tabs matter on a first load. Operations holds Update
+        target database structure. Turn that on when the vault tables do
+        not exist yet. Data catalog holds Publish target tables to catalog.
+        That writes the layouts back under hop/retail-example/models. After
+        the first successful load, later runs insert new keys and new
+        satellite versions. They do not reload every row. The checkpoint is
+        tables on the Vault connection, and those published layouts.
+
+  - id: metrics
+    title: While it runs
+    visual: images/metrics.png
+    visual_type: still
+    shot: >
+      Resource group load metrics, wave status only. Phase UPDATING, models
+      5 of 8, current model retail-f-orders, table f_orders. File paths are
+      cropped out of
+      docs/images/action-update-resource-group-load-metrics-dialog.png.
+    narration:
+      en: |
+        While the action runs, the load metrics show this wave. The phase
+        is updating. Models are 5 of 8. The current model is
+        retail-f-orders, and the current table is f_orders. Do not sit
+        through a full initial load in this video. A few seconds of this
+        panel are enough. Data Vault models in the list have already
+        completed. The dimensional models are still running or waiting.
+        That is the layer order you set on the Selection tab.
+
+  - id: wave
+    title: The production wave
+    visual: images/wave.png
+    visual_type: still
+    card_title: Around the update
+    card_subtitle: Harvest, validate, quality, then load
+    shot: >
+      Title card. Title "Around the update". Subtitle "Harvest, validate,
+      quality, then load". No GUI. Name the four controls. Do not configure
+      them.
+    narration:
+      en: |
+        A production run puts four controls around this action, in this
+        order. Harvest source metadata reads what the source looks like
+        now. Validate resource definitions compares the models with the
+        catalog. Measure data quality scores the feeds. Then this update
+        loads. This video does not configure those three steps. It names
+        them so you know the update is the last step of the wave, not the
+        only step.
+
+  - id: where-next
+    title: Where next
+    visual: images/where-next.png
+    visual_type: still
+    card_title: Where next
+    card_subtitle: Business rules, same group
+    shot: >
+      Title card. Title "Where next". Subtitle "Business rules, same
+      group". No GUI. The next episode is the Business Vault.
+    narration:
+      en: |
+        The next video opens the Business Vault. The raw vault keeps source
+        history. The Business Vault stores the rules you do not want to
+        repeat in every report. You add the .hbv to this same group,
+        retail-sources, and you run this action again with Business Vault
+        included. The written guide for this video is Getting started,
+        building an EDW, chapter 4, at data-hopper.com.
