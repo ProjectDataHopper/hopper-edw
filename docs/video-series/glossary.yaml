@@ -32,6 +32,12 @@ keep_english:
 # Literal replacements applied to the text before text-to-speech.
 # Subtitles keep the narration as written. Longer patterns win.
 speak_as:
+  - pattern: hop/retail-example/sources
+    say: hop, retail example, sources
+  - pattern: source-tables-crm.hsm
+    say: source tables C R M dot h s m
+  - pattern: order_header
+    say: order header
   - pattern: plugins/misc/hopper-edw
     say: plugins misc hopper E D W
   - pattern: 2.20.0-SNAPSHOT

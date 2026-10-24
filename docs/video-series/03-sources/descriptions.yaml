@@ -1,0 +1,51 @@
+#
+# Copyright 2026 i-Bridge bv
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+series:
+  en: Part of the Data Hopper EDW getting started series.
+chapters_label:
+  en: Chapters
+issue_label:
+  en: Issue
+title:
+  en: Sources and the Data Catalog
+summary:
+  en: >
+    A source is landing data. The rows stay where they are. The Data Catalog
+    holds the feed name, the columns, and the keys. Retail feeds live under
+    hop/retail-example/sources.
+link_labels:
+  Getting started:
+    en: Getting started
+  Sources:
+    en: Sources
+  Data Hopper:
+    en: Data Hopper
+chapters:
+  welcome:
+    en: Welcome
+  landing:
+    en: Landing data
+  one-feed:
+    en: One feed
+  namespace:
+    en: Where feeds live
+  import-tables:
+    en: Import tables
+  push:
+    en: Push to catalog
+  where-next:
+    en: Where next

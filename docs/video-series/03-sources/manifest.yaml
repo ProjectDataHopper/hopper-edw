@@ -1,0 +1,170 @@
+#
+# Copyright 2026 i-Bridge bv
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# Narration for video 03. English is the source.
+# Add the other locales after this cut has been heard.
+video:
+  id: 03-sources
+  title: "Sources"
+  issue: 227
+  width: 1920
+  height: 1080
+  fps: 30
+  transition: fade
+  transition_ms: 400
+  padding_after_sec: 0.4
+  voice_id: ara
+  links:
+    - label: Getting started
+      url: https://github.com/ProjectDataHopper/hopper-edw/blob/main/docs/getting-started-edw.adoc
+    - label: Sources
+      url: https://github.com/ProjectDataHopper/hopper-edw/blob/main/docs/datavault-source.adoc
+    - label: Data Hopper
+      url: https://data-hopper.com/
+
+scenes:
+  - id: welcome
+    title: Welcome
+    visual: images/welcome.png
+    visual_type: still
+    card_title: Sources
+    card_subtitle: The rows stay put. The catalog holds the contract.
+    shot: >
+      Title card. Title "Sources". Subtitle "The rows stay put. The catalog
+      holds the contract." No GUI.
+    narration:
+      en: |
+        This video is about sources. A source is the landing data your
+        warehouse reads. The rows stay where they are. The Data Catalog
+        keeps the contract: the feed name, the columns, and the keys. Later
+        models bind to that name. You already have Hop 2.20, Java 21, and
+        Configure EDW setup. The sample is still the retail-example project.
+        The next video draws the picture. This one names the feed.
+
+  - id: landing
+    title: Landing data
+    visual: images/landing.png
+    visual_type: still
+    card_title: Landing data
+    card_subtitle: Tables, files, and events
+    shot: >
+      Title card. Title "Landing data". Subtitle "Tables, files, and events".
+      No GUI.
+    narration:
+      en: |
+        Landing data arrives as database tables, files, or events.
+        retail-example lands its CRM tables on the connection named CRM.
+        A file feed can be CSV, Parquet, or Iceberg. An event feed can be
+        JSON inside a column. None of these copies the rows into the
+        catalog. The catalog stores the description. The database, the file,
+        or the event stream keeps the rows. Rename a table in the database
+        and the contract does not move with it.
+
+  - id: one-feed
+    title: One feed
+    visual: images/one-feed.png
+    visual_type: still
+    shot: >
+      Source table dialog for order_header. Catalog source name and the CRM
+      connection are readable. The committed still is
+      docs/images/source-modeler-source-table.png, padded to 16:9. A Data
+      Catalog perspective capture of the same feed can replace it.
+    narration:
+      en: |
+        Open a feed far enough to read its name. This is the source table
+        order_header. The catalog source name is order_header. That name is
+        what a hub or a satellite will cite. The database connection is CRM,
+        the schema is public, and the table is order_header. The JDBC URL
+        stays on that connection. The Columns tab lists the fields and the
+        primary key. Those fields are the contract. The connection only says
+        where the rows live.
+
+  - id: namespace
+    title: Where feeds live
+    visual: images/namespace.png
+    visual_type: still
+    card_title: Where feeds live
+    card_subtitle: hop/retail-example/sources
+    shot: >
+      Title card. Title "Where feeds live". Subtitle
+      "hop/retail-example/sources". Replace with the Data Catalog perspective
+      expanded on that namespace when the feed names are readable.
+    narration:
+      en: |
+        Retail feeds live under hop/retail-example/sources. You browse them
+        in the Data Catalog perspective, and you refresh with F5 when files
+        change on disk. The path after the catalog folder must match the
+        namespace. A load writes target layouts somewhere else, under
+        models. If a feed seems to vanish after a load, look under sources
+        again. Double-click a feed to read its fields. The source contract
+        stays there.
+
+  - id: import-tables
+    title: Import tables
+    visual: images/import-tables.png
+    visual_type: still
+    card_title: Import tables
+    card_subtitle: One physical table, one feed
+    shot: >
+      Title card. Title "Import tables". Subtitle "One physical table, one
+      feed". No GUI. A later capture can show the catalog Import tables
+      dialog.
+    narration:
+      en: |
+        When every feed is one physical table, Import tables in the Data
+        Catalog perspective is the short path. It creates catalog entries
+        from the live database. This series does not stop there. Generate
+        Data Vault needs the keys and the relationships, and those are drawn
+        on a source model. Import tables is the right tool when you only
+        need the contract, and you will not generate a vault from a picture.
+
+  - id: push
+    title: Push to catalog
+    visual: images/push.png
+    visual_type: still
+    card_title: Push to catalog
+    card_subtitle: The model publishes the feed
+    shot: >
+      Title card. Title "Push to catalog". Subtitle "The model publishes the
+      feed". No GUI. The next episode opens the source model canvas.
+    narration:
+      en: |
+        The usual way a feed arrives is Push to catalog, from a source
+        model. Tables, queries, JSON extractions, and pipelines each publish
+        a feed under hop/retail-example/sources. A feed that already has
+        that name is overwritten. The next video opens
+        source-tables-crm.hsm and draws that picture. This video's
+        checkpoint is smaller. You can name a feed, the rows stay put, and
+        the Data Catalog holds the contract. You will see that button in
+        the next video.
+
+  - id: where-next
+    title: Where next
+    visual: images/where-next.png
+    visual_type: still
+    card_title: Where next
+    card_subtitle: Draw the source model
+    shot: >
+      Title card. Title "Where next". Subtitle "Draw the source model". No
+      GUI. The next episode is source models.
+    narration:
+      en: |
+        The next video is source models. You will import a schema, see the
+        relationships, and push the feeds you just heard about. The written
+        guide for this video is Getting started, building an EDW, chapter 1,
+        at data-hopper.com. If the Data Catalog perspective is empty, open
+        retail-example and press F5. The feeds are files under the project
+        catalog, not rows in the Vault database. Bring a feed name with you.
