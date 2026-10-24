@@ -36,6 +36,10 @@ speak_as:
     say: hop, retail example, sources
   - pattern: source-tables-crm.hsm
     say: source tables C R M dot h s m
+  - pattern: customer_address
+    say: customer address
+  - pattern: customer_id
+    say: customer id
   - pattern: order_header
     say: order header
   - pattern: plugins/misc/hopper-edw
@@ -75,7 +79,12 @@ speak_as:
 
 # Sent to the TTS API as replace. The written narration and the subtitles
 # stay as they are. A value in slashes is IPA. GUI is "gooey", not G-U-I.
+# "live" the verb (/lɪv/, where the rows live) is not the adjective (/laɪv/,
+# a live database). Only the verb phrases are listed.
 pronounce:
   GUI: "/ˈɡuːi/"
   EDW: "E D W"
   JDBC: "J D B C"
+  "rows live": "/roʊz lɪv/"
+  "feeds live": "/fiːdz lɪv/"
+  "settings live": "/ˈsɛtɪŋz lɪv/"
