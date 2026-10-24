@@ -14,34 +14,129 @@
 # limitations under the License.
 #
 
+# Product words stay in English. The first line of each rendered description is the title.
 series:
   en: Part of the Data Hopper EDW getting started series.
+  zh-CN: Data Hopper EDW 入门系列的一部分。
+  es-ES: Parte de la serie de introducción a Data Hopper EDW.
+  pt-PT: Parte da série de introdução ao Data Hopper EDW.
+  fr-FR: Fait partie de la série de prise en main de Data Hopper EDW.
+  de-DE: Teil der Einführungsreihe zu Data Hopper EDW.
+  it-IT: Parte della serie introduttiva a Data Hopper EDW.
 chapters_label:
   en: Chapters
+  zh-CN: 章节
+  es-ES: Capítulos
+  pt-PT: Capítulos
+  fr-FR: Chapitres
+  de-DE: Kapitel
+  it-IT: Capitoli
 issue_label:
   en: Issue
+  zh-CN: 议题
+  es-ES: Incidencia
+  pt-PT: Incidência
+  fr-FR: Ticket
+  de-DE: Ticket
+  it-IT: Segnalazione
 title:
   en: Business Vault
+  zh-CN: Business Vault
+  es-ES: Business Vault
+  pt-PT: Business Vault
+  fr-FR: Business Vault
+  de-DE: Business Vault
+  it-IT: Business Vault
 summary:
   en: >
     The Business Vault stores business rules as their own tables. Open
     retail-360.hbv and the customer 360 SCD2, built from hub_customer and
     four raw satellites. Add the file to the same group, retail-sources.
+  zh-CN: >
+    Business Vault 把业务规则存成自己的表。打开 retail-360.hbv 和客户 360 SCD2，它由 hub_customer 和四颗原始卫星建成。把文件加进同一个组 retail-sources。
+  es-ES: >
+    El Business Vault guarda las reglas de negocio como tablas propias. Abre
+    retail-360.hbv y el SCD2 de cliente 360, construido desde hub_customer y
+    cuatro satélites en bruto. Añade el archivo al mismo grupo, retail-sources.
+  pt-PT: >
+    O Business Vault guarda as regras de negócio como tabelas próprias. Abre
+    retail-360.hbv e o SCD2 de cliente 360, construído a partir de hub_customer
+    e quatro satélites em bruto. Acrescenta o ficheiro ao mesmo grupo, retail-sources.
+  fr-FR: >
+    Le Business Vault range les règles métier dans leurs propres tables. Ouvre
+    retail-360.hbv et le SCD2 client 360, construit depuis hub_customer et
+    quatre satellites bruts. Ajoute le fichier au même groupe, retail-sources.
+  de-DE: >
+    Der Business Vault speichert Geschäftsregeln als eigene Tabellen. Öffne
+    retail-360.hbv und das Kunden-360-SCD2, gebaut aus hub_customer und vier
+    rohen Satellites. Füge die Datei derselben Gruppe hinzu, retail-sources.
+  it-IT: >
+    Il Business Vault conserva le regole di business come tabelle proprie. Apri
+    retail-360.hbv e l'SCD2 cliente 360, costruito da hub_customer e quattro
+    satelliti grezzi. Aggiungi il file allo stesso gruppo, retail-sources.
 link_labels:
   Getting started:
     en: Getting started
+    zh-CN: 入门
+    es-ES: Primeros pasos
+    pt-PT: Primeiros passos
+    fr-FR: Prise en main
+    de-DE: Erste Schritte
+    it-IT: Per iniziare
   Business Vault:
     en: Business Vault
+    zh-CN: Business Vault
+    es-ES: Business Vault
+    pt-PT: Business Vault
+    fr-FR: Business Vault
+    de-DE: Business Vault
+    it-IT: Business Vault
   Data Hopper:
     en: Data Hopper
+    zh-CN: Data Hopper
+    es-ES: Data Hopper
+    pt-PT: Data Hopper
+    fr-FR: Data Hopper
+    de-DE: Data Hopper
+    it-IT: Data Hopper
 chapters:
   welcome:
     en: Welcome
+    zh-CN: 欢迎
+    es-ES: Bienvenida
+    pt-PT: Boas-vindas
+    fr-FR: Bienvenue
+    de-DE: Willkommen
+    it-IT: Benvenuto
   canvas:
     en: Customer 360
+    zh-CN: 客户 360
+    es-ES: Cliente 360
+    pt-PT: Cliente 360
+    fr-FR: Client 360
+    de-DE: Kunde 360
+    it-IT: Cliente 360
   scd2:
     en: The SCD2 table
+    zh-CN: SCD2 表
+    es-ES: La tabla SCD2
+    pt-PT: A tabela SCD2
+    fr-FR: La table SCD2
+    de-DE: Die SCD2-Tabelle
+    it-IT: La tabella SCD2
   group:
     en: Same group
+    zh-CN: 同一个组
+    es-ES: El mismo grupo
+    pt-PT: O mesmo grupo
+    fr-FR: Le même groupe
+    de-DE: Dieselbe Gruppe
+    it-IT: Lo stesso gruppo
   where-next:
     en: Where next
+    zh-CN: 接下来
+    es-ES: Qué sigue
+    pt-PT: O que vem a seguir
+    fr-FR: Et ensuite
+    de-DE: Wie es weitergeht
+    it-IT: Che cosa viene dopo
