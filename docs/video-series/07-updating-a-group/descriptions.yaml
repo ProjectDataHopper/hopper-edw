@@ -14,36 +14,137 @@
 # limitations under the License.
 #
 
+# Product words stay in English. The first line of each rendered description is the title.
 series:
   en: Part of the Data Hopper EDW getting started series.
+  zh-CN: Data Hopper EDW 入门系列的一部分。
+  es-ES: Parte de la serie de introducción a Data Hopper EDW.
+  pt-PT: Parte da série de introdução ao Data Hopper EDW.
+  fr-FR: Fait partie de la série de prise en main de Data Hopper EDW.
+  de-DE: Teil der Einführungsreihe zu Data Hopper EDW.
+  it-IT: Parte della serie introduttiva a Data Hopper EDW.
 chapters_label:
   en: Chapters
+  zh-CN: 章节
+  es-ES: Capítulos
+  pt-PT: Capítulos
+  fr-FR: Chapitres
+  de-DE: Kapitel
+  it-IT: Capitoli
 issue_label:
   en: Issue
+  zh-CN: 议题
+  es-ES: Incidencia
+  pt-PT: Incidência
+  fr-FR: Ticket
+  de-DE: Ticket
+  it-IT: Segnalazione
 title:
   en: Updating a resource definition group
+  zh-CN: 更新 resource definition group
+  es-ES: Actualizar un resource definition group
+  pt-PT: Atualizar um resource definition group
+  fr-FR: Mettre à jour un resource definition group
+  de-DE: Eine resource definition group aktualisieren
+  it-IT: Aggiornare un resource definition group
 summary:
   en: >
     Update resource definition group loads every model on retail-sources.
     A first load creates the vault tables and publishes the layouts. Later
     runs insert new keys and new satellite versions.
+  zh-CN: >
+    Update resource definition group 加载 retail-sources 上的每个模型。第一次加载创建 vault 表并发布布局。后来的运行插入新的键和新的卫星版本。
+  es-ES: >
+    Update resource definition group carga cada modelo de retail-sources.
+    Una primera carga crea las tablas del vault y publica los diseños. Las
+    siguientes insertan claves nuevas y versiones nuevas de satélite.
+  pt-PT: >
+    Update resource definition group carrega cada modelo de retail-sources.
+    Uma primeira carga cria as tabelas do vault e publica os layouts. As
+    seguintes inserem chaves novas e versões novas de satélite.
+  fr-FR: >
+    Update resource definition group charge chaque modèle de retail-sources.
+    Un premier chargement crée les tables du vault et publie les dispositions.
+    Les suivants insèrent de nouvelles clés et de nouvelles versions de satellite.
+  de-DE: >
+    Update resource definition group lädt jedes Modell von retail-sources.
+    Ein erster Lauf legt die Vault-Tabellen an und veröffentlicht die Layouts.
+    Spätere Läufe fügen neue Schlüssel und neue Satellite-Versionen ein.
+  it-IT: >
+    Update resource definition group carica ogni modello di retail-sources.
+    Un primo carico crea le tabelle del vault e pubblica i layout. I successivi
+    inseriscono chiavi nuove e nuove versioni di satellite.
 link_labels:
   Getting started:
     en: Getting started
+    zh-CN: 入门
+    es-ES: Primeros pasos
+    pt-PT: Primeiros passos
+    fr-FR: Prise en main
+    de-DE: Erste Schritte
+    it-IT: Per iniziare
   The update:
     en: The update
+    zh-CN: 这次更新
+    es-ES: La actualización
+    pt-PT: A atualização
+    fr-FR: La mise à jour
+    de-DE: Die Aktualisierung
+    it-IT: L'aggiornamento
   Data Hopper:
     en: Data Hopper
+    zh-CN: Data Hopper
+    es-ES: Data Hopper
+    pt-PT: Data Hopper
+    fr-FR: Data Hopper
+    de-DE: Data Hopper
+    it-IT: Data Hopper
 chapters:
   welcome:
     en: Welcome
+    zh-CN: 欢迎
+    es-ES: Bienvenida
+    pt-PT: Boas-vindas
+    fr-FR: Bienvenue
+    de-DE: Willkommen
+    it-IT: Benvenuto
   selection:
     en: What the action loads
+    zh-CN: 这个动作加载什么
+    es-ES: Qué carga la acción
+    pt-PT: O que a ação carrega
+    fr-FR: Ce que l'action charge
+    de-DE: Was die Aktion lädt
+    it-IT: Che cosa carica l'azione
   operations:
     en: Tables and the catalog
+    zh-CN: 表和目录
+    es-ES: Tablas y catálogo
+    pt-PT: Tabelas e catálogo
+    fr-FR: Tables et catalogue
+    de-DE: Tabellen und Katalog
+    it-IT: Tabelle e catalogo
   metrics:
     en: While it runs
+    zh-CN: 运行时
+    es-ES: Mientras corre
+    pt-PT: Enquanto corre
+    fr-FR: Pendant l'exécution
+    de-DE: Während es läuft
+    it-IT: Mentre gira
   wave:
     en: The production wave
+    zh-CN: 生产波次
+    es-ES: La oleada de producción
+    pt-PT: A onda de produção
+    fr-FR: La vague de production
+    de-DE: Die Produktionswelle
+    it-IT: L'ondata di produzione
   where-next:
     en: Where next
+    zh-CN: 接下来
+    es-ES: Qué sigue
+    pt-PT: O que vem a seguir
+    fr-FR: Et ensuite
+    de-DE: Wie es weitergeht
+    it-IT: Che cosa viene dopo

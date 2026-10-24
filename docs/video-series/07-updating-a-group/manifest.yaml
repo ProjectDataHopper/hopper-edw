@@ -15,7 +15,7 @@
 #
 
 # Narration for video 07. English is the source.
-# Add the other locales after this cut has been heard.
+# Product words stay in English. See docs/video-series/glossary.yaml.
 video:
   id: 07-updating-a-group
   title: "Updating a resource definition group"
@@ -27,6 +27,14 @@ video:
   transition_ms: 400
   padding_after_sec: 0.4
   voice_id: ara
+  locales:
+    - en
+    - zh-CN
+    - es-ES
+    - pt-PT
+    - fr-FR
+    - de-DE
+    - it-IT
   links:
     - label: Getting started
       url: https://github.com/ProjectDataHopper/hopper-edw/blob/main/docs/getting-started-edw.adoc
@@ -54,6 +62,18 @@ scenes:
         models, then all dimensional models. A single-model Data Vault
         Update action still exists. Prefer the group action. One list, one
         run.
+      zh-CN: |
+        组一旦存在，Update resource definition group 就是加载。它是一个 Workflow Action。已经包含它的 retail 工作流是 run-retail-update-models.hwf。这个动作走完组上的每个模型：先是全部 Data Vault 模型，然后全部 Business Vault 模型，然后全部维度模型。单模型的 Data Vault Update 动作仍然存在。优先用组动作。一份清单，一次运行。
+      es-ES: |
+        Update resource definition group es la carga, una vez que el grupo existe. Es una Workflow Action. El workflow de retail que ya la contiene es run-retail-update-models.hwf. La acción recorre cada modelo del grupo: todos los modelos Data Vault, luego todos los modelos Business Vault, y luego todos los modelos dimensionales. Una acción Data Vault Update de un solo modelo sigue existiendo. Prefiere la acción del grupo. Una lista, una ejecución.
+      pt-PT: |
+        Update resource definition group é a carga, quando o grupo já existe. É uma Workflow Action. O workflow retail que já a contém é run-retail-update-models.hwf. A ação percorre cada modelo do grupo: todos os modelos Data Vault, depois todos os modelos Business Vault, e depois todos os modelos dimensionais. Uma ação Data Vault Update de um só modelo continua a existir. Prefere a ação do grupo. Uma lista, uma execução.
+      fr-FR: |
+        Update resource definition group est le chargement, une fois que le groupe existe. C'est une Workflow Action. Le workflow retail qui la contient déjà est run-retail-update-models.hwf. L'action parcourt chaque modèle du groupe : tous les modèles Data Vault, puis tous les modèles Business Vault, puis tous les modèles dimensionnels. Une action Data Vault Update pour un seul modèle existe encore. Préfère l'action du groupe. Une liste, une exécution.
+      de-DE: |
+        Update resource definition group ist der Ladevorgang, sobald die Gruppe existiert. Sie ist eine Workflow Action. Der Retail-Workflow, der sie schon enthält, ist run-retail-update-models.hwf. Die Aktion geht jedes Modell der Gruppe durch: alle Data Vault Modelle, dann alle Business Vault Modelle, dann alle dimensionalen Modelle. Eine Data Vault Update Aktion für ein einzelnes Modell gibt es noch. Nimm die Gruppenaktion. Eine Liste, ein Lauf.
+      it-IT: |
+        Update resource definition group è il caricamento, una volta che il gruppo esiste. È una Workflow Action. Il workflow retail che già la contiene è run-retail-update-models.hwf. L'azione percorre ogni modello del gruppo: tutti i modelli Data Vault, poi tutti i modelli Business Vault, poi tutti i modelli dimensionali. Un'azione Data Vault Update per un solo modello esiste ancora. Preferisci l'azione del gruppo. Un elenco, un'esecuzione.
 
   - id: selection
     title: What the action loads
@@ -75,6 +95,18 @@ scenes:
         .hdv. The order does not change. Data Vault finishes before
         Business Vault starts, and Business Vault finishes before the
         dimensional models start.
+      zh-CN: |
+        Selection 页写出 resource definition group。这里是 retail-sources。Include Data Vault models、Include Business Vault models 和 Include dimensional models 都打开了，因为这个示例组已经列出后面的层。第一次加载可以关掉 Business Vault 和维度的框，只加载 .hdv。顺序不变。Data Vault 结束之后 Business Vault 才开始，Business Vault 结束之后维度模型才开始。
+      es-ES: |
+        La pestaña Selection nombra el resource definition group. Aquí es retail-sources. Include Data Vault models, Include Business Vault models e Include dimensional models están marcados, porque este grupo de ejemplo ya lista las capas posteriores. Una primera carga puede dejar sin marcar Business Vault y dimensional, y cargar solo el .hdv. El orden no cambia. Data Vault termina antes de que empiece Business Vault, y Business Vault termina antes de que empiecen los modelos dimensionales.
+      pt-PT: |
+        O separador Selection nomeia o resource definition group. Aqui é retail-sources. Include Data Vault models, Include Business Vault models e Include dimensional models estão ligados, porque este grupo de exemplo já lista as camadas seguintes. Uma primeira carga pode deixar Business Vault e dimensional desligados e carregar só o .hdv. A ordem não muda. Data Vault acaba antes de Business Vault começar, e Business Vault acaba antes de os modelos dimensionais começarem.
+      fr-FR: |
+        L'onglet Selection nomme le resource definition group. Ici c'est retail-sources. Include Data Vault models, Include Business Vault models et Include dimensional models sont cochés, parce que ce groupe d'exemple liste déjà les couches suivantes. Un premier chargement peut laisser Business Vault et dimensionnel décochés et ne charger que le .hdv. L'ordre ne change pas. Data Vault finit avant que Business Vault commence, et Business Vault finit avant que les modèles dimensionnels commencent.
+      de-DE: |
+        Der Reiter Selection nennt die resource definition group. Hier ist es retail-sources. Include Data Vault models, Include Business Vault models und Include dimensional models sind an, weil diese Beispielgruppe die späteren Schichten schon listet. Ein erster Ladevorgang kann Business Vault und dimensional auslassen und nur die .hdv laden. Die Reihenfolge ändert sich nicht. Data Vault endet, bevor Business Vault beginnt, und Business Vault endet, bevor die dimensionalen Modelle beginnen.
+      it-IT: |
+        La scheda Selection nomina il resource definition group. Qui è retail-sources. Include Data Vault models, Include Business Vault models e Include dimensional models sono attivi, perché questo gruppo di esempio elenca già gli strati successivi. Un primo carico può lasciare spenti Business Vault e dimensionale e caricare solo il .hdv. L'ordine non cambia. Data Vault finisce prima che Business Vault inizi, e Business Vault finisce prima che i modelli dimensionali inizino.
 
   - id: operations
     title: Tables and the catalog
@@ -92,6 +124,18 @@ scenes:
         the first successful load, later runs insert new keys and new
         satellite versions. They do not reload every row. The checkpoint is
         tables on the Vault connection, and those published layouts.
+      zh-CN: |
+        第一次加载还有两个页重要。Operations 页有 Update target database structure。vault 表还不存在时打开它。Data catalog 页有 Publish target tables to catalog。那会把布局写回 hop/retail-example/models。第一次成功加载之后，后来的运行插入新的键和新的卫星版本。它们不会重载每一行。检查点是 Vault 连接上的表，以及这些已发布的布局。
+      es-ES: |
+        En una primera carga importan dos pestañas más. Operations contiene Update target database structure. Actívalo cuando las tablas del vault aún no existen. Data catalog contiene Publish target tables to catalog. Eso escribe los diseños de vuelta bajo hop/retail-example/models. Tras la primera carga correcta, las siguientes insertan claves nuevas y versiones nuevas de satélite. No recargan cada fila. El punto de control son las tablas en la conexión Vault, y esos diseños publicados.
+      pt-PT: |
+        Numa primeira carga importam mais dois separadores. Operations tem Update target database structure. Liga-o quando as tabelas do vault ainda não existem. Data catalog tem Publish target tables to catalog. Isso escreve os layouts de volta sob hop/retail-example/models. Depois da primeira carga com sucesso, as seguintes inserem chaves novas e versões novas de satélite. Não recarregam cada linha. O ponto de controlo são as tabelas na ligação Vault, e esses layouts publicados.
+      fr-FR: |
+        Deux autres onglets comptent pour un premier chargement. Operations contient Update target database structure. Active-le quand les tables du vault n'existent pas encore. Data catalog contient Publish target tables to catalog. Cela réécrit les dispositions sous hop/retail-example/models. Après le premier chargement réussi, les suivants insèrent de nouvelles clés et de nouvelles versions de satellite. Ils ne rechargent pas chaque ligne. Le point de contrôle, ce sont les tables sur la connexion Vault, et ces dispositions publiées.
+      de-DE: |
+        Bei einem ersten Laden zählen zwei weitere Reiter. Operations enthält Update target database structure. Schalte es ein, wenn die Vault-Tabellen noch nicht existieren. Data catalog enthält Publish target tables to catalog. Das schreibt die Layouts zurück unter hop/retail-example/models. Nach dem ersten erfolgreichen Laden fügen spätere Läufe neue Schlüssel und neue Satellite-Versionen ein. Sie laden nicht jede Zeile neu. Der Kontrollpunkt sind die Tabellen auf der Verbindung Vault und diese veröffentlichten Layouts.
+      it-IT: |
+        In un primo carico contano altre due schede. Operations contiene Update target database structure. Attivalo quando le tabelle del vault non esistono ancora. Data catalog contiene Publish target tables to catalog. Quello riscrive i layout sotto hop/retail-example/models. Dopo il primo carico riuscito, i successivi inseriscono chiavi nuove e nuove versioni di satellite. Non ricaricano ogni riga. Il punto di controllo sono le tabelle sulla connessione Vault, e quei layout pubblicati.
 
   - id: metrics
     title: While it runs
@@ -111,6 +155,18 @@ scenes:
         panel are enough. Data Vault models in the list have already
         completed. The dimensional models are still running or waiting.
         That is the layer order you set on the Selection tab.
+      zh-CN: |
+        动作运行时，加载指标显示这一波。阶段是 updating。模型是 8 个里的第 5 个。当前模型是 retail-f-orders，当前表是 f_orders。这一集不要坐等一次完整的初次加载。这块面板看几秒就够了。清单里的 Data Vault 模型已经完成。维度模型还在运行或等待。这就是你在 Selection 页设定的层顺序。
+      es-ES: |
+        Mientras la acción corre, las métricas de carga muestran esta oleada. La fase es updating. Los modelos van 5 de 8. El modelo actual es retail-f-orders, y la tabla actual es f_orders. No te quedes a ver una carga inicial completa en este vídeo. Unos segundos de este panel bastan. Los modelos Data Vault de la lista ya han terminado. Los modelos dimensionales siguen en ejecución o en espera. Ese es el orden de capas que marcaste en la pestaña Selection.
+      pt-PT: |
+        Enquanto a ação corre, as métricas de carga mostram esta onda. A fase é updating. Os modelos vão 5 de 8. O modelo atual é retail-f-orders, e a tabela atual é f_orders. Não fiques a ver uma carga inicial completa neste vídeo. Uns segundos deste painel chegam. Os modelos Data Vault da lista já terminaram. Os modelos dimensionais ainda estão a correr ou à espera. Essa é a ordem de camadas que definiste no separador Selection.
+      fr-FR: |
+        Pendant que l'action tourne, les métriques de chargement montrent cette vague. La phase est updating. Les modèles en sont à 5 sur 8. Le modèle en cours est retail-f-orders, et la table en cours est f_orders. Ne reste pas devant un chargement initial complet dans cette vidéo. Quelques secondes de ce panneau suffisent. Les modèles Data Vault de la liste sont déjà terminés. Les modèles dimensionnels tournent encore ou attendent. C'est l'ordre des couches que tu as fixé dans l'onglet Selection.
+      de-DE: |
+        Während die Aktion läuft, zeigen die Lademetriken diese Welle. Die Phase ist updating. Die Modelle sind bei 5 von 8. Das aktuelle Modell ist retail-f-orders, und die aktuelle Tabelle ist f_orders. Sieh dir in diesem Video keinen kompletten Erstladevorgang an. Ein paar Sekunden dieses Panels genügen. Die Data Vault Modelle der Liste sind schon fertig. Die dimensionalen Modelle laufen noch oder warten. Das ist die Schichtenreihenfolge, die du auf dem Reiter Selection gesetzt hast.
+      it-IT: |
+        Mentre l'azione gira, le metriche di carico mostrano quest'ondata. La fase è updating. I modelli sono 5 di 8. Il modello corrente è retail-f-orders, e la tabella corrente è f_orders. Non restare a guardare un carico iniziale completo in questo video. Bastano pochi secondi di questo pannello. I modelli Data Vault dell'elenco sono già finiti. I modelli dimensionali stanno ancora girando o aspettano. Quello è l'ordine degli strati che hai impostato nella scheda Selection.
 
   - id: wave
     title: The production wave
@@ -131,6 +187,18 @@ scenes:
         loads. This video does not configure those three steps. It names
         them so you know the update is the last step of the wave, not the
         only step.
+      zh-CN: |
+        一次生产运行把四个控制放在这个动作周围，顺序如下。Harvest source metadata 读取源现在的样子。Validate resource definitions 把模型与目录比较。Measure data quality 给供给打分。然后这次更新才加载。这一集不配置那三步。点出它们，是为了让你知道更新是这一波的最后一步，不是唯一步。
+      es-ES: |
+        Una ejecución de producción pone cuatro controles alrededor de esta acción, en este orden. Harvest source metadata lee cómo es la fuente ahora. Validate resource definitions compara los modelos con el catálogo. Measure data quality puntúa los feeds. Después esta actualización carga. Este vídeo no configura esos tres pasos. Los nombra para que sepas que la actualización es el último paso de la oleada, no el único.
+      pt-PT: |
+        Uma execução de produção põe quatro controlos à volta desta ação, nesta ordem. Harvest source metadata lê como a origem está agora. Validate resource definitions compara os modelos com o catálogo. Measure data quality pontua os feeds. Depois esta atualização carrega. Este vídeo não configura esses três passos. Nomeia-os para saberes que a atualização é o último passo da onda, não o único.
+      fr-FR: |
+        Une exécution de production place quatre contrôles autour de cette action, dans cet ordre. Harvest source metadata lit à quoi la source ressemble maintenant. Validate resource definitions compare les modèles au catalogue. Measure data quality note les flux. Ensuite cette mise à jour charge. Cette vidéo ne configure pas ces trois étapes. Elle les nomme pour que tu saches que la mise à jour est la dernière étape de la vague, pas la seule.
+      de-DE: |
+        Ein Produktionslauf stellt vier Kontrollen um diese Aktion, in dieser Reihenfolge. Harvest source metadata liest, wie die Quelle jetzt aussieht. Validate resource definitions vergleicht die Modelle mit dem Katalog. Measure data quality bewertet die Feeds. Dann lädt diese Aktualisierung. Dieses Video konfiguriert diese drei Schritte nicht. Es nennt sie, damit du weißt, dass die Aktualisierung der letzte Schritt der Welle ist, nicht der einzige.
+      it-IT: |
+        Un'esecuzione di produzione mette quattro controlli intorno a questa azione, in quest'ordine. Harvest source metadata legge com'è la sorgente adesso. Validate resource definitions confronta i modelli con il catalogo. Measure data quality dà un punteggio ai feed. Poi questo aggiornamento carica. Questo video non configura quei tre passi. Li nomina perché tu sappia che l'aggiornamento è l'ultimo passo dell'ondata, non l'unico.
 
   - id: where-next
     title: Where next
@@ -149,3 +217,15 @@ scenes:
         retail-sources, and you run this action again with Business Vault
         included. The written guide for this video is Getting started,
         building an EDW, chapter 4, at data-hopper.com.
+      zh-CN: |
+        下一集打开 Business Vault。原始 vault 保留源的历史。Business Vault 保存你不想在每份报表里重复的规则。你把 .hbv 加进同一个组 retail-sources，并再次运行这个动作，同时包含 Business Vault。这一集的书面指南是 Getting started, building an EDW 的第 4 章，在 data-hopper.com。
+      es-ES: |
+        El siguiente vídeo abre el Business Vault. El vault en bruto guarda la historia de la fuente. El Business Vault guarda las reglas que no quieres repetir en cada informe. Añades el .hbv a este mismo grupo, retail-sources, y ejecutas esta acción otra vez con Business Vault incluido. La guía escrita de este vídeo es Getting started, building an EDW, capítulo 4, en data-hopper.com.
+      pt-PT: |
+        O vídeo seguinte abre o Business Vault. O vault em bruto guarda a história da origem. O Business Vault guarda as regras que não queres repetir em cada relatório. Acrescentas o .hbv a este mesmo grupo, retail-sources, e corres esta ação outra vez com Business Vault incluído. O guia escrito deste vídeo é Getting started, building an EDW, capítulo 4, em data-hopper.com.
+      fr-FR: |
+        La vidéo suivante ouvre le Business Vault. Le vault brut garde l'historique de la source. Le Business Vault range les règles que tu ne veux pas répéter dans chaque rapport. Tu ajoutes le .hbv à ce même groupe, retail-sources, et tu relances cette action avec Business Vault inclus. Le guide écrit de cette vidéo est Getting started, building an EDW, chapitre 4, sur data-hopper.com.
+      de-DE: |
+        Das nächste Video öffnet den Business Vault. Der rohe Vault behält die Quellhistorie. Der Business Vault speichert die Regeln, die du nicht in jedem Bericht wiederholen willst. Du fügst die .hbv derselben Gruppe hinzu, retail-sources, und startest diese Aktion erneut mit eingeschlossenem Business Vault. Die schriftliche Anleitung für dieses Video ist Getting started, building an EDW, Kapitel 4, unter data-hopper.com.
+      it-IT: |
+        Il prossimo video apre il Business Vault. Il vault grezzo tiene la storia della sorgente. Il Business Vault conserva le regole che non vuoi ripetere in ogni report. Aggiungi il .hbv a questo stesso gruppo, retail-sources, ed esegui di nuovo questa azione con Business Vault incluso. La guida scritta di questo video è Getting started, building an EDW, capitolo 4, su data-hopper.com.
