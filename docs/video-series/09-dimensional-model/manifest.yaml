@@ -1,0 +1,201 @@
+#
+# Copyright 2026 i-Bridge bv
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# Narration for video 09. English is the source.
+# Product words stay in English. See docs/video-series/glossary.yaml.
+video:
+  id: 09-dimensional-model
+  title: "Dimensional model"
+  issue: 233
+  width: 1920
+  height: 1080
+  fps: 30
+  transition: fade
+  transition_ms: 400
+  padding_after_sec: 0.4
+  voice_id: ara
+  locales:
+    - en
+    - zh-CN
+    - es-ES
+    - pt-PT
+    - fr-FR
+    - de-DE
+    - it-IT
+  links:
+    - label: Getting started
+      url: https://github.com/ProjectDataHopper/hopper-edw/blob/main/docs/getting-started-edw.adoc
+    - label: Dimensional modeler
+      url: https://github.com/ProjectDataHopper/hopper-edw/blob/main/docs/dimensional-modeler-overview.adoc
+    - label: Data Hopper
+      url: https://data-hopper.com/
+
+scenes:
+  - id: welcome
+    title: Welcome
+    visual: images/welcome.png
+    visual_type: still
+    card_title: Dimensional model
+    card_subtitle: Facts and dimensions for a report
+    shot: >
+      Title card. Title "Dimensional model". Subtitle "Facts and dimensions
+      for a report". No GUI.
+    narration:
+      en: |
+        A dimensional model is facts and dimensions. A report reads the
+        fact. The fact is loaded from the Business Vault, the raw Data
+        Vault, or both. The file ends in .hdm. In retail-example the orders
+        fact is retail-f-orders.hdm. Shared dimensions live in a second
+        file, retail-conformed-dims, and several facts point at them. You
+        add the .hdm to the same group, retail-sources. The update loads
+        every Data Vault model, then every Business Vault model, then every
+        dimensional model.
+      zh-CN: |
+        维度模型是事实和维度。报表读取事实。事实从 Business Vault、原始 Data Vault，或两者加载。文件以 .hdm 结尾。在 retail-example 里，订单事实是 retail-f-orders.hdm。共享维度住在第二个文件 retail-conformed-dims 里，多个事实指向它们。你把 .hdm 加进同一个组 retail-sources。更新先加载每一个 Data Vault 模型，然后每一个 Business Vault 模型，然后每一个维度模型。
+      es-ES: |
+        Un modelo dimensional son hechos y dimensiones. Un informe lee el hecho. El hecho se carga desde el Business Vault, el Data Vault en bruto, o ambos. El archivo termina en .hdm. En retail-example el hecho de pedidos es retail-f-orders.hdm. Las dimensiones compartidas están en un segundo archivo, retail-conformed-dims, y varios hechos apuntan a ellas. Añades el .hdm al mismo grupo, retail-sources. La actualización carga cada modelo Data Vault, luego cada modelo Business Vault, y luego cada modelo dimensional.
+      pt-PT: |
+        Um modelo dimensional são factos e dimensões. Um relatório lê o facto. O facto é carregado a partir do Business Vault, do Data Vault em bruto, ou de ambos. O ficheiro termina em .hdm. No retail-example o facto de encomendas é retail-f-orders.hdm. As dimensões partilhadas estão num segundo ficheiro, retail-conformed-dims, e vários factos apontam para elas. Acrescentas o .hdm ao mesmo grupo, retail-sources. A atualização carrega cada modelo Data Vault, depois cada modelo Business Vault, e depois cada modelo dimensional.
+      fr-FR: |
+        Un modèle dimensionnel, ce sont des faits et des dimensions. Un rapport lit le fait. Le fait est chargé depuis le Business Vault, le Data Vault brut, ou les deux. Le fichier se termine par .hdm. Dans retail-example le fait des commandes est retail-f-orders.hdm. Les dimensions partagées sont dans un second fichier, retail-conformed-dims, et plusieurs faits pointent vers elles. Tu ajoutes le .hdm au même groupe, retail-sources. La mise à jour charge chaque modèle Data Vault, puis chaque modèle Business Vault, puis chaque modèle dimensionnel.
+      de-DE: |
+        Ein dimensionales Modell sind Fakten und Dimensionen. Ein Bericht liest den Fakt. Der Fakt wird aus dem Business Vault, dem rohen Data Vault oder aus beiden geladen. Die Datei endet auf .hdm. In retail-example ist der Bestellfakt retail-f-orders.hdm. Gemeinsame Dimensionen liegen in einer zweiten Datei, retail-conformed-dims, und mehrere Fakten zeigen auf sie. Du fügst die .hdm derselben Gruppe hinzu, retail-sources. Die Aktualisierung lädt jedes Data Vault Modell, dann jedes Business Vault Modell, dann jedes dimensionale Modell.
+      it-IT: |
+        Un modello dimensionale sono fatti e dimensioni. Un report legge il fatto. Il fatto è caricato dal Business Vault, dal Data Vault grezzo, o da entrambi. Il file finisce con .hdm. In retail-example il fatto degli ordini è retail-f-orders.hdm. Le dimensioni condivise stanno in un secondo file, retail-conformed-dims, e diversi fatti puntano a esse. Aggiungi il .hdm allo stesso gruppo, retail-sources. L'aggiornamento carica ogni modello Data Vault, poi ogni modello Business Vault, poi ogni modello dimensionale.
+
+  - id: fact
+    title: The orders fact
+    visual: images/fact.png
+    visual_type: still
+    shot: >
+      Dimensional canvas for f_orders. Role-playing dates and conformed
+      dimension aliases are readable. The committed still is
+      docs/images/dimensional-model-f-orders.png, padded to 16:9.
+    narration:
+      en: |
+        The orange card is the fact f_orders. Around it are dimension
+        aliases from retail-conformed-dims. d_customer is the customer.
+        d_order is the order. Three dates point at one calendar:
+        d_order_date, d_shipping_date, and d_delivery_date. That is role
+        playing. One date dimension, three roles on this fact. d_orders_junk
+        is a junk dimension for the small flags that do not deserve a
+        dimension of their own. The grain of this fact is one order.
+      zh-CN: |
+        橙色卡片是事实 f_orders。周围是来自 retail-conformed-dims 的维度别名。d_customer 是客户。d_order 是订单。三个日期指向同一本日历：d_order_date、d_shipping_date 和 d_delivery_date。这就是角色扮演。一个日期维度，在这个事实上有三个角色。d_orders_junk 是垃圾维度，放那些不值得单独成维的小标志。这个事实的粒度是一张订单。
+      es-ES: |
+        La tarjeta naranja es el hecho f_orders. Alrededor hay alias de dimensión de retail-conformed-dims. d_customer es el cliente. d_order es el pedido. Tres fechas apuntan a un calendario: d_order_date, d_shipping_date y d_delivery_date. Eso es juego de roles. Una dimensión de fecha, tres roles en este hecho. d_orders_junk es una dimensión basura para las banderas pequeñas que no merecen una dimensión propia. El grano de este hecho es un pedido.
+      pt-PT: |
+        O cartão laranja é o facto f_orders. À volta estão aliases de dimensão de retail-conformed-dims. d_customer é o cliente. d_order é a encomenda. Três datas apontam para um calendário: d_order_date, d_shipping_date e d_delivery_date. Isso é representação de papéis. Uma dimensão de data, três papéis neste facto. d_orders_junk é uma dimensão de lixo para as pequenas bandeiras que não merecem uma dimensão própria. O grão deste facto é uma encomenda.
+      fr-FR: |
+        La carte orange est le fait f_orders. Autour, des alias de dimension venus de retail-conformed-dims. d_customer est le client. d_order est la commande. Trois dates pointent vers un calendrier : d_order_date, d_shipping_date et d_delivery_date. C'est le jeu de rôles. Une dimension date, trois rôles sur ce fait. d_orders_junk est une dimension fourre-tout pour les petits indicateurs qui ne méritent pas une dimension à eux. Le grain de ce fait est une commande.
+      de-DE: |
+        Die orange Karte ist der Fakt f_orders. Darum liegen Dimensionsaliase aus retail-conformed-dims. d_customer ist der Kunde. d_order ist die Bestellung. Drei Daten zeigen auf einen Kalender: d_order_date, d_shipping_date und d_delivery_date. Das ist Rollenwechsel. Eine Datumsdimension, drei Rollen auf diesem Fakt. d_orders_junk ist eine Junk-Dimension für die kleinen Kennzeichen, die keine eigene Dimension verdienen. Die Körnung dieses Fakts ist eine Bestellung.
+      it-IT: |
+        La scheda arancione è il fatto f_orders. Intorno ci sono alias di dimensione da retail-conformed-dims. d_customer è il cliente. d_order è l'ordine. Tre date puntano a un calendario: d_order_date, d_shipping_date e d_delivery_date. Quello è il gioco di ruoli. Una dimensione data, tre ruoli su questo fatto. d_orders_junk è una dimensione junk per i piccoli flag che non meritano una dimensione propria. La grana di questo fatto è un ordine.
+
+  - id: bus
+    title: The bus matrix
+    visual: images/bus.png
+    visual_type: still
+    shot: >
+      Bus matrix for retail-sources. The Orders row is f_orders. d_date
+      shows 3. No personal paths. The committed still is
+      docs/images/bus-matrix-of-the-retail-example.png, padded to 16:9.
+    narration:
+      en: |
+        The bus matrix is where that fact and dimension list is planned.
+        This one is already built for retail-sources. You do not build a
+        new one in this video. The Orders row is the fact f_orders. The
+        mark under d_customer, d_order, and d_orders_junk is a plain X. The
+        mark under d_date is 3. That 3 is the three date roles you just saw
+        on the canvas. Order lines are the next row, a finer grain, reusing
+        the same conformed dimensions.
+      zh-CN: |
+        总线矩阵是规划这份事实和维度清单的地方。这一张已经为 retail-sources 建好。这一集不新建一张。Orders 行是事实 f_orders。d_customer、d_order 和 d_orders_junk 下面的标记是一个普通的 X。d_date 下面的标记是 3。这个 3 就是你刚在画布上看到的三个日期角色。下一行是订单行，粒度更细，复用同一批一致维度。
+      es-ES: |
+        La matriz bus es donde se planifica esa lista de hecho y dimensiones. Esta ya está construida para retail-sources. No construyes una nueva en este vídeo. La fila Orders es el hecho f_orders. La marca bajo d_customer, d_order y d_orders_junk es una X sencilla. La marca bajo d_date es 3. Ese 3 son los tres roles de fecha que acabas de ver en el lienzo. La fila siguiente son las líneas de pedido, un grano más fino, reutilizando las mismas dimensiones conformadas.
+      pt-PT: |
+        A matriz bus é onde essa lista de facto e dimensões é planeada. Esta já está construída para retail-sources. Não constróis uma nova neste vídeo. A linha Orders é o facto f_orders. A marca sob d_customer, d_order e d_orders_junk é um X simples. A marca sob d_date é 3. Esse 3 são os três papéis de data que acabaste de ver na tela. A linha seguinte são as linhas de encomenda, um grão mais fino, a reutilizar as mesmas dimensões conformadas.
+      fr-FR: |
+        La matrice bus est l'endroit où cette liste de fait et de dimensions est planifiée. Celle-ci est déjà construite pour retail-sources. Tu n'en construis pas une nouvelle dans cette vidéo. La ligne Orders est le fait f_orders. La marque sous d_customer, d_order et d_orders_junk est un simple X. La marque sous d_date est 3. Ce 3, ce sont les trois rôles de date que tu viens de voir sur le canevas. La ligne suivante est les lignes de commande, un grain plus fin, qui réutilise les mêmes dimensions conformées.
+      de-DE: |
+        Die Bus-Matrix ist der Ort, an dem diese Fakt- und Dimensionsliste geplant wird. Diese ist schon für retail-sources gebaut. Du baust in diesem Video keine neue. Die Zeile Orders ist der Fakt f_orders. Die Markierung unter d_customer, d_order und d_orders_junk ist ein einfaches X. Die Markierung unter d_date ist 3. Diese 3 sind die drei Datumsrollen, die du gerade auf der Zeichenfläche gesehen hast. Die nächste Zeile sind die Bestellzeilen, eine feinere Körnung, mit denselben konformen Dimensionen.
+      it-IT: |
+        La bus matrix è dove si pianifica quell'elenco di fatto e dimensioni. Questa è già costruita per retail-sources. Non ne costruisci una nuova in questo video. La riga Orders è il fatto f_orders. Il segno sotto d_customer, d_order e d_orders_junk è una semplice X. Il segno sotto d_date è 3. Quel 3 sono i tre ruoli di data che hai appena visto sull'area. La riga successiva sono le righe d'ordine, una grana più fine, che riusa le stesse dimensioni conformi.
+
+  - id: page
+    title: A page on the fact
+    visual: images/page.png
+    visual_type: still
+    card_title: A page on the fact
+    card_subtitle: retail-f-orders.hsl
+    shot: >
+      Title card. Title "A page on the fact". Subtitle
+      "retail-f-orders.hsl". No captured presentation page is in the docs
+      yet. Do not open the crosstab editor.
+    narration:
+      en: |
+        The semantic layer is consumption metadata on top of the fact. The
+        retail file is retail-f-orders.hsl. It holds formats and a saved
+        selection: which attributes and measures a page shows. Create
+        presentation builds that page from the layer. It is a report, not
+        another model editor. This video does not open the crosstab. The
+        point is that the .hdm is what you load, and the .hsl is how a page
+        reads it.
+      zh-CN: |
+        语义层是事实之上的消费元数据。retail 文件是 retail-f-orders.hsl。它保存格式和一份已保存的选择：页面显示哪些属性和度量。Create presentation 从这一层生成那个页面。它是一份报表，不是另一个模型编辑器。这一集不打开交叉表。要点是：.hdm 是你加载的东西，.hsl 是页面读取它的方式。
+      es-ES: |
+        La capa semántica es metadatos de consumo encima del hecho. El archivo de retail es retail-f-orders.hsl. Guarda formatos y una selección guardada: qué atributos y medidas muestra una página. Create presentation construye esa página desde la capa. Es un informe, no otro editor de modelos. Este vídeo no abre la tabla cruzada. El punto es que el .hdm es lo que cargas, y el .hsl es cómo una página lo lee.
+      pt-PT: |
+        A camada semântica são metadados de consumo por cima do facto. O ficheiro retail é retail-f-orders.hsl. Guarda formatos e uma seleção gravada: que atributos e medidas uma página mostra. Create presentation constrói essa página a partir da camada. É um relatório, não outro editor de modelos. Este vídeo não abre a tabela cruzada. O ponto é que o .hdm é o que carregas, e o .hsl é como uma página o lê.
+      fr-FR: |
+        La couche sémantique est des métadonnées de consommation au-dessus du fait. Le fichier retail est retail-f-orders.hsl. Il garde des formats et une sélection enregistrée : quels attributs et mesures une page affiche. Create presentation construit cette page depuis la couche. C'est un rapport, pas un autre éditeur de modèle. Cette vidéo n'ouvre pas le tableau croisé. Le point est que le .hdm est ce que tu charges, et le .hsl est la façon dont une page le lit.
+      de-DE: |
+        Die semantische Schicht sind Verbrauchsmetadaten über dem Fakt. Die Retail-Datei ist retail-f-orders.hsl. Sie hält Formate und eine gespeicherte Auswahl: welche Attribute und Kennzahlen eine Seite zeigt. Create presentation baut diese Seite aus der Schicht. Es ist ein Bericht, kein weiterer Modelleditor. Dieses Video öffnet die Kreuztabelle nicht. Der Punkt ist: die .hdm ist das, was du lädst, und die .hsl ist, wie eine Seite sie liest.
+      it-IT: |
+        Lo strato semantico sono metadati di consumo sopra il fatto. Il file retail è retail-f-orders.hsl. Tiene formati e una selezione salvata: quali attributi e misure mostra una pagina. Create presentation costruisce quella pagina dallo strato. È un report, non un altro editor di modelli. Questo video non apre la tabella incrociata. Il punto è che il .hdm è ciò che carichi, e il .hsl è come una pagina lo legge.
+
+  - id: where-next
+    title: Where next
+    visual: images/where-next.png
+    visual_type: still
+    card_title: Where next
+    card_subtitle: Metrics and the warehouse of the warehouse
+    shot: >
+      Title card. Title "Where next". Subtitle "Metrics and the warehouse
+      of the warehouse". No GUI. The next episode is metrics and analytics
+      operations.
+    narration:
+      en: |
+        The next video is the last one. A load writes timings into the OPS
+        database. You will open the metrics for a retail-sources run, then
+        see Create operational analytics turn that database into a small
+        warehouse of its own. The written guide for this video is Getting
+        started, building an EDW, chapter 5, at data-hopper.com. If the
+        fact is missing, open retail-f-orders.hdm and look for the orange
+        card.
+      zh-CN: |
+        下一集是最后一集。一次加载把计时写入 OPS 数据库。你会打开一次 retail-sources 运行的指标，然后看到 Create operational analytics 把那个数据库变成一个属于它自己的小仓库。这一集的书面指南是 Getting started, building an EDW 的第 5 章，在 data-hopper.com。如果事实不见了，打开 retail-f-orders.hdm，找那张橙色卡片。
+      es-ES: |
+        El siguiente vídeo es el último. Una carga escribe los tiempos en la base OPS. Abrirás las métricas de una ejecución de retail-sources, y luego verás Create operational analytics convertir esa base en un pequeño almacén propio. La guía escrita de este vídeo es Getting started, building an EDW, capítulo 5, en data-hopper.com. Si falta el hecho, abre retail-f-orders.hdm y busca la tarjeta naranja.
+      pt-PT: |
+        O vídeo seguinte é o último. Uma carga escreve os tempos na base OPS. Vais abrir as métricas de uma execução de retail-sources, e depois ver Create operational analytics transformar essa base num pequeno armazém próprio. O guia escrito deste vídeo é Getting started, building an EDW, capítulo 5, em data-hopper.com. Se o facto faltar, abre retail-f-orders.hdm e procura o cartão laranja.
+      fr-FR: |
+        La vidéo suivante est la dernière. Un chargement écrit les durées dans la base OPS. Tu ouvriras les métriques d'une exécution de retail-sources, puis tu verras Create operational analytics transformer cette base en un petit entrepôt à elle. Le guide écrit de cette vidéo est Getting started, building an EDW, chapitre 5, sur data-hopper.com. Si le fait manque, ouvre retail-f-orders.hdm et cherche la carte orange.
+      de-DE: |
+        Das nächste Video ist das letzte. Ein Ladevorgang schreibt die Zeiten in die OPS-Datenbank. Du öffnest die Metriken eines retail-sources Laufs und siehst dann, wie Create operational analytics diese Datenbank in ein eigenes kleines Warehouse verwandelt. Die schriftliche Anleitung für dieses Video ist Getting started, building an EDW, Kapitel 5, unter data-hopper.com. Wenn der Fakt fehlt, öffne retail-f-orders.hdm und suche die orange Karte.
+      it-IT: |
+        Il prossimo video è l'ultimo. Un carico scrive i tempi nel database OPS. Aprirai le metriche di un'esecuzione di retail-sources, poi vedrai Create operational analytics trasformare quel database in un piccolo warehouse suo. La guida scritta di questo video è Getting started, building an EDW, capitolo 5, su data-hopper.com. Se manca il fatto, apri retail-f-orders.hdm e cerca la scheda arancione.

@@ -1,0 +1,168 @@
+#
+# Copyright 2026 i-Bridge bv
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# Product words stay in English in every spoken language, because the GUI
+# in the picture uses these words. Gloss a word the first time, then keep it.
+keep_english:
+  - Pipeline
+  - Workflow
+  - Transform
+  - Action
+  - Hop GUI
+  - Hop
+  - Data Vault
+  - Business Vault
+  - resource definition group
+  - Data Catalog
+  - EDW Journey
+
+# Literal replacements applied to the text before text-to-speech.
+# Subtitles keep the narration as written. Longer patterns win.
+speak_as:
+  - pattern: "${PROJECT_HOME}"
+    say: project home
+  - pattern: hop/retail-example/models
+    say: hop, retail example, models
+  - pattern: run-retail-update-models.hwf
+    say: run retail update models
+  - pattern: run-retail-update-models
+    say: run retail update models
+  - pattern: f_orders-upstream.hlv
+    say: f orders upstream dot H L V
+  - pattern: hop_executions
+    say: hop executions
+  - pattern: ops-analytics
+    say: ops analytics
+  - pattern: dv_ops
+    say: d v ops
+  - pattern: retail-f-orders.hsl
+    say: retail f orders dot H S L
+  - pattern: retail-f-orders.hdm
+    say: retail f orders dot H D M
+  - pattern: retail-conformed-dims
+    say: retail conformed dims
+  - pattern: d_shipping_date
+    say: d shipping date
+  - pattern: d_delivery_date
+    say: d delivery date
+  - pattern: d_order_date
+    say: d order date
+  - pattern: d_orders_junk
+    say: d orders junk
+  - pattern: d_order
+    say: d order
+  - pattern: d_date
+    say: d date
+  - pattern: d_customer
+    say: d customer
+  - pattern: retail-f-orders
+    say: retail f orders
+  - pattern: f_orders
+    say: f orders
+  - pattern: hop/retail-example/sources
+    say: hop, retail example, sources
+  - pattern: source-tables-crm.hsm
+    say: source tables C R M dot h s m
+  - pattern: retail-360.hbv
+    say: retail three sixty dot H B V
+  - pattern: customer_360_bv
+    say: customer three sixty B V
+  - pattern: sat_customer_contact
+    say: sat customer contact
+  - pattern: sat_customer_address
+    say: sat customer address
+  - pattern: retail-360.hdv
+    say: retail three sixty dot H D V
+  - pattern: sat_customer_demo
+    say: sat customer demo
+  - pattern: sat_customer_prefs
+    say: sat customer prefs
+  - pattern: order_shipment_event
+    say: order shipment event
+  - pattern: customer_hub
+    say: customer hub
+  - pattern: hub_customer
+    say: hub customer
+  - pattern: hub_order
+    say: hub order
+  - pattern: lnk_order
+    say: link order
+  - pattern: order_shipment_tracking
+    say: order shipment tracking
+  - pattern: all-customer-info
+    say: all customer info
+  - pattern: customer_contact
+    say: customer contact
+  - pattern: customer_demo
+    say: customer demo
+  - pattern: customer_prefs
+    say: customer prefs
+  - pattern: customer_address
+    say: customer address
+  - pattern: customer_id
+    say: customer id
+  - pattern: order_header
+    say: order header
+  - pattern: plugins/misc/hopper-edw
+    say: plugins misc hopper E D W
+  - pattern: 2.20.0-SNAPSHOT
+    say: two twenty snapshot
+  - pattern: "2.20"
+    say: two twenty
+  - pattern: local-catalog
+    say: local catalog
+  - pattern: source-model
+    say: source model
+  - pattern: business-vault
+    say: business vault
+  - pattern: data-vault
+    say: data vault
+  - pattern: "54320"
+    say: five four three two zero
+  - pattern: data-hopper.com
+    say: data hopper dot com
+  - pattern: retail-example
+    say: retail example
+  - pattern: retail-sources
+    say: retail sources
+  - pattern: ".hsm"
+    say: dot H S M
+  - pattern: ".hdv"
+    say: dot H D V
+  - pattern: ".hbv"
+    say: dot H B V
+  - pattern: ".hdm"
+    say: dot H D M
+  - pattern: ".hsl"
+    say: dot H S L
+  - pattern: ".hlv"
+    say: dot H L V
+  - pattern: ".hem"
+    say: dot H E M
+
+# Sent to the TTS API as replace. The written narration and the subtitles
+# stay as they are. A value in slashes is IPA. GUI is "gooey", not G-U-I.
+# "live" the verb (/lɪv/, where the rows live) is not the adjective (/laɪv/,
+# a live database). Only the verb phrases are listed.
+pronounce:
+  GUI: "/ˈɡuːi/"
+  EDW: "E D W"
+  JDBC: "J D B C"
+  "dimensions live": "/dɪˈmɛnʃənz lɪv/"
+  "rules live": "/ruːlz lɪv/"
+  "rows live": "/roʊz lɪv/"
+  "feeds live": "/fiːdz lɪv/"
+  "settings live": "/ˈsɛtɪŋz lɪv/"

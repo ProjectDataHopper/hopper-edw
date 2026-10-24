@@ -53,6 +53,8 @@ retail-example/files/asn_20*.xml
 integration-tests/vault-catalog/**/*.json
 
 docs/video-tutorials/**/output/
+docs/video-series/**/output/
+docs/video-series/output/
 scripts/video/.venv/
 
 docs/video-tutorials/**/output/**
