@@ -36,7 +36,7 @@ The voice for this series is `ara`. The Apache Hop series uses `orion`. Set `voi
 | `06-resource-definition-group` | 230 | The resource definition group | English and six translations, voice `ara` |
 | `07-updating-a-group` | 231 | Updating a resource definition group | English and six translations, voice `ara` |
 | `08-business-vault` | 232 | Business Vault | English and six translations, voice `ara` |
-| `09-dimensional-model` | 233 | Dimensional model | English script, voice `ara`. Translations after the cut is heard |
+| `09-dimensional-model` | 233 | Dimensional model | English and six translations, voice `ara` |
 | `10-metrics-and-analytics` | 234 | Metrics and analytics operations | Not started |
 
 Later videos may point at an earlier one in a single sentence. They do not re-teach it. The longer tutorials under `docs/video-tutorials/` stay.

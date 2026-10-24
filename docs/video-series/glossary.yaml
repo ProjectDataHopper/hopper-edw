@@ -52,6 +52,8 @@ speak_as:
     say: d order date
   - pattern: d_orders_junk
     say: d orders junk
+  - pattern: d_order
+    say: d order
   - pattern: d_date
     say: d date
   - pattern: d_customer
@@ -147,6 +149,7 @@ pronounce:
   GUI: "/ˈɡuːi/"
   EDW: "E D W"
   JDBC: "J D B C"
+  "dimensions live": "/dɪˈmɛnʃənz lɪv/"
   "rules live": "/ruːlz lɪv/"
   "rows live": "/roʊz lɪv/"
   "feeds live": "/fiːdz lɪv/"
