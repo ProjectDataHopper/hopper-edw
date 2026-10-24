@@ -14,36 +14,138 @@
 # limitations under the License.
 #
 
+# Product words stay in English. The first line of each rendered description is the title.
 series:
   en: Part of the Data Hopper EDW getting started series.
+  zh-CN: Data Hopper EDW 入门系列的一部分。
+  es-ES: Parte de la serie de introducción a Data Hopper EDW.
+  pt-PT: Parte da série de introdução ao Data Hopper EDW.
+  fr-FR: Fait partie de la série de prise en main de Data Hopper EDW.
+  de-DE: Teil der Einführungsreihe zu Data Hopper EDW.
+  it-IT: Parte della serie introduttiva a Data Hopper EDW.
 chapters_label:
   en: Chapters
+  zh-CN: 章节
+  es-ES: Capítulos
+  pt-PT: Capítulos
+  fr-FR: Chapitres
+  de-DE: Kapitel
+  it-IT: Capitoli
 issue_label:
   en: Issue
+  zh-CN: 议题
+  es-ES: Incidencia
+  pt-PT: Incidência
+  fr-FR: Ticket
+  de-DE: Ticket
+  it-IT: Segnalazione
 title:
   en: Source models
+  zh-CN: 源模型
+  es-ES: Modelos de origen
+  pt-PT: Modelos de origem
+  fr-FR: Modèles source
+  de-DE: Quellenmodelle
+  it-IT: Modelli di origine
 summary:
   en: >
     A source model is the picture of one source system. Open
     source-tables-crm.hsm, see the tables and relationships, then Push to
     catalog. A query card is where a join lives.
+  zh-CN: >
+    源模型是一个源系统的图。打开 source-tables-crm.hsm，看见表和关系，然后
+    Push to catalog。查询卡片是连接所在的地方。
+  es-ES: >
+    Un modelo de origen es la imagen de un sistema de origen. Abre
+    source-tables-crm.hsm, mira las tablas y las relaciones, y luego Push to
+    catalog. Una tarjeta de consulta es donde vive un join.
+  pt-PT: >
+    Um modelo de origem é a imagem de um sistema de origem. Abre
+    source-tables-crm.hsm, vê as tabelas e as relações, e depois Push to
+    catalog. Um cartão de consulta é onde vive um join.
+  fr-FR: >
+    Un modèle source est l'image d'un système source. Ouvre
+    source-tables-crm.hsm, regarde les tables et les relations, puis Push to
+    catalog. Une carte de requête est l'endroit où vit une jointure.
+  de-DE: >
+    Ein Quellenmodell ist das Bild eines Quellsystems. Öffne
+    source-tables-crm.hsm, sieh die Tabellen und Beziehungen, dann Push to
+    catalog. Eine Abfragekarte ist der Ort, an dem ein Join lebt.
+  it-IT: >
+    Un modello di origine è l'immagine di un sistema di origine. Apri
+    source-tables-crm.hsm, guarda le tabelle e le relazioni, poi Push to
+    catalog. Una scheda di query è il posto in cui vive un join.
 link_labels:
   Getting started:
     en: Getting started
+    zh-CN: 入门
+    es-ES: Primeros pasos
+    pt-PT: Primeiros passos
+    fr-FR: Prise en main
+    de-DE: Erste Schritte
+    it-IT: Per iniziare
   Source modeler:
     en: Source modeler
+    zh-CN: 源建模器
+    es-ES: Modelador de origen
+    pt-PT: Modelador de origem
+    fr-FR: Modeleur source
+    de-DE: Quellenmodellierer
+    it-IT: Modellatore di origine
   Data Hopper:
     en: Data Hopper
+    zh-CN: Data Hopper
+    es-ES: Data Hopper
+    pt-PT: Data Hopper
+    fr-FR: Data Hopper
+    de-DE: Data Hopper
+    it-IT: Data Hopper
 chapters:
   welcome:
     en: Welcome
+    zh-CN: 欢迎
+    es-ES: Bienvenida
+    pt-PT: Boas-vindas
+    fr-FR: Bienvenue
+    de-DE: Willkommen
+    it-IT: Benvenuto
   canvas:
     en: The canvas
+    zh-CN: 画布
+    es-ES: El lienzo
+    pt-PT: A tela
+    fr-FR: Le canevas
+    de-DE: Die Zeichenfläche
+    it-IT: L'area di disegno
   query:
     en: A query card
+    zh-CN: 查询卡片
+    es-ES: Una tarjeta de consulta
+    pt-PT: Um cartão de consulta
+    fr-FR: Une carte de requête
+    de-DE: Eine Abfragekarte
+    it-IT: Una scheda di query
   json:
     en: A JSON card
+    zh-CN: JSON 卡片
+    es-ES: Una tarjeta JSON
+    pt-PT: Um cartão JSON
+    fr-FR: Une carte JSON
+    de-DE: Eine JSON-Karte
+    it-IT: Una scheda JSON
   push:
     en: Push to catalog
+    zh-CN: Push to catalog
+    es-ES: Push to catalog
+    pt-PT: Push to catalog
+    fr-FR: Push to catalog
+    de-DE: Push to catalog
+    it-IT: Push to catalog
   where-next:
     en: Where next
+    zh-CN: 接下来
+    es-ES: Qué sigue
+    pt-PT: O que vem a seguir
+    fr-FR: Et ensuite
+    de-DE: Wie es weitergeht
+    it-IT: Che cosa viene dopo

@@ -40,6 +40,12 @@ speak_as:
     say: order shipment tracking
   - pattern: all-customer-info
     say: all customer info
+  - pattern: customer_contact
+    say: customer contact
+  - pattern: customer_demo
+    say: customer demo
+  - pattern: customer_prefs
+    say: customer prefs
   - pattern: customer_address
     say: customer address
   - pattern: customer_id

@@ -15,7 +15,7 @@
 #
 
 # Narration for video 04. English is the source.
-# Add the other locales after this cut has been heard.
+# Product words stay in English. See docs/video-series/glossary.yaml.
 video:
   id: 04-source-models
   title: "Source models"
@@ -27,6 +27,14 @@ video:
   transition_ms: 400
   padding_after_sec: 0.4
   voice_id: ara
+  locales:
+    - en
+    - zh-CN
+    - es-ES
+    - pt-PT
+    - fr-FR
+    - de-DE
+    - it-IT
   links:
     - label: Getting started
       url: https://github.com/ProjectDataHopper/hopper-edw/blob/main/docs/getting-started-edw.adoc
@@ -54,6 +62,18 @@ scenes:
         file at catalog connection local-catalog and configuration
         source-model. Both already exist from Configure EDW setup. The file
         is not a copy of the rows. It is the drawing the later models trust.
+      zh-CN: |
+        源模型的扩展名是 .hsm。它是一个源系统的图。这一集打开 retail-example 项目里的 source-tables-crm.hsm。上一集给供给起了名。这一集画出这些供给来自的表、键和关系。Edit model 把文件指向目录连接 local-catalog 和配置 source-model。两者都来自 Configure EDW setup。这个文件不是行的副本。它是后面的模型所信任的那张图。
+      es-ES: |
+        Un modelo de origen, extensión .hsm, es la imagen de un sistema de origen. Este vídeo abre source-tables-crm.hsm en el proyecto retail-example. El vídeo anterior puso nombre a los feeds. Este dibuja las tablas, las claves y las relaciones de las que salen. Edit model apunta el archivo a la conexión de catálogo local-catalog y a la configuración source-model. Ambas existen desde Configure EDW setup. El archivo no es una copia de las filas. Es el dibujo en el que confían los modelos posteriores.
+      pt-PT: |
+        Um modelo de origem, extensão .hsm, é a imagem de um sistema de origem. Este vídeo abre source-tables-crm.hsm no projeto retail-example. O vídeo anterior deu nome aos feeds. Este desenha as tabelas, as chaves e as relações de onde esses feeds vêm. Edit model aponta o ficheiro para a ligação de catálogo local-catalog e para a configuração source-model. Ambas já existem desde Configure EDW setup. O ficheiro não é uma cópia das linhas. É o desenho em que os modelos seguintes confiam.
+      fr-FR: |
+        Un modèle source, extension .hsm, est l'image d'un système source. Cette vidéo ouvre source-tables-crm.hsm dans le projet retail-example. La vidéo précédente a nommé les flux. Celle-ci dessine les tables, les clés et les relations d'où viennent ces flux. Edit model pointe le fichier vers la connexion de catalogue local-catalog et la configuration source-model. Les deux existent déjà depuis Configure EDW setup. Le fichier n'est pas une copie des lignes. C'est le dessin auquel les modèles suivants font confiance.
+      de-DE: |
+        Ein Quellenmodell, Erweiterung .hsm, ist das Bild eines Quellsystems. Dieses Video öffnet source-tables-crm.hsm im Projekt retail-example. Das vorige Video hat die Feeds benannt. Dieses zeichnet die Tabellen, die Schlüssel und die Beziehungen, aus denen die Feeds kommen. Edit model zeigt die Datei auf die Katalogverbindung local-catalog und die Konfiguration source-model. Beide gibt es schon seit Configure EDW setup. Die Datei ist keine Kopie der Zeilen. Sie ist die Zeichnung, der die späteren Modelle vertrauen.
+      it-IT: |
+        Un modello di origine, estensione .hsm, è l'immagine di un sistema di origine. Questo video apre source-tables-crm.hsm nel progetto retail-example. Il video precedente ha dato il nome ai feed. Questo disegna le tabelle, le chiavi e le relazioni da cui quei feed arrivano. Edit model punta il file alla connessione di catalogo local-catalog e alla configurazione source-model. Entrambe esistono già da Configure EDW setup. Il file non è una copia delle righe. È il disegno di cui i modelli successivi si fidano.
 
   - id: canvas
     title: The canvas
@@ -74,6 +94,18 @@ scenes:
         parent card. On the right, customer_demo, customer_contact,
         customer_address, and customer_prefs each point back to the customer
         hub. Generate Data Vault reads these edges.
+      zh-CN: |
+        这就是那块画布。每张表卡片都带着主键。customer_address 和 order_header 是表。卡片之间的线是关系。从 CRM 连接执行 Import schema 把卡片放在这里：你选择表，列和键就会到来。数据库里的外键变成一条边。如果没有外键，按住 Shift，从子卡片拖到父卡片。右边的 customer_demo、customer_contact、customer_address 和 customer_prefs 都指回客户枢纽。Generate Data Vault 读取这些边。
+      es-ES: |
+        Este es ese lienzo. Cada tarjeta de tabla lleva su clave primaria. customer_address y order_header son tablas. Las líneas entre tarjetas son relaciones. Import schema desde la conexión CRM puso aquí las tarjetas: eliges las tablas, y llegan las columnas y las claves. Una clave ajena en la base se vuelve una arista. Si la base no tiene ninguna, mantén Shift y arrastra de la tarjeta hija a la tarjeta padre. A la derecha, customer_demo, customer_contact, customer_address y customer_prefs apuntan al hub de cliente. Generate Data Vault lee estas aristas.
+      pt-PT: |
+        Esta é essa tela. Cada cartão de tabela traz a sua chave primária. customer_address e order_header são tabelas. As linhas entre cartões são relações. Import schema a partir da ligação CRM pôs aqui os cartões: escolhes as tabelas, e chegam as colunas e as chaves. Uma chave estrangeira na base torna-se uma aresta. Se a base não tiver nenhuma, mantém Shift e arrasta do cartão filho para o cartão pai. À direita, customer_demo, customer_contact, customer_address e customer_prefs apontam para o hub de cliente. Generate Data Vault lê estas arestas.
+      fr-FR: |
+        Voici ce canevas. Chaque carte de table porte sa clé primaire. customer_address et order_header sont des tables. Les traits entre les cartes sont des relations. Import schema depuis la connexion CRM a posé ces cartes : tu choisis les tables, et les colonnes et les clés arrivent. Une clé étrangère dans la base devient une arête. Si la base n'en a pas, maintiens Shift et glisse de la carte enfant vers la carte parent. À droite, customer_demo, customer_contact, customer_address et customer_prefs pointent vers le hub client. Generate Data Vault lit ces arêtes.
+      de-DE: |
+        Das ist diese Zeichenfläche. Jede Tabellenkarte trägt ihren Primärschlüssel. customer_address und order_header sind Tabellen. Die Linien zwischen den Karten sind Beziehungen. Import schema von der Verbindung CRM hat die Karten hierher gesetzt: du wählst die Tabellen, und die Spalten und Schlüssel kommen an. Ein Fremdschlüssel in der Datenbank wird eine Kante. Hat die Datenbank keinen, halte Shift und ziehe von der Kindkarte zur Elternkarte. Rechts zeigen customer_demo, customer_contact, customer_address und customer_prefs auf den Kunden-Hub. Generate Data Vault liest diese Kanten.
+      it-IT: |
+        Questa è quell'area. Ogni scheda di tabella porta la sua chiave primaria. customer_address e order_header sono tabelle. Le linee tra le schede sono relazioni. Import schema dalla connessione CRM ha messo qui le schede: scegli le tabelle, e arrivano le colonne e le chiavi. Una chiave esterna nel database diventa un arco. Se il database non ne ha, tieni premuto Shift e trascina dalla scheda figlia alla scheda padre. A destra, customer_demo, customer_contact, customer_address e customer_prefs puntano all'hub cliente. Generate Data Vault legge questi archi.
 
   - id: query
     title: A query card
@@ -94,6 +126,18 @@ scenes:
         on the source model, not inside a satellite. The Joins tab is where
         those lines were chosen. Validate checks the query before you
         publish it.
+      zh-CN: |
+        查询卡片是连接所在的地方，这样 vault 就不必自己发明连接。这个对话框是查询 all-customer-info。它把客户枢纽连到 demo、地址、prefs 和 contact 表。Generate SQL 写出了屏幕上的 SELECT。Preview data 会运行它。这一集不新建查询。连接放在源模型上，不放在卫星里。Joins 页是这些线被选定的地方。Validate 在发布之前检查查询。
+      es-ES: |
+        Una tarjeta de consulta es donde vive un join, así el vault no tiene que inventarlo. Este diálogo es la consulta all-customer-info. Une el hub de cliente con las tablas demo, address, prefs y contact. Generate SQL escribió el SELECT de la pantalla. Preview data lo ejecutaría. No construyes una consulta nueva en este vídeo. El join está en el modelo de origen, no dentro de un satélite. La pestaña Joins es donde se eligieron esas líneas. Validate comprueba la consulta antes de publicarla.
+      pt-PT: |
+        Um cartão de consulta é onde vive um join, para o vault não ter de o inventar. Este diálogo é a consulta all-customer-info. Liga o hub de cliente às tabelas demo, address, prefs e contact. Generate SQL escreveu o SELECT no ecrã. Preview data executá-lo-ia. Não constróis uma consulta nova neste vídeo. O join fica no modelo de origem, não dentro de um satélite. O separador Joins é onde essas linhas foram escolhidas. Validate verifica a consulta antes de a publicares.
+      fr-FR: |
+        Une carte de requête est l'endroit où vit une jointure, pour que le vault n'ait pas à l'inventer. Cette boîte de dialogue est la requête all-customer-info. Elle joint le hub client aux tables demo, address, prefs et contact. Generate SQL a écrit le SELECT à l'écran. Preview data l'exécuterait. Tu ne construis pas une nouvelle requête dans cette vidéo. La jointure est sur le modèle source, pas dans un satellite. L'onglet Joins est l'endroit où ces traits ont été choisis. Validate contrôle la requête avant de la publier.
+      de-DE: |
+        Eine Abfragekarte ist der Ort, an dem ein Join lebt, damit der Vault ihn nicht erfinden muss. Dieser Dialog ist die Abfrage all-customer-info. Sie verbindet den Kunden-Hub mit den Tabellen demo, address, prefs und contact. Generate SQL hat das SELECT auf dem Bildschirm geschrieben. Preview data würde es ausführen. Du baust in diesem Video keine neue Abfrage. Der Join sitzt auf dem Quellenmodell, nicht in einem Satellite. Der Reiter Joins ist der Ort, an dem diese Linien gewählt wurden. Validate prüft die Abfrage, bevor du sie veröffentlichst.
+      it-IT: |
+        Una scheda di query è il posto in cui vive un join, così il vault non deve inventarlo. Questa finestra è la query all-customer-info. Unisce l'hub cliente alle tabelle demo, address, prefs e contact. Generate SQL ha scritto il SELECT sullo schermo. Preview data lo eseguirebbe. Non costruisci una nuova query in questo video. Il join sta sul modello di origine, non dentro un satellite. La scheda Joins è dove sono state scelte quelle linee. Validate controlla la query prima di pubblicarla.
 
   - id: json
     title: A JSON card
@@ -111,6 +155,18 @@ scenes:
         source, the JSON field, and the paths to pull out. You do not fill
         one in during this video. The extraction lives on the source model,
         and Push to catalog publishes it as its own feed.
+      zh-CN: |
+        JSON 卡片从存在某一列里的文档抽出字段。画布上的 order_shipment_tracking 就是这种卡片。它读取发运事件的 payload。对话框写出父源、JSON 字段，以及要抽出的路径。这一集不填写这个对话框。抽取住在源模型上，Push to catalog 把它发布成自己的供给。
+      es-ES: |
+        Una tarjeta JSON extrae campos de un documento guardado en una columna. En el lienzo, order_shipment_tracking es esa clase de tarjeta. Lee la carga del evento de envío. El diálogo nombra el origen padre, el campo JSON y las rutas que hay que sacar. No rellenas uno en este vídeo. La extracción vive en el modelo de origen, y Push to catalog la publica como su propio feed.
+      pt-PT: |
+        Um cartão JSON extrai campos de um documento guardado numa coluna. Na tela, order_shipment_tracking é esse tipo de cartão. Lê a carga do evento de expedição. O diálogo nomeia a origem pai, o campo JSON e os caminhos a extrair. Não preenches um neste vídeo. A extração vive no modelo de origem, e Push to catalog publica-a como o seu próprio feed.
+      fr-FR: |
+        Une carte JSON extrait des champs d'un document stocké dans une colonne. Sur le canevas, order_shipment_tracking est cette sorte de carte. Elle lit la charge de l'événement d'expédition. La boîte de dialogue nomme la source parente, le champ JSON et les chemins à extraire. Tu n'en remplis pas une dans cette vidéo. L'extraction vit sur le modèle source, et Push to catalog la publie comme son propre flux.
+      de-DE: |
+        Eine JSON-Karte zieht Felder aus einem Dokument, das in einer Spalte liegt. Auf der Zeichenfläche ist order_shipment_tracking so eine Karte. Sie liest die Nutzlast des Versandereignisses. Der Dialog nennt die Elternquelle, das JSON-Feld und die Pfade, die herausgezogen werden. Du füllst in diesem Video keinen aus. Die Extraktion lebt auf dem Quellenmodell, und Push to catalog veröffentlicht sie als eigenen Feed.
+      it-IT: |
+        Una scheda JSON estrae campi da un documento tenuto in una colonna. Sull'area, order_shipment_tracking è quel tipo di scheda. Legge il payload dell'evento di spedizione. La finestra nomina la sorgente padre, il campo JSON e i percorsi da estrarre. Non ne compili una in questo video. L'estrazione vive sul modello di origine, e Push to catalog la pubblica come feed proprio.
 
   - id: push
     title: Push to catalog
@@ -130,6 +186,18 @@ scenes:
         is the usual path, because it lists every card. A client can also
         query the model through Hop JDBC. That client stays outside this
         video.
+      zh-CN: |
+        工具栏上的 Push to catalog 把选中的卡片写进 hop/retail-example/sources。表、查询、JSON 抽取和 Pipeline 各自变成一份供给。已有同名供给会被覆盖。这份清单就是结果。customer_address 是其中一个名字。你也可以一次发布一张卡片。工具栏按钮是常用路径，因为它列出每张卡片。客户端还可以通过 Hop JDBC 查询这个模型。那个客户端不在这一集里。
+      es-ES: |
+        El botón Push to catalog de la barra escribe las tarjetas seleccionadas en hop/retail-example/sources. Tablas, consultas, extracciones JSON y Pipeline se vuelven cada una un feed. Un feed que ya tiene ese nombre se sobrescribe. Esta lista es el resultado. customer_address es uno de esos nombres. También puedes publicar una tarjeta cada vez. El botón de la barra es el camino habitual, porque lista todas las tarjetas. Un cliente también puede consultar el modelo por Hop JDBC. Ese cliente queda fuera de este vídeo.
+      pt-PT: |
+        O botão Push to catalog da barra escreve os cartões selecionados em hop/retail-example/sources. Tabelas, consultas, extrações JSON e Pipeline tornam-se cada uma um feed. Um feed que já tenha esse nome é substituído. Esta lista é o resultado. customer_address é um desses nomes. Também podes publicar um cartão de cada vez. O botão da barra é o caminho habitual, porque lista todos os cartões. Um cliente também pode consultar o modelo por Hop JDBC. Esse cliente fica fora deste vídeo.
+      fr-FR: |
+        Le bouton Push to catalog de la barre écrit les cartes sélectionnées dans hop/retail-example/sources. Tables, requêtes, extractions JSON et Pipeline deviennent chacun un flux. Un flux qui porte déjà ce nom est écrasé. Cette liste est le résultat. customer_address est l'un de ces noms. Tu peux aussi publier une carte à la fois. Le bouton de la barre est le chemin habituel, parce qu'il liste chaque carte. Un client peut aussi interroger le modèle par Hop JDBC. Ce client reste hors de cette vidéo.
+      de-DE: |
+        Die Schaltfläche Push to catalog in der Werkzeugleiste schreibt die gewählten Karten nach hop/retail-example/sources. Tabellen, Abfragen, JSON-Extraktionen und Pipeline werden je ein Feed. Ein Feed mit diesem Namen wird überschrieben. Diese Liste ist das Ergebnis. customer_address ist einer dieser Namen. Du kannst auch eine Karte nach der anderen veröffentlichen. Die Schaltfläche ist der übliche Weg, weil sie jede Karte aufführt. Ein Client kann das Modell auch über Hop JDBC abfragen. Dieser Client bleibt außerhalb dieses Videos.
+      it-IT: |
+        Il pulsante Push to catalog sulla barra scrive le schede selezionate in hop/retail-example/sources. Tabelle, query, estrazioni JSON e Pipeline diventano ciascuna un feed. Un feed che ha già quel nome viene sovrascritto. Questo elenco è il risultato. customer_address è uno di quei nomi. Puoi anche pubblicare una scheda alla volta. Il pulsante sulla barra è la strada abituale, perché elenca ogni scheda. Un client può anche interrogare il modello tramite Hop JDBC. Quel client resta fuori da questo video.
 
   - id: where-next
     title: Where next
@@ -149,3 +217,15 @@ scenes:
         at data-hopper.com. If the canvas is empty, run Import schema on
         the CRM connection and choose the customer tables. Bring this file
         with you. The generator reads the edges you just saw.
+      zh-CN: |
+        下一集从这张图生成 Data Vault。你会复查枢纽、链接和卫星，然后检查模型。生成不会创建表，也不会创建管道。这一集的书面指南是 Getting started, building an EDW 的第 1 章，在 data-hopper.com。如果画布是空的，对 CRM 连接运行 Import schema，并选择客户表。带上这个文件。生成器读取你刚看到的边。
+      es-ES: |
+        El siguiente vídeo genera un Data Vault a partir de esta imagen. Revisarás hubs, enlaces y satélites, y luego comprobarás el modelo. La generación no crea tablas ni crea tuberías. La guía escrita de este vídeo es Getting started, building an EDW, capítulo 1, en data-hopper.com. Si el lienzo está vacío, ejecuta Import schema en la conexión CRM y elige las tablas de cliente. Trae este archivo contigo. El generador lee las aristas que acabas de ver.
+      pt-PT: |
+        O vídeo seguinte gera um Data Vault a partir desta imagem. Vais rever hubs, ligações e satélites, e depois verificar o modelo. A geração não cria tabelas nem cria pipelines de carga. O guia escrito deste vídeo é Getting started, building an EDW, capítulo 1, em data-hopper.com. Se a tela estiver vazia, corre Import schema na ligação CRM e escolhe as tabelas de cliente. Traz este ficheiro contigo. O gerador lê as arestas que acabaste de ver.
+      fr-FR: |
+        La vidéo suivante génère un Data Vault à partir de cette image. Tu passeras en revue les hubs, les liens et les satellites, puis tu vérifieras le modèle. La génération ne crée pas de tables et ne crée pas de traitements de chargement. Le guide écrit de cette vidéo est Getting started, building an EDW, chapitre 1, sur data-hopper.com. Si le canevas est vide, lance Import schema sur la connexion CRM et choisis les tables client. Emporte ce fichier. Le générateur lit les arêtes que tu viens de voir.
+      de-DE: |
+        Das nächste Video erzeugt einen Data Vault aus diesem Bild. Du prüfst Hubs, Links und Satellites und kontrollierst dann das Modell. Die Erzeugung legt keine Tabellen an und legt keine Ladeabläufe an. Die schriftliche Anleitung für dieses Video ist Getting started, building an EDW, Kapitel 1, unter data-hopper.com. Wenn die Zeichenfläche leer ist, starte Import schema auf der Verbindung CRM und wähle die Kundentabellen. Nimm diese Datei mit. Der Generator liest die Kanten, die du gerade gesehen hast.
+      it-IT: |
+        Il prossimo video genera un Data Vault da questa immagine. Rivedrai hub, link e satelliti, poi controllerai il modello. La generazione non crea tabelle e non crea flussi di caricamento. La guida scritta di questo video è Getting started, building an EDW, capitolo 1, su data-hopper.com. Se l'area è vuota, esegui Import schema sulla connessione CRM e scegli le tabelle cliente. Porta con te questo file. Il generatore legge gli archi che hai appena visto.

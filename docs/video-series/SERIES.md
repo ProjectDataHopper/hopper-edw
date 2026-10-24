@@ -31,7 +31,7 @@ The voice for this series is `ara`. The Apache Hop series uses `orion`. Set `voi
 | `01-orientation` | 225 | What Data Hopper EDW is | English and six translations, voice `ara` |
 | `02-installation` | 226 | Installation and configuration | English and six translations, voice `ara` |
 | `03-sources` | 227 | Sources | English and six translations, voice `ara` |
-| `04-source-models` | 228 | Source models | English script, voice `ara`. Translations after the cut is heard |
+| `04-source-models` | 228 | Source models | English and six translations, voice `ara` |
 | `05-data-vault` | 229 | Building a Data Vault | Not started |
 | `06-resource-definition-group` | 230 | The resource definition group | Not started |
 | `07-updating-a-group` | 231 | Updating a resource definition group | Not started |
