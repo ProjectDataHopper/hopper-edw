@@ -32,6 +32,22 @@ keep_english:
 # Literal replacements applied to the text before text-to-speech.
 # Subtitles keep the narration as written. Longer patterns win.
 speak_as:
+  - pattern: plugins/misc/hopper-edw
+    say: plugins misc hopper E D W
+  - pattern: 2.20.0-SNAPSHOT
+    say: two twenty snapshot
+  - pattern: "2.20"
+    say: two twenty
+  - pattern: local-catalog
+    say: local catalog
+  - pattern: source-model
+    say: source model
+  - pattern: business-vault
+    say: business vault
+  - pattern: data-vault
+    say: data vault
+  - pattern: "54320"
+    say: five four three two zero
   - pattern: data-hopper.com
     say: data hopper dot com
   - pattern: retail-example

@@ -1,0 +1,171 @@
+#
+# Copyright 2026 i-Bridge bv
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# Narration for video 02. English is the source.
+# Add the other locales after this cut has been heard.
+video:
+  id: 02-installation
+  title: "Install and configure"
+  issue: 226
+  width: 1920
+  height: 1080
+  fps: 30
+  transition: fade
+  transition_ms: 400
+  padding_after_sec: 0.4
+  voice_id: ara
+  links:
+    - label: Getting started
+      url: https://github.com/ProjectDataHopper/hopper-edw/blob/main/docs/getting-started-edw.adoc
+    - label: Installation
+      url: https://github.com/ProjectDataHopper/hopper-edw/blob/main/docs/training/module-1-installation-and-setup.adoc
+    - label: Data Hopper
+      url: https://data-hopper.com/
+
+scenes:
+  - id: welcome
+    title: Welcome
+    visual: images/welcome.png
+    visual_type: still
+    card_title: Install and configure
+    card_subtitle: Hop 2.20, Java 21, then the project
+    shot: >
+      Title card. Title "Install and configure". Subtitle "Hop 2.20, Java 21,
+      then the project". No GUI.
+    narration:
+      en: |
+        Data Hopper EDW is a plugin for Apache Hop, not a second application.
+        This video installs it and prepares a project. You need Apache Hop
+        2.20 and Java 21. A development build uses Hop 2.20.0-SNAPSHOT.
+        Older Hop releases are not supported. The sample for the rest of
+        this series is the retail-example project. Open that, or start from
+        an empty Hop project and follow the same steps.
+
+  - id: install
+    title: Where it installs
+    visual: images/install.png
+    visual_type: still
+    card_title: Two places
+    card_subtitle: The plugin folder, and lib/core
+    shot: >
+      Title card. Title "Two places". Subtitle "The plugin folder, and
+      lib/core". No GUI. A later capture can show the Marketplace install
+      if the repository name stays readable.
+    narration:
+      en: |
+        There are two ways in. The Hop Marketplace installs the plugin from
+        the Data Hopper repository, then you restart Hop. The release zip
+        works offline. Unzip it into the Hop home folder. It writes two
+        places, and both matter. plugins/misc/hopper-edw holds the plugin,
+        the icons, and the offline guides. lib/core receives the Jinja
+        library the generated SQL uses. Copying only the jar leaves that
+        SQL unable to render. After a restart, Metadata shows an EDW category.
+
+  - id: configure
+    title: Configure EDW setup
+    visual: images/configure.png
+    visual_type: still
+    shot: >
+      The Configure EDW setup dialog, large enough to read every checkbox.
+      The committed still is docs/images/configure-edw-dialog.png, padded
+      to 16:9. local-catalog and the four configurations are selected.
+    narration:
+      en: |
+        Open Tools, Configure EDW setup. You can also accept the prompt the
+        first time you create a model. The dialog creates only what is
+        missing. local-catalog is the file catalog for this project. The
+        four shared configurations are source-model, data-vault,
+        business-vault, and dimensional. Each model points at one of those
+        with Edit model, Configuration. On retail-example the boxes are
+        already selected, because the project ships with them. On a new
+        project you tick them and press Create selected.
+
+  - id: connections
+    title: Three connections
+    visual: images/connections.png
+    visual_type: still
+    card_title: Three connections
+    card_subtitle: Source, Vault, and OPS
+    shot: >
+      Title card. Title "Three connections". Subtitle "Source, Vault, and
+      OPS". Replace with the metadata perspective on CRM, Vault, and OPS
+      when that list is readable.
+    narration:
+      en: |
+        Before that dialog is useful you want database connections. A source
+        connection holds the landing data. A Vault connection is where the
+        warehouse tables will be created. An OPS connection stores load
+        timings, harvest history, and quality history. retail-example
+        already has CRM, Vault, and OPS. The sample database is Postgres on
+        port 54320, and the user, password, and database are test. This
+        video stays in Hop GUI. You do not need to run a workflow yet.
+
+  - id: options
+    title: Plugin options
+    visual: images/options.png
+    visual_type: still
+    shot: >
+      Hop configuration perspective, Plugins, Data Vault 2.0. The hash-key
+      and Unicode checks are readable. The committed still is
+      docs/images/hopgui-configuration-perspecive-data-vault-options.png,
+      padded to 16:9.
+    narration:
+      en: |
+        A few choices apply to every model. Open the configuration
+        perspective and select Data Vault 2.0 under Plugins. Draw hash keys
+        in model controls whether those columns appear on the canvas.
+        Enforce Unicode-capable target databases is on, and it should stay
+        on. These settings live in Hop GUI, not inside the model files.
+        Leave the defaults. A later video will tell you when one of them
+        matters.
+
+  - id: not-the-group
+    title: Not the group yet
+    visual: images/not-the-group.png
+    visual_type: still
+    card_title: Not the group yet
+    card_subtitle: Four configurations, then stop
+    shot: >
+      Title card. Title "Not the group yet". Subtitle "Four configurations,
+      then stop". No GUI.
+    narration:
+      en: |
+        Configure EDW setup does not create a resource definition group.
+        That list is what you load, and it waits until a Data Vault model
+        exists. The next videos cover sources, the source model, and
+        generating the vault. The group is the video after those. The
+        checkpoint for this one is smaller. local-catalog exists, and the
+        four configurations exist. Your source, Vault, and OPS connections
+        answer.
+
+  - id: where-next
+    title: Where next
+    visual: images/where-next.png
+    visual_type: still
+    card_title: Where next
+    card_subtitle: Sources, and the catalog contract
+    shot: >
+      Title card. Title "Where next". Subtitle "Sources, and the catalog
+      contract". No GUI. The next episode is sources.
+    narration:
+      en: |
+        The next video is sources. A source is landing data, and the Data
+        Catalog holds the contract for that feed. You will open one feed
+        from retail-example and see the columns. The written guide for this
+        video is Getting started, building an EDW, chapter 0, at
+        data-hopper.com. If Hop does not show the EDW metadata types, the
+        plugin is not on the 2.20 line, or Hop was not restarted after the
+        install.
