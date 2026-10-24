@@ -36,6 +36,20 @@ speak_as:
     say: hop, retail example, sources
   - pattern: source-tables-crm.hsm
     say: source tables C R M dot h s m
+  - pattern: retail-360.hdv
+    say: retail three sixty dot H D V
+  - pattern: sat_customer_demo
+    say: sat customer demo
+  - pattern: sat_customer_prefs
+    say: sat customer prefs
+  - pattern: order_shipment_event
+    say: order shipment event
+  - pattern: hub_customer
+    say: hub customer
+  - pattern: hub_order
+    say: hub order
+  - pattern: lnk_order
+    say: link order
   - pattern: order_shipment_tracking
     say: order shipment tracking
   - pattern: all-customer-info

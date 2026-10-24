@@ -1,0 +1,147 @@
+#
+# Copyright 2026 i-Bridge bv
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# Narration for video 05. English is the source.
+# Add the other locales after this cut has been heard.
+video:
+  id: 05-data-vault
+  title: "Building a Data Vault"
+  issue: 229
+  width: 1920
+  height: 1080
+  fps: 30
+  transition: fade
+  transition_ms: 400
+  padding_after_sec: 0.4
+  voice_id: ara
+  links:
+    - label: Getting started
+      url: https://github.com/ProjectDataHopper/hopper-edw/blob/main/docs/getting-started-edw.adoc
+    - label: Generate
+      url: https://github.com/ProjectDataHopper/hopper-edw/blob/main/docs/generating-data-vault-from-source-model.adoc
+    - label: Data Hopper
+      url: https://data-hopper.com/
+
+scenes:
+  - id: welcome
+    title: Welcome
+    visual: images/welcome.png
+    visual_type: still
+    card_title: Building a Data Vault
+    card_subtitle: Generate it from the source model
+    shot: >
+      Title card. Title "Building a Data Vault". Subtitle "Generate it from
+      the source model". No GUI.
+    narration:
+      en: |
+        Generate Data Vault reads the source model and proposes a raw Data
+        Vault. Hubs, links, satellites, and reference tables. This video
+        uses that path on source-tables-crm.hsm. You can also start from an
+        empty .hdv, open the coach panel, and drag a catalog source onto
+        the canvas. That path is for a few tables, drawn by hand. Here we
+        let Generate propose the model. In retail-example the file is
+        retail-360.hdv.
+
+  - id: options
+    title: What Generate decides
+    visual: images/options.png
+    visual_type: still
+    shot: >
+      Top of the Generate Data Vault dialog. The classification checkboxes
+      are readable. The folder path is not in this still. Cropped from
+      docs/images/source-modeler-generate-data-vault-model-dialog.png.
+    narration:
+      en: |
+        The dialog starts with the choices Generate will apply. Create links
+        for leftover foreign keys. Create hub satellites from the descriptive
+        columns. Classify lookup tables as reference tables. Include the
+        query cards, the JSON cards, and the pipeline cards. Leave those
+        defaults for this pass. The list under the choices is what you
+        review before Apply.
+
+  - id: review
+    title: The review
+    visual: images/review.png
+    visual_type: still
+    shot: >
+      Generate Data Vault review table only. Proposed hubs, satellites, and
+      links are readable. The folder path from the original dialog is not
+      in this still. Cropped from
+      docs/images/source-modeler-generate-data-vault-model-dialog.png.
+    narration:
+      en: |
+        This is the review. Uncheck a row to skip it, and edit the vault
+        name before you apply. customer_hub becomes the hub hub_customer.
+        Its business key is customer_id. customer_address, customer_contact,
+        customer_demo, and customer_prefs become satellites of that hub.
+        order_header becomes hub_order, and the same source also proposes
+        the link lnk_order between hub_order and hub_customer.
+        order_shipment_event is skipped. Apply selected writes the model.
+
+  - id: result
+    title: Hubs, links, and satellites
+    visual: images/result.png
+    visual_type: still
+    shot: >
+      Generated Data Vault canvas with hub_customer and its satellites, and
+      the confirmation that 24 model tables were created. The committed
+      still is docs/images/source-modeler-generated-data-vault-result.png,
+      padded to 16:9. No personal paths.
+    narration:
+      en: |
+        Apply opens the generated canvas. A hub holds the business key.
+        hub_customer is that hub. A link holds the relationship between
+        hubs. A satellite holds the descriptive history. sat_customer_demo
+        and sat_customer_prefs hang off hub_customer. The message says 24
+        tables were created in the model, and the source tables that were
+        not yet in the catalog were published. The rows are still not in
+        the Vault database. This is a drawing.
+
+  - id: check
+    title: Check the model
+    visual: images/check.png
+    visual_type: still
+    card_title: Check the model
+    card_subtitle: Configuration data-vault, target Vault
+    shot: >
+      Title card. Title "Check the model". Subtitle "Configuration
+      data-vault, target Vault". No GUI.
+    narration:
+      en: |
+        Edit model points the .hdv at configuration data-vault and at the
+        target database Vault. Then run Check model. A clean check means
+        every feed is present and every key is mapped. Generation does not
+        create database tables and does not create pipelines. Those appear
+        when you update the resource definition group. Until that update,
+        retail-360.hdv is only the drawing you just reviewed.
+
+  - id: where-next
+    title: Where next
+    visual: images/where-next.png
+    visual_type: still
+    card_title: Where next
+    card_subtitle: Put the model on the group
+    shot: >
+      Title card. Title "Where next". Subtitle "Put the model on the
+      group". No GUI. The next episode is the resource definition group.
+    narration:
+      en: |
+        The next video creates the resource definition group and puts
+        retail-360.hdv on it. Harvest, validation, and the load all take
+        that list as their scope. The written guide for this video is
+        Getting started, building an EDW, chapter 2, at data-hopper.com.
+        If the review is empty, open source-tables-crm.hsm and run Generate
+        Data Vault again. Bring the .hdv with you.
