@@ -14,38 +14,147 @@
 # limitations under the License.
 #
 
+# Product words stay in English. The first line of each rendered description is the title.
 series:
   en: Part of the Data Hopper EDW getting started series.
+  zh-CN: Data Hopper EDW 入门系列的一部分。
+  es-ES: Parte de la serie de introducción a Data Hopper EDW.
+  pt-PT: Parte da série de introdução ao Data Hopper EDW.
+  fr-FR: Fait partie de la série de prise en main de Data Hopper EDW.
+  de-DE: Teil der Einführungsreihe zu Data Hopper EDW.
+  it-IT: Parte della serie introduttiva a Data Hopper EDW.
 chapters_label:
   en: Chapters
+  zh-CN: 章节
+  es-ES: Capítulos
+  pt-PT: Capítulos
+  fr-FR: Chapitres
+  de-DE: Kapitel
+  it-IT: Capitoli
 issue_label:
   en: Issue
+  zh-CN: 议题
+  es-ES: Incidencia
+  pt-PT: Incidência
+  fr-FR: Ticket
+  de-DE: Ticket
+  it-IT: Segnalazione
 title:
   en: Install and configure Data Hopper EDW
+  zh-CN: 安装并配置 Data Hopper EDW
+  es-ES: Instalar y configurar Data Hopper EDW
+  pt-PT: Instalar e configurar o Data Hopper EDW
+  fr-FR: Installer et configurer Data Hopper EDW
+  de-DE: Data Hopper EDW installieren und einrichten
+  it-IT: Installare e configurare Data Hopper EDW
 summary:
   en: >
     Install the Data Hopper EDW plugin on Apache Hop 2.20 with Java 21, then
     run Configure EDW setup. The dialog creates local-catalog and four shared
     configurations. It does not create a resource definition group.
+  zh-CN: >
+    在 Apache Hop 2.20 和 Java 21 上安装 Data Hopper EDW 插件，然后运行
+    Configure EDW setup。对话框创建 local-catalog 和四个共享配置。它不会创建
+    resource definition group。
+  es-ES: >
+    Instala el plugin Data Hopper EDW en Apache Hop 2.20 con Java 21 y ejecuta
+    Configure EDW setup. El diálogo crea local-catalog y cuatro configuraciones
+    compartidas. No crea un resource definition group.
+  pt-PT: >
+    Instala o plugin Data Hopper EDW no Apache Hop 2.20 com Java 21 e executa
+    Configure EDW setup. O diálogo cria local-catalog e quatro configurações
+    partilhadas. Não cria um resource definition group.
+  fr-FR: >
+    Installe le plugin Data Hopper EDW sur Apache Hop 2.20 avec Java 21, puis
+    lance Configure EDW setup. La boîte de dialogue crée local-catalog et
+    quatre configurations partagées. Elle ne crée pas de resource definition group.
+  de-DE: >
+    Installiere das Data Hopper EDW Plugin auf Apache Hop 2.20 mit Java 21 und
+    starte Configure EDW setup. Der Dialog erzeugt local-catalog und vier
+    gemeinsame Konfigurationen. Er erzeugt keine resource definition group.
+  it-IT: >
+    Installa il plugin Data Hopper EDW su Apache Hop 2.20 con Java 21, poi
+    avvia Configure EDW setup. La finestra crea local-catalog e quattro
+    configurazioni condivise. Non crea un resource definition group.
 link_labels:
   Getting started:
     en: Getting started
+    zh-CN: 入门
+    es-ES: Primeros pasos
+    pt-PT: Primeiros passos
+    fr-FR: Prise en main
+    de-DE: Erste Schritte
+    it-IT: Per iniziare
   Installation:
     en: Installation
+    zh-CN: 安装
+    es-ES: Instalación
+    pt-PT: Instalação
+    fr-FR: Installation
+    de-DE: Installation
+    it-IT: Installazione
   Data Hopper:
     en: Data Hopper
+    zh-CN: Data Hopper
+    es-ES: Data Hopper
+    pt-PT: Data Hopper
+    fr-FR: Data Hopper
+    de-DE: Data Hopper
+    it-IT: Data Hopper
 chapters:
   welcome:
     en: Welcome
+    zh-CN: 欢迎
+    es-ES: Bienvenida
+    pt-PT: Boas-vindas
+    fr-FR: Bienvenue
+    de-DE: Willkommen
+    it-IT: Benvenuto
   install:
     en: Where it installs
+    zh-CN: 安装位置
+    es-ES: Dónde se instala
+    pt-PT: Onde se instala
+    fr-FR: Où il s'installe
+    de-DE: Wohin es installiert wird
+    it-IT: Dove si installa
   configure:
     en: Configure EDW setup
+    zh-CN: Configure EDW setup
+    es-ES: Configure EDW setup
+    pt-PT: Configure EDW setup
+    fr-FR: Configure EDW setup
+    de-DE: Configure EDW setup
+    it-IT: Configure EDW setup
   connections:
     en: Three connections
+    zh-CN: 三个连接
+    es-ES: Tres conexiones
+    pt-PT: Três ligações
+    fr-FR: Trois connexions
+    de-DE: Drei Verbindungen
+    it-IT: Tre connessioni
   options:
     en: Plugin options
+    zh-CN: 插件选项
+    es-ES: Opciones del plugin
+    pt-PT: Opções do plugin
+    fr-FR: Options du plugin
+    de-DE: Plugin-Optionen
+    it-IT: Opzioni del plugin
   not-the-group:
     en: Not the group yet
+    zh-CN: 还不是分组
+    es-ES: Aún no es el grupo
+    pt-PT: Ainda não é o grupo
+    fr-FR: Pas encore le groupe
+    de-DE: Noch nicht die Gruppe
+    it-IT: Non ancora il gruppo
   where-next:
     en: Where next
+    zh-CN: 接下来
+    es-ES: Qué sigue
+    pt-PT: O que vem a seguir
+    fr-FR: Et ensuite
+    de-DE: Wie es weitergeht
+    it-IT: Che cosa viene dopo

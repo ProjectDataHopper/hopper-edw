@@ -15,7 +15,7 @@
 #
 
 # Narration for video 02. English is the source.
-# Add the other locales after this cut has been heard.
+# Product words stay in English. See docs/video-series/glossary.yaml.
 video:
   id: 02-installation
   title: "Install and configure"
@@ -27,6 +27,14 @@ video:
   transition_ms: 400
   padding_after_sec: 0.4
   voice_id: ara
+  locales:
+    - en
+    - zh-CN
+    - es-ES
+    - pt-PT
+    - fr-FR
+    - de-DE
+    - it-IT
   links:
     - label: Getting started
       url: https://github.com/ProjectDataHopper/hopper-edw/blob/main/docs/getting-started-edw.adoc
@@ -53,6 +61,18 @@ scenes:
         Older Hop releases are not supported. The sample for the rest of
         this series is the retail-example project. Open that, or start from
         an empty Hop project and follow the same steps.
+      zh-CN: |
+        Data Hopper EDW 是 Apache Hop 的一个插件，不是另一个程序。这一集安装它，并准备一个项目。你需要 Apache Hop 2.20 和 Java 21。开发构建使用 Hop 2.20.0-SNAPSHOT。更早的 Hop 版本不受支持。这一系列其余部分的示例是 retail-example 项目。打开它，或者从一个空的 Hop 项目开始，步骤相同。
+      es-ES: |
+        Data Hopper EDW es un plugin de Apache Hop, no una segunda aplicación. Este vídeo lo instala y prepara un proyecto. Necesitas Apache Hop 2.20 y Java 21. Una compilación de desarrollo usa Hop 2.20.0-SNAPSHOT. Las versiones anteriores de Hop no están soportadas. El ejemplo del resto de la serie es el proyecto retail-example. Ábrelo, o empieza desde un proyecto Hop vacío y sigue los mismos pasos.
+      pt-PT: |
+        Data Hopper EDW é um plugin do Apache Hop, não uma segunda aplicação. Este vídeo instala-o e prepara um projeto. Precisas do Apache Hop 2.20 e do Java 21. Uma build de desenvolvimento usa Hop 2.20.0-SNAPSHOT. Versões mais antigas do Hop não são suportadas. O exemplo do resto da série é o projeto retail-example. Abre-o, ou começa num projeto Hop vazio e segue os mesmos passos.
+      fr-FR: |
+        Data Hopper EDW est un plugin pour Apache Hop, pas une seconde application. Cette vidéo l'installe et prépare un projet. Il te faut Apache Hop 2.20 et Java 21. Une version de développement utilise Hop 2.20.0-SNAPSHOT. Les versions plus anciennes de Hop ne sont pas prises en charge. L'exemple pour la suite de la série est le projet retail-example. Ouvre-le, ou pars d'un projet Hop vide et suis les mêmes étapes.
+      de-DE: |
+        Data Hopper EDW ist ein Plugin für Apache Hop, keine zweite Anwendung. Dieses Video installiert es und bereitet ein Projekt vor. Du brauchst Apache Hop 2.20 und Java 21. Ein Entwicklungsbuild nutzt Hop 2.20.0-SNAPSHOT. Ältere Hop Versionen werden nicht unterstützt. Das Beispiel für den Rest der Reihe ist das Projekt retail-example. Öffne es, oder starte mit einem leeren Hop Projekt und folge denselben Schritten.
+      it-IT: |
+        Data Hopper EDW è un plugin per Apache Hop, non una seconda applicazione. Questo video lo installa e prepara un progetto. Ti servono Apache Hop 2.20 e Java 21. Una build di sviluppo usa Hop 2.20.0-SNAPSHOT. Le versioni precedenti di Hop non sono supportate. L'esempio per il resto della serie è il progetto retail-example. Aprilo, oppure parti da un progetto Hop vuoto e segui gli stessi passi.
 
   - id: install
     title: Where it installs
@@ -73,6 +93,18 @@ scenes:
         the icons, and the offline guides. lib/core receives the Jinja
         library the generated SQL uses. Copying only the jar leaves that
         SQL unable to render. After a restart, Metadata shows an EDW category.
+      zh-CN: |
+        有两条路。Hop Marketplace 从 Data Hopper 仓库安装插件，然后你重启 Hop。发行压缩包可以离线使用。把它解压到 Hop 主目录。它写入两个位置，两者都重要。plugins/misc/hopper-edw 放着插件、图标和离线指南。lib/core 接收生成 SQL 所用的 Jinja 库。只复制 jar 会让这些 SQL 无法渲染。重启之后，Metadata 里会出现 EDW 分类。
+      es-ES: |
+        Hay dos caminos. El Hop Marketplace instala el plugin desde el repositorio de Data Hopper, y luego reinicias Hop. El zip de la versión funciona sin red. Descomprímelo en la carpeta de inicio de Hop. Escribe en dos sitios, y los dos importan. plugins/misc/hopper-edw guarda el plugin, los iconos y las guías sin conexión. lib/core recibe la biblioteca Jinja que usa el SQL generado. Copiar solo el jar deja ese SQL sin poder generarse. Tras reiniciar, Metadata muestra una categoría EDW.
+      pt-PT: |
+        Há dois caminhos. O Hop Marketplace instala o plugin a partir do repositório Data Hopper, e depois reinicias o Hop. O zip da versão funciona sem rede. Descompacta-o na pasta de início do Hop. Escreve em dois sítios, e os dois importam. plugins/misc/hopper-edw guarda o plugin, os ícones e os guias offline. lib/core recebe a biblioteca Jinja que o SQL gerado usa. Copiar só o jar deixa esse SQL sem conseguir gerar-se. Depois de reiniciar, Metadata mostra uma categoria EDW.
+      fr-FR: |
+        Il y a deux chemins. Le Hop Marketplace installe le plugin depuis le dépôt Data Hopper, puis tu redémarres Hop. L'archive de la version fonctionne hors ligne. Décompresse-la dans le dossier d'accueil de Hop. Elle écrit à deux endroits, et les deux comptent. plugins/misc/hopper-edw contient le plugin, les icônes et les guides hors ligne. lib/core reçoit la bibliothèque Jinja que le SQL généré utilise. Copier seulement le jar empêche ce SQL de se générer. Après un redémarrage, Metadata affiche une catégorie EDW.
+      de-DE: |
+        Es gibt zwei Wege. Der Hop Marketplace installiert das Plugin aus dem Data Hopper Repository, danach startest du Hop neu. Das Release-Zip funktioniert offline. Entpacke es in den Hop Home-Ordner. Es schreibt an zwei Stellen, und beide zählen. plugins/misc/hopper-edw enthält das Plugin, die Icons und die Offline-Anleitungen. lib/core erhält die Jinja-Bibliothek, die das erzeugte SQL nutzt. Nur das Jar zu kopieren lässt dieses SQL nicht entstehen. Nach einem Neustart zeigt Metadata eine EDW-Kategorie.
+      it-IT: |
+        Ci sono due strade. L'Hop Marketplace installa il plugin dal repository Data Hopper, poi riavvii Hop. Lo zip della versione funziona offline. Decomprimilo nella cartella home di Hop. Scrive in due posti, ed entrambi contano. plugins/misc/hopper-edw contiene il plugin, le icone e le guide offline. lib/core riceve la libreria Jinja che usa l'SQL generato. Copiare solo il jar impedisce a quell'SQL di generarsi. Dopo un riavvio, Metadata mostra una categoria EDW.
 
   - id: configure
     title: Configure EDW setup
@@ -92,6 +124,18 @@ scenes:
         with Edit model, Configuration. On retail-example the boxes are
         already selected, because the project ships with them. On a new
         project you tick them and press Create selected.
+      zh-CN: |
+        打开 Tools 里的 Configure EDW setup。你也可以在第一次创建模型时接受那个提示。对话框只创建缺少的部分。local-catalog 是这个项目的文件目录。四个共享配置是 source-model、data-vault、business-vault 和 dimensional。每个模型用 Edit model 里的 Configuration 指向其中一个。在 retail-example 上这些框已经选中，因为项目自带它们。在新项目上你勾选它们，然后按 Create selected。
+      es-ES: |
+        Abre Tools, Configure EDW setup. También puedes aceptar el aviso la primera vez que creas un modelo. El diálogo crea solo lo que falta. local-catalog es el catálogo de archivos de este proyecto. Las cuatro configuraciones compartidas son source-model, data-vault, business-vault y dimensional. Cada modelo apunta a una de ellas con Edit model, Configuration. En retail-example las casillas ya están seleccionadas, porque el proyecto las trae. En un proyecto nuevo las marcas y pulsas Create selected.
+      pt-PT: |
+        Abre Tools, Configure EDW setup. Também podes aceitar o aviso na primeira vez que crias um modelo. O diálogo cria só o que falta. local-catalog é o catálogo de ficheiros deste projeto. As quatro configurações partilhadas são source-model, data-vault, business-vault e dimensional. Cada modelo aponta para uma delas com Edit model, Configuration. No retail-example as caixas já estão selecionadas, porque o projeto já as traz. Num projeto novo marcas-as e carregas em Create selected.
+      fr-FR: |
+        Ouvre Tools, Configure EDW setup. Tu peux aussi accepter l'invite la première fois que tu crées un modèle. La boîte de dialogue ne crée que ce qui manque. local-catalog est le catalogue de fichiers de ce projet. Les quatre configurations partagées sont source-model, data-vault, business-vault et dimensional. Chaque modèle en désigne une avec Edit model, Configuration. Sur retail-example les cases sont déjà cochées, parce que le projet les apporte. Sur un projet neuf tu les coches et tu appuies sur Create selected.
+      de-DE: |
+        Öffne Tools, Configure EDW setup. Du kannst auch die Rückfrage annehmen, wenn du zum ersten Mal ein Modell anlegst. Der Dialog erzeugt nur, was fehlt. local-catalog ist der Dateikatalog dieses Projekts. Die vier gemeinsamen Konfigurationen sind source-model, data-vault, business-vault und dimensional. Jedes Modell zeigt mit Edit model, Configuration auf eine davon. Bei retail-example sind die Kästen schon ausgewählt, weil das Projekt sie mitbringt. Bei einem neuen Projekt hakst du sie an und drückst Create selected.
+      it-IT: |
+        Apri Tools, Configure EDW setup. Puoi anche accettare la richiesta la prima volta che crei un modello. La finestra crea solo ciò che manca. local-catalog è il catalogo di file di questo progetto. Le quattro configurazioni condivise sono source-model, data-vault, business-vault e dimensional. Ogni modello ne indica una con Edit model, Configuration. Su retail-example le caselle sono già selezionate, perché il progetto le include. Su un progetto nuovo le spunti e premi Create selected.
 
   - id: connections
     title: Three connections
@@ -112,6 +156,18 @@ scenes:
         already has CRM, Vault, and OPS. The sample database is Postgres on
         port 54320, and the user, password, and database are test. This
         video stays in Hop GUI. You do not need to run a workflow yet.
+      zh-CN: |
+        在那个对话框有用之前，你需要数据库连接。源连接保存落地数据。Vault 连接是将来创建仓库表的地方。OPS 连接保存加载计时、采集历史和质量历史。retail-example 已经有 CRM、Vault 和 OPS。示例数据库是端口 54320 上的 Postgres，用户、密码和数据库名都是 test。这一集留在 Hop GUI 里。你还不需要运行 Workflow。
+      es-ES: |
+        Antes de que ese diálogo sirva, quieres conexiones de base de datos. Una conexión de origen guarda los datos de aterrizaje. Una conexión Vault es donde se crearán las tablas del almacén. Una conexión OPS guarda tiempos de carga, historial de cosecha e historial de calidad. retail-example ya tiene CRM, Vault y OPS. La base de ejemplo es Postgres en el puerto 54320, y el usuario, la contraseña y la base se llaman test. Este vídeo se queda en Hop GUI. Aún no necesitas ejecutar un Workflow.
+      pt-PT: |
+        Antes de esse diálogo ser útil, queres ligações de base de dados. Uma ligação de origem guarda os dados de chegada. Uma ligação Vault é onde as tabelas do armazém serão criadas. Uma ligação OPS guarda tempos de carga, histórico de colheita e histórico de qualidade. O retail-example já tem CRM, Vault e OPS. A base de exemplo é Postgres na porta 54320, e o utilizador, a palavra-passe e a base chamam-se test. Este vídeo fica no Hop GUI. Ainda não precisas de correr um Workflow.
+      fr-FR: |
+        Avant que cette boîte de dialogue serve, il te faut des connexions de base de données. Une connexion source garde les données d'atterrissage. Une connexion Vault est l'endroit où les tables de l'entrepôt seront créées. Une connexion OPS garde les durées de chargement, l'historique de récolte et l'historique de qualité. retail-example a déjà CRM, Vault et OPS. La base d'exemple est Postgres sur le port 54320, et l'utilisateur, le mot de passe et la base s'appellent test. Cette vidéo reste dans Hop GUI. Tu n'as pas encore à lancer un Workflow.
+      de-DE: |
+        Bevor dieser Dialog nützt, brauchst du Datenbankverbindungen. Eine Quellverbindung hält die Landedaten. Eine Vault-Verbindung ist der Ort, an dem die Warehouse-Tabellen entstehen. Eine OPS-Verbindung speichert Ladezeiten, Ernte-Historie und Qualitäts-Historie. retail-example hat bereits CRM, Vault und OPS. Die Beispieldatenbank ist Postgres auf Port 54320, und Benutzer, Passwort und Datenbank heißen test. Dieses Video bleibt in Hop GUI. Du musst noch kein Workflow starten.
+      it-IT: |
+        Prima che quella finestra serva, ti servono connessioni di database. Una connessione sorgente tiene i dati di atterraggio. Una connessione Vault è dove verranno create le tabelle del warehouse. Una connessione OPS conserva i tempi di carico, la storia del harvest e la storia della qualità. retail-example ha già CRM, Vault e OPS. Il database di esempio è Postgres sulla porta 54320, e utente, password e database si chiamano test. Questo video resta in Hop GUI. Non devi ancora eseguire un Workflow.
 
   - id: options
     title: Plugin options
@@ -131,6 +187,18 @@ scenes:
         on. These settings live in Hop GUI, not inside the model files.
         Leave the defaults. A later video will tell you when one of them
         matters.
+      zh-CN: |
+        有几项选择作用于每个模型。打开配置透视图，在 Plugins 下面选择 Hopper EDW。Draw hash keys in model 控制这些列是否画在画布上。Enforce Unicode-capable target databases 默认打开，请保持打开。这些设置属于 Hop GUI，不属于模型文件。先留着默认值。后面的视频会说明何时要改一项。
+      es-ES: |
+        Unas pocas opciones valen para todos los modelos. Abre la perspectiva de configuración y elige Hopper EDW bajo Plugins. Draw hash keys in model decide si esas columnas aparecen en el lienzo. Enforce Unicode-capable target databases está activada, y debe seguir así. Estos ajustes viven en Hop GUI, no dentro de los archivos del modelo. Deja los valores por defecto. Un vídeo posterior te dirá cuándo importa uno de ellos.
+      pt-PT: |
+        Algumas opções valem para todos os modelos. Abre a perspetiva de configuração e escolhe Hopper EDW em Plugins. Draw hash keys in model decide se essas colunas aparecem na tela. Enforce Unicode-capable target databases está ligada, e deve continuar ligada. Estas definições vivem no Hop GUI, não dentro dos ficheiros do modelo. Deixa os valores por omissão. Um vídeo posterior diz-te quando uma delas importa.
+      fr-FR: |
+        Quelques choix valent pour chaque modèle. Ouvre la perspective de configuration et sélectionne Hopper EDW sous Plugins. Draw hash keys in model décide si ces colonnes apparaissent sur le canevas. Enforce Unicode-capable target databases est activé, et il doit le rester. Ces réglages vivent dans Hop GUI, pas dans les fichiers du modèle. Laisse les valeurs par défaut. Une vidéo plus tard te dira quand l'un d'eux compte.
+      de-DE: |
+        Ein paar Entscheidungen gelten für jedes Modell. Öffne die Konfigurationsperspektive und wähle Hopper EDW unter Plugins. Draw hash keys in model steuert, ob diese Spalten auf der Zeichenfläche erscheinen. Enforce Unicode-capable target databases ist an, und das soll so bleiben. Diese Einstellungen leben in Hop GUI, nicht in den Modelldateien. Lass die Vorgaben stehen. Ein späteres Video sagt dir, wann eine davon zählt.
+      it-IT: |
+        Alcune scelte valgono per ogni modello. Apri la prospettiva di configurazione e seleziona Hopper EDW sotto Plugins. Draw hash keys in model decide se quelle colonne compaiono sull'area di disegno. Enforce Unicode-capable target databases è attivo, e deve restarlo. Queste impostazioni stanno in Hop GUI, non nei file del modello. Lascia i valori predefiniti. Un video successivo ti dirà quando uno di essi conta.
 
   - id: not-the-group
     title: Not the group yet
@@ -150,6 +218,18 @@ scenes:
         checkpoint for this one is smaller. local-catalog exists, and the
         four configurations exist. Your source, Vault, and OPS connections
         answer.
+      zh-CN: |
+        Configure EDW setup 不会创建 resource definition group。那份清单才是你要加载的东西，它要等到 Data Vault 模型存在之后。接下来的视频讲源、源模型，以及生成 vault。这个组是那些视频之后的一集。这一集的检查点更小。local-catalog 存在，四个配置也存在。你的源、Vault 和 OPS 连接能应答。
+      es-ES: |
+        Configure EDW setup no crea un resource definition group. Esa lista es lo que cargas, y espera hasta que exista un modelo Data Vault. Los próximos vídeos cubren los orígenes, el modelo de origen y la generación del vault. El grupo es el vídeo posterior. El punto de control de este es más pequeño. local-catalog existe, y existen las cuatro configuraciones. Tus conexiones de origen, Vault y OPS responden.
+      pt-PT: |
+        Configure EDW setup não cria um resource definition group. Essa lista é o que carregas, e espera até existir um modelo Data Vault. Os vídeos seguintes cobrem as origens, o modelo de origem e a geração do vault. O grupo é o vídeo a seguir a esses. O ponto de controlo deste é mais pequeno. local-catalog existe, e as quatro configurações existem. As tuas ligações de origem, Vault e OPS respondem.
+      fr-FR: |
+        Configure EDW setup ne crée pas de resource definition group. Cette liste est ce que tu charges, et elle attend qu'un modèle Data Vault existe. Les prochaines vidéos couvrent les sources, le modèle source et la génération du vault. Le groupe est la vidéo d'après. Le point de contrôle de celle-ci est plus petit. local-catalog existe, et les quatre configurations existent. Tes connexions source, Vault et OPS répondent.
+      de-DE: |
+        Configure EDW setup erzeugt keine resource definition group. Diese Liste ist das, was du lädst, und sie wartet, bis ein Data Vault Modell existiert. Die nächsten Videos behandeln Quellen, das Quellenmodell und das Erzeugen des Vault. Die Gruppe ist das Video danach. Der Kontrollpunkt für dieses ist kleiner. local-catalog existiert, und die vier Konfigurationen existieren. Deine Quell-, Vault- und OPS-Verbindungen antworten.
+      it-IT: |
+        Configure EDW setup non crea un resource definition group. Quell'elenco è ciò che carichi, e aspetta che esista un modello Data Vault. I prossimi video coprono le sorgenti, il modello di origine e la generazione del vault. Il gruppo è il video successivo. Il punto di controllo di questo è più piccolo. local-catalog esiste, e le quattro configurazioni esistono. Le tue connessioni sorgente, Vault e OPS rispondono.
 
   - id: where-next
     title: Where next
@@ -169,3 +249,15 @@ scenes:
         data-hopper.com. If Hop does not show the EDW metadata types, the
         plugin is not on the 2.20 line, or Hop was not restarted after the
         install.
+      zh-CN: |
+        下一集是源。源是落地数据，Data Catalog 保存这份供给的契约。你会打开 retail-example 里的一份供给，并看到列。这一集的书面指南是 Getting started, building an EDW 的第 0 章，在 data-hopper.com。如果 Hop 没有显示 EDW 元数据类型，插件就不在 2.20 这一线上，或者安装之后没有重启 Hop。
+      es-ES: |
+        El siguiente vídeo trata de las fuentes. Una fuente son datos de aterrizaje, y el Data Catalog guarda el contrato de ese feed. Abrirás un feed de retail-example y verás las columnas. La guía escrita de este vídeo es Getting started, building an EDW, capítulo 0, en data-hopper.com. Si Hop no muestra los tipos de metadatos EDW, el plugin no está en la línea 2.20, o Hop no se reinició tras la instalación.
+      pt-PT: |
+        O vídeo seguinte é sobre origens. Uma origem são dados de chegada, e o Data Catalog guarda o contrato desse feed. Vais abrir um feed do retail-example e ver as colunas. O guia escrito deste vídeo é Getting started, building an EDW, capítulo 0, em data-hopper.com. Se o Hop não mostrar os tipos de metadados EDW, o plugin não está na linha 2.20, ou o Hop não foi reiniciado depois da instalação.
+      fr-FR: |
+        La vidéo suivante parle des sources. Une source, ce sont des données d'atterrissage, et le Data Catalog porte le contrat de ce flux. Tu ouvriras un flux de retail-example et tu verras les colonnes. Le guide écrit de cette vidéo est Getting started, building an EDW, chapitre 0, sur data-hopper.com. Si Hop n'affiche pas les types de métadonnées EDW, le plugin n'est pas sur la ligne 2.20, ou Hop n'a pas été redémarré après l'installation.
+      de-DE: |
+        Das nächste Video behandelt Quellen. Eine Quelle sind Landedaten, und der Data Catalog hält den Vertrag für diesen Feed. Du öffnest einen Feed aus retail-example und siehst die Spalten. Die schriftliche Anleitung für dieses Video ist Getting started, building an EDW, Kapitel 0, unter data-hopper.com. Wenn Hop die EDW-Metadatentypen nicht zeigt, liegt das Plugin nicht auf der Linie 2.20, oder Hop wurde nach der Installation nicht neu gestartet.
+      it-IT: |
+        Il prossimo video parla delle sorgenti. Una sorgente sono dati di atterraggio, e il Data Catalog tiene il contratto di quel feed. Aprirai un feed di retail-example e vedrai le colonne. La guida scritta di questo video è Getting started, building an EDW, capitolo 0, su data-hopper.com. Se Hop non mostra i tipi di metadati EDW, il plugin non è sulla linea 2.20, oppure Hop non è stato riavviato dopo l'installazione.
