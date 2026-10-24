@@ -1,0 +1,151 @@
+#
+# Copyright 2026 i-Bridge bv
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# Narration for video 04. English is the source.
+# Add the other locales after this cut has been heard.
+video:
+  id: 04-source-models
+  title: "Source models"
+  issue: 228
+  width: 1920
+  height: 1080
+  fps: 30
+  transition: fade
+  transition_ms: 400
+  padding_after_sec: 0.4
+  voice_id: ara
+  links:
+    - label: Getting started
+      url: https://github.com/ProjectDataHopper/hopper-edw/blob/main/docs/getting-started-edw.adoc
+    - label: Source modeler
+      url: https://github.com/ProjectDataHopper/hopper-edw/blob/main/docs/source-modeler-overview.adoc
+    - label: Data Hopper
+      url: https://data-hopper.com/
+
+scenes:
+  - id: welcome
+    title: Welcome
+    visual: images/welcome.png
+    visual_type: still
+    card_title: Source models
+    card_subtitle: One picture of one source system
+    shot: >
+      Title card. Title "Source models". Subtitle "One picture of one source
+      system". No GUI.
+    narration:
+      en: |
+        A source model, extension .hsm, is the picture of one source system.
+        This video opens source-tables-crm.hsm in the retail-example project.
+        The last video named the feeds. This one draws the tables, the keys,
+        and the relationships those feeds come from. Edit model points the
+        file at catalog connection local-catalog and configuration
+        source-model. Both already exist from Configure EDW setup. The file
+        is not a copy of the rows. It is the drawing the later models trust.
+
+  - id: canvas
+    title: The canvas
+    visual: images/canvas.png
+    visual_type: still
+    shot: >
+      Source model canvas for source-tables-crm.hsm. Tables, primary keys,
+      and relationship lines are readable. The committed still is
+      docs/images/source-modeler-example.png.
+    narration:
+      en: |
+        This is that canvas. Each table card carries its primary key.
+        customer_address and order_header are tables. The lines between
+        cards are relationships. Import schema from the CRM connection put
+        the cards here: you choose the tables, and the columns and keys
+        arrive. A foreign key in the database becomes an edge. If the
+        database has none, hold Shift and drag from the child card to the
+        parent card. On the right, customer_demo, customer_contact,
+        customer_address, and customer_prefs each point back to the customer
+        hub. Generate Data Vault reads these edges.
+
+  - id: query
+    title: A query card
+    visual: images/query.png
+    visual_type: still
+    shot: >
+      Source query dialog for all-customer-info, SQL tab, with the joins
+      readable and the canvas behind it. The committed still is
+      docs/images/source-modeler-retail-example-with-query-dialog-generated-sql.png,
+      padded to 16:9.
+    narration:
+      en: |
+        A query card is where a join lives, so the vault does not have to
+        invent it. This dialog is the query all-customer-info. It joins the
+        customer hub to the demo, the address, the prefs, and the contact
+        tables. Generate SQL wrote the SELECT on screen. Preview data would
+        run it. You do not build a new query in this video. The join sits
+        on the source model, not inside a satellite. The Joins tab is where
+        those lines were chosen. Validate checks the query before you
+        publish it.
+
+  - id: json
+    title: A JSON card
+    visual: images/json.png
+    visual_type: still
+    shot: >
+      Source JSON dialog, parent source and extracted fields readable. The
+      committed still is docs/images/source-modeler-json-source.png, padded
+      to 16:9. The canvas also shows the order_shipment_tracking JSON card.
+    narration:
+      en: |
+        A JSON card extracts fields from a document stored in a column. On
+        the canvas, order_shipment_tracking is that kind of card. It reads
+        the payload of the shipment event. The dialog names the parent
+        source, the JSON field, and the paths to pull out. You do not fill
+        one in during this video. The extraction lives on the source model,
+        and Push to catalog publishes it as its own feed.
+
+  - id: push
+    title: Push to catalog
+    visual: images/push.png
+    visual_type: still
+    shot: >
+      Data Catalog perspective, namespace hop/retail-example/sources,
+      customer_address selected. Same still as episode 3. This is the list
+      Push to catalog writes.
+    narration:
+      en: |
+        Toolbar Push to catalog writes the selected cards into
+        hop/retail-example/sources. Tables, queries, JSON extractions, and
+        pipelines each become a feed. A feed that already has that name is
+        overwritten. This list is the result. customer_address is one of
+        those names. You can publish one card at a time. The toolbar button
+        is the usual path, because it lists every card. A client can also
+        query the model through Hop JDBC. That client stays outside this
+        video.
+
+  - id: where-next
+    title: Where next
+    visual: images/where-next.png
+    visual_type: still
+    card_title: Where next
+    card_subtitle: Generate the Data Vault
+    shot: >
+      Title card. Title "Where next". Subtitle "Generate the Data Vault".
+      No GUI. The next episode is building a Data Vault.
+    narration:
+      en: |
+        The next video generates a Data Vault from this picture. You will
+        review hubs, links, and satellites, then check the model. Generation
+        does not create tables and does not create pipelines. The written
+        guide for this video is Getting started, building an EDW, chapter 1,
+        at data-hopper.com. If the canvas is empty, run Import schema on
+        the CRM connection and choose the customer tables. Bring this file
+        with you. The generator reads the edges you just saw.
