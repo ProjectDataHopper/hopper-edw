@@ -17,37 +17,148 @@
 # Product words stay in English. The first line of each rendered description is the title.
 series:
   en: Part of the Data Hopper EDW getting started series.
+  zh-CN: Data Hopper EDW 入门系列的一部分。
+  es-ES: Parte de la serie de introducción a Data Hopper EDW.
+  pt-PT: Parte da série de introdução ao Data Hopper EDW.
+  fr-FR: Fait partie de la série de prise en main de Data Hopper EDW.
+  de-DE: Teil der Einführungsreihe zu Data Hopper EDW.
+  it-IT: Parte della serie introduttiva a Data Hopper EDW.
 chapters_label:
   en: Chapters
+  zh-CN: 章节
+  es-ES: Capítulos
+  pt-PT: Capítulos
+  fr-FR: Chapitres
+  de-DE: Kapitel
+  it-IT: Capitoli
 issue_label:
   en: Issue
+  zh-CN: 议题
+  es-ES: Incidencia
+  pt-PT: Incidência
+  fr-FR: Ticket
+  de-DE: Ticket
+  it-IT: Segnalazione
 title:
   en: Metrics and analytics operations
+  zh-CN: 指标与分析运维
+  es-ES: Métricas y operaciones de análisis
+  pt-PT: Métricas e operações de análise
+  fr-FR: Métriques et opérations d'analyse
+  de-DE: Metriken und Analysebetrieb
+  it-IT: Metriche e operazioni di analisi
 summary:
   en: >
     The last video. Open This run and History for a retail-sources load,
     then Create operational analytics on the OPS database. A Hop Lineage
     View shows where f_orders came from. An execution map is the picture
     of one run.
+  zh-CN: >
+    最后一集。打开一次 retail-sources 加载的 This run 和 History，然后在 OPS 数据库上使用 Create operational analytics。Hop Lineage View 显示 f_orders 从哪里来。执行图是一次运行的画面。
+  es-ES: >
+    El último vídeo. Abre This run y History de una carga de retail-sources,
+    y luego Create operational analytics sobre la base OPS. Una Hop Lineage
+    View muestra de dónde viene f_orders. Un mapa de ejecución es la imagen
+    de una ejecución.
+  pt-PT: >
+    O último vídeo. Abre This run e History de uma carga de retail-sources,
+    e depois Create operational analytics sobre a base OPS. Uma Hop Lineage
+    View mostra de onde vem f_orders. Um mapa de execução é a imagem de uma
+    execução.
+  fr-FR: >
+    La dernière vidéo. Ouvre This run et History d'un chargement
+    retail-sources, puis Create operational analytics sur la base OPS.
+    Une Hop Lineage View montre d'où vient f_orders. Une carte d'exécution
+    est l'image d'une exécution.
+  de-DE: >
+    Das letzte Video. Öffne This run und History für einen retail-sources
+    Ladevorgang, dann Create operational analytics auf der OPS-Datenbank.
+    Eine Hop Lineage View zeigt, woher f_orders kommt. Eine Ausführungskarte
+    ist das Bild eines Laufs.
+  it-IT: >
+    L'ultimo video. Apri This run e History di un carico di retail-sources,
+    poi Create operational analytics sul database OPS. Una Hop Lineage View
+    mostra da dove arriva f_orders. Una mappa di esecuzione è l'immagine di
+    un'esecuzione.
 link_labels:
   Getting started:
     en: Getting started
+    zh-CN: 入门
+    es-ES: Primeros pasos
+    pt-PT: Primeiros passos
+    fr-FR: Prise en main
+    de-DE: Erste Schritte
+    it-IT: Per iniziare
   Operational analytics:
     en: Operational analytics
+    zh-CN: 运营分析
+    es-ES: Analítica operativa
+    pt-PT: Analítica operacional
+    fr-FR: Analytique opérationnelle
+    de-DE: Operative Analytik
+    it-IT: Analitica operativa
   Training:
     en: Training
+    zh-CN: 培训
+    es-ES: Formación
+    pt-PT: Formação
+    fr-FR: Formation
+    de-DE: Training
+    it-IT: Formazione
   Data Hopper:
     en: Data Hopper
+    zh-CN: Data Hopper
+    es-ES: Data Hopper
+    pt-PT: Data Hopper
+    fr-FR: Data Hopper
+    de-DE: Data Hopper
+    it-IT: Data Hopper
 chapters:
   welcome:
     en: Welcome
+    zh-CN: 欢迎
+    es-ES: Bienvenida
+    pt-PT: Boas-vindas
+    fr-FR: Bienvenue
+    de-DE: Willkommen
+    it-IT: Benvenuto
   metrics:
     en: This run and History
+    zh-CN: 本次运行与历史
+    es-ES: Esta ejecución y el historial
+    pt-PT: Esta execução e o histórico
+    fr-FR: Cette exécution et l'historique
+    de-DE: Dieser Lauf und die Historie
+    it-IT: Questa esecuzione e la cronologia
   create:
     en: Create operational analytics
+    zh-CN: Create operational analytics
+    es-ES: Create operational analytics
+    pt-PT: Create operational analytics
+    fr-FR: Create operational analytics
+    de-DE: Create operational analytics
+    it-IT: Create operational analytics
   lineage:
     en: Where f_orders came from
+    zh-CN: f_orders 从哪里来
+    es-ES: De dónde viene f_orders
+    pt-PT: De onde vem f_orders
+    fr-FR: D'où vient f_orders
+    de-DE: Woher f_orders kommt
+    it-IT: Da dove arriva f_orders
   map:
     en: The picture of one run
+    zh-CN: 一次运行的画面
+    es-ES: La imagen de una ejecución
+    pt-PT: A imagem de uma execução
+    fr-FR: L'image d'une exécution
+    de-DE: Das Bild eines Laufs
+    it-IT: L'immagine di un'esecuzione
   where-next:
     en: Where next
+    zh-CN: 接下来
+    es-ES: Qué sigue
+    pt-PT: O que vem a seguir
+    fr-FR: Et ensuite
+    de-DE: Wie es weitergeht
+    it-IT: Che cosa viene dopo
