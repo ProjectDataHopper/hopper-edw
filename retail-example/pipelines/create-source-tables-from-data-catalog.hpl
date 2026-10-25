@@ -191,6 +191,39 @@ limitations under the License.
     <attributes/>
   </transform>
   <transform>
+    <type>FilterRows</type>
+    <name>physical_table &lt;&gt; hop_executions</name>
+    <compare>
+      <condition>
+        <negated>N</negated>
+        <operator>-</operator>
+        <leftvalue>physical_table</leftvalue>
+        <function>&lt;&gt;</function>
+        <value>
+          <name>constant</name>
+          <type>String</type>
+          <text>hop_executions</text>
+          <length>-1</length>
+          <precision>-1</precision>
+          <isnull>N</isnull>
+          <mask/>
+        </value>
+        <conditions/>
+      </condition>
+    </compare>
+    <distribute>Y</distribute>
+    <copies>1</copies>
+    <GUI>
+      <xloc>752</xloc>
+      <yloc>80</yloc>
+    </GUI>
+    <partitioning>
+      <method>none</method>
+      <schema_name/>
+    </partitioning>
+    <attributes/>
+  </transform>
+  <transform>
     <type>RecordDefinitionDdl</type>
     <name>Record Definition DDL</name>
     <catalog_connection>local-catalog</catalog_connection>
@@ -212,7 +245,7 @@ limitations under the License.
     <distribute>Y</distribute>
     <copies>1</copies>
     <GUI>
-      <xloc>896</xloc>
+      <xloc>1040</xloc>
       <yloc>80</yloc>
     </GUI>
     <partitioning>
@@ -234,6 +267,11 @@ limitations under the License.
     </hop>
     <hop>
       <from>namespace, name, db, schema, table, dv_source_type</from>
+      <to>physical_table &lt;&gt; hop_executions</to>
+      <enabled>Y</enabled>
+    </hop>
+    <hop>
+      <from>physical_table &lt;&gt; hop_executions</from>
       <to>Record Definition DDL</to>
       <enabled>Y</enabled>
     </hop>

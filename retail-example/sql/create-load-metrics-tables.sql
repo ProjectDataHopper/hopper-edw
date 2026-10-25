@@ -147,4 +147,8 @@ CREATE INDEX IF NOT EXISTS idx_hop_exec_parent ON hop_executions(parent_id)
 ;
 CREATE INDEX IF NOT EXISTS idx_hop_exec_status ON hop_executions(status_description)
 ;
+ALTER TABLE hop_executions ADD COLUMN IF NOT EXISTS project_id VARCHAR(1024);
+ALTER TABLE hop_executions ADD COLUMN IF NOT EXISTS state_json TEXT;
+CREATE INDEX IF NOT EXISTS idx_hop_exec_project ON hop_executions(project_id)
+;
 
