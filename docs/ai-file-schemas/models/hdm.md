@@ -38,6 +38,7 @@ Kimball-style dimensional model: dimensions, facts, junk dimensions, bridges, di
 ## Logical contracts and field documentation
 
 - Table `sourceType` may be `NONE` (logical: no load source). Default remains `SQL` for existing files.
+- Optional `<load_strategy>` on a physical table. Absent means Initial / Reload. `strategy` is `INITIAL_RELOAD`, `INITIAL_LOAD`, `INCREMENTAL`, or `INCREMENTAL_LATE_ARRIVING`. `value_binding` is `VARIABLES`, `JDBC_PARAMETERS`, or `BOTH`. `baseline_column` is the target high-water mark. Only Initial / Reload and Incremental are executed.
 - Attributes, natural keys, measures, and degenerates may include nested `documentation`: `description`, Markdown `notes`, Markdown `requirements`, and `required` (Y/N, default required).  
 
 ## Anti-patterns

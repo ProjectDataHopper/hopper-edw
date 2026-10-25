@@ -44,6 +44,7 @@ import org.apache.hop.core.logging.LoggingObjectType;
 import org.apache.hop.core.logging.SimpleLoggingObject;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.core.variables.Variables;
 import org.apache.hop.core.vfs.HopVfs;
 import org.apache.hop.core.xml.XmlHandler;
 import org.apache.hop.i18n.BaseMessages;
@@ -69,7 +70,9 @@ import org.hopper.edw.datavault.metadata.GeneratedPipelineMetadataConstants;
 import org.hopper.edw.datavault.metadata.ModelConfigurationResolver;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalConfiguration;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
+import org.hopper.edw.datavault.metadata.dimensional.DmLoadStrategySupport;
 import org.hopper.edw.datavault.metadata.dimensional.DmSourceRecordDefinitionSupport;
+import org.hopper.edw.datavault.metadata.dimensional.DmTableBase;
 import org.hopper.edw.datavault.metadata.dimensional.DmTargetDatabaseSupport;
 import org.hopper.edw.datavault.metadata.dimensional.IDmTable;
 import org.hopper.edw.datavault.metadata.dimensional.pipeline.DmGeneratedPipelineSupport;
@@ -568,6 +571,9 @@ public class ActionDimensionalUpdate extends ActionBase implements Cloneable, IA
 
       List<PipelineMeta> allPipelineMetas = new ArrayList<>();
       Date loadTimestamp = new Date();
+      DatabaseMeta loadTargetDatabase =
+          DmTargetDatabaseSupport.loadTargetDatabase(
+              getMetadataProvider(), dmModel.getConfigurationOrDefault());
 
       for (IDmTable table : DmUpdateExecutionSupport.orderTablesForPipelineExecution(tables)) {
         logBasic(
@@ -577,9 +583,47 @@ public class ActionDimensionalUpdate extends ActionBase implements Cloneable, IA
                 table.getName(),
                 table.getTableType()));
 
+        Variables tableVariables = new Variables();
+        tableVariables.initializeFrom(getVariables());
+        DmLoadStrategySupport.Snapshot loadSnapshot = null;
+        if (table instanceof DmTableBase tableBase) {
+          try {
+            loadSnapshot =
+                DmLoadStrategySupport.resolveSnapshot(
+                    tableBase, loadTargetDatabase, getVariables(), loadTimestamp);
+            if (DmLoadStrategySupport.publishVariables(tableBase)) {
+              DmLoadStrategySupport.applyVariables(
+                  tableVariables, tableBase.getLoadStrategy(), loadSnapshot);
+            }
+            logBasic(
+                BaseMessages.getString(
+                    PKG,
+                    "ActionDimensionalUpdate.Log.LoadStrategy",
+                    table.getName(),
+                    tableBase.copyLoadStrategyOrDefault().resolveStrategy().getDescription(),
+                    loadSnapshot.mode(),
+                    loadSnapshot.loadFrom()));
+          } catch (HopException e) {
+            logError(
+                BaseMessages.getString(
+                    PKG,
+                    "ActionDimensionalUpdate.Error.LoadStrategy",
+                    table.getName(),
+                    e.getMessage()),
+                e);
+            totalErrors++;
+            success = false;
+            continue;
+          }
+        }
+
+        final DmLoadStrategySupport.Snapshot snapshotForGeneration = loadSnapshot;
         List<PipelineMeta> pipelineMetas =
-            table.generateUpdatePipelines(
-                getMetadataProvider(), getVariables(), dmModel, loadTimestamp);
+            DmLoadStrategySupport.withSnapshot(
+                snapshotForGeneration,
+                () ->
+                    table.generateUpdatePipelines(
+                        getMetadataProvider(), tableVariables, dmModel, loadTimestamp));
 
         if (pipelineMetas == null || pipelineMetas.isEmpty()) {
           logError(

@@ -17,6 +17,7 @@ package org.hopper.edw.datavault.metadata.dimensional.pipeline;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import org.apache.hop.core.database.DatabaseMeta;
@@ -31,6 +32,8 @@ import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.transform.TransformMeta;
 import org.apache.hop.pipeline.transforms.dummy.DummyMeta;
 import org.apache.hop.pipeline.transforms.metainject.MetaInjectMeta;
+import org.apache.hop.pipeline.transforms.rowgenerator.GeneratorField;
+import org.apache.hop.pipeline.transforms.rowgenerator.RowGeneratorMeta;
 import org.apache.hop.pipeline.transforms.tableinput.TableInputMeta;
 import org.hopper.edw.datavault.metadata.DvLoadCycleSupport;
 import org.hopper.edw.datavault.metadata.DvSqlSupport;
@@ -42,6 +45,8 @@ import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
 import org.hopper.edw.datavault.metadata.dimensional.DmDateGeneratorConfiguration;
 import org.hopper.edw.datavault.metadata.dimensional.DmDimension;
 import org.hopper.edw.datavault.metadata.dimensional.DmDimensionLoadStrategySupport;
+import org.hopper.edw.datavault.metadata.dimensional.DmLoadStrategy;
+import org.hopper.edw.datavault.metadata.dimensional.DmLoadStrategySupport;
 import org.hopper.edw.datavault.metadata.dimensional.DmSourceConfiguration;
 import org.hopper.edw.datavault.metadata.dimensional.DmSourcePipelineSupport;
 import org.hopper.edw.datavault.metadata.dimensional.DmSourceRecordDefinitionSupport;
@@ -246,6 +251,10 @@ public final class DmPipelineBuilderSupport {
     if (sourceTransform != null) {
       GeneratedPipelineMetadataSupport.stampSourceRead(sourceTransform, ctx.sourceDbName);
     }
+    if (ctx.source.isPipelineSource()) {
+      DmLoadStrategySupport.addPipelineParameters(
+          pipelineMeta, ctx.table.getLoadStrategy(), loadStrategySnapshot(ctx.table));
+    }
     return sourceTransform;
   }
 
@@ -276,16 +285,81 @@ public final class DmPipelineBuilderSupport {
         ctx.metadataProvider);
   }
 
-  public static TransformMeta addSourceTableInput(BuildContext ctx, PipelineMeta pipelineMeta) {
+  public static TransformMeta addSourceTableInput(BuildContext ctx, PipelineMeta pipelineMeta)
+      throws HopException {
     TableInputMeta tableInputMeta = new TableInputMeta();
     tableInputMeta.setConnection(ctx.sourceDbName);
     DvSqlSupport.assignDisplaySql(tableInputMeta, ctx.source.resolveSourceSql(ctx.variables));
 
+    TransformMeta parameterRow = null;
+    if (DmLoadStrategySupport.usesJdbcParameters(ctx.table)) {
+      parameterRow = addLoadStrategyParameterRow(ctx, pipelineMeta);
+      tableInputMeta.setUseNamedParameters(true);
+      tableInputMeta.setExecuteEachInputRow(false);
+      tableInputMeta.setLookup(parameterRow.getName());
+    }
+
     TransformMeta tm =
         new TransformMeta("TableInput", "source_" + ctx.targetTableName, tableInputMeta);
-    tm.setLocation(LOCATION_START.x, LOCATION_START.y);
+    tm.setLocation(LOCATION_START.x + (parameterRow == null ? 0 : SPACING_WIDTH), LOCATION_START.y);
     pipelineMeta.addTransform(tm);
+    if (parameterRow != null) {
+      pipelineMeta.addPipelineHop(new PipelineHopMeta(parameterRow, tm));
+      tableInputMeta.searchInfoAndTargetTransforms(pipelineMeta.getTransforms());
+    }
     return tm;
+  }
+
+  private static TransformMeta addLoadStrategyParameterRow(
+      BuildContext ctx, PipelineMeta pipelineMeta) {
+    DmLoadStrategy strategy = ctx.table.getLoadStrategy();
+    DmLoadStrategy effective = strategy != null ? strategy : new DmLoadStrategy();
+    DmLoadStrategySupport.Snapshot snapshot = loadStrategySnapshot(ctx.table);
+    RowGeneratorMeta generatorMeta = new RowGeneratorMeta();
+    generatorMeta.setRowLimit("1");
+    generatorMeta.setNeverEnding(false);
+    generatorMeta
+        .getFields()
+        .add(generatorField(effective.resolveJdbcModeParameter(), "String", "", snapshot.mode()));
+    generatorMeta
+        .getFields()
+        .add(
+            generatorField(
+                effective.resolveJdbcFromParameter(),
+                "Timestamp",
+                DmLoadStrategySupport.TIMESTAMP_MASK,
+                snapshot.loadFrom()));
+    generatorMeta
+        .getFields()
+        .add(
+            generatorField(
+                effective.resolveJdbcToParameter(),
+                "Timestamp",
+                DmLoadStrategySupport.TIMESTAMP_MASK,
+                snapshot.loadTo()));
+    TransformMeta transformMeta =
+        new TransformMeta("RowGenerator", DmLoadStrategySupport.PARAMETER_TRANSFORM, generatorMeta);
+    transformMeta.setLocation(LOCATION_START.x, LOCATION_START.y);
+    transformMeta.setDistributes(false);
+    pipelineMeta.addTransform(transformMeta);
+    return transformMeta;
+  }
+
+  private static GeneratorField generatorField(
+      String name, String type, String format, String value) {
+    return new GeneratorField(name, type, format, -1, -1, null, null, null, value, false);
+  }
+
+  private static DmLoadStrategySupport.Snapshot loadStrategySnapshot(DmTableBase table) {
+    DmLoadStrategySupport.Snapshot snapshot = DmLoadStrategySupport.activeSnapshot();
+    if (snapshot != null) {
+      return snapshot;
+    }
+    DmLoadStrategy strategy = table != null ? table.getLoadStrategy() : null;
+    String sentinel =
+        strategy != null ? strategy.resolveSentinel() : DmLoadStrategy.DEFAULT_SENTINEL;
+    String now = DmLoadStrategySupport.formatTimestamp(new Date());
+    return new DmLoadStrategySupport.Snapshot(DmLoadStrategySupport.MODE_RELOAD, sentinel, now);
   }
 
   public static TransformMeta addSourceMetaInject(BuildContext ctx, PipelineMeta pipelineMeta)

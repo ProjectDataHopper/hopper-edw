@@ -90,6 +90,12 @@ limitations under the License.
             <required>Y</required>
           </documentation>
         </degenerate_dimension>
+        <degenerate_dimension>
+          <fieldName>source_load_ts</fieldName>
+          <documentation>
+            <required>Y</required>
+          </documentation>
+        </degenerate_dimension>
       </degenerate_dimensions>
       <range_dimension_roles/>
       <junk_dimension_roles>
@@ -113,6 +119,7 @@ limitations under the License.
       <sourceSql>SELECT lo.customer_hk, ho.order_id, hc.customer_id, lo.order_hk, 
        so.order_date, so.shipping_date, so.delivery_date, so.total_amount, 
        'abcd' as degenerate_info,
+       so.x_load_ts AS source_load_ts,
        'a' as j1,
        'b' as j2,
        'c' as j3 
@@ -122,7 +129,14 @@ JOIN sat_order so
 JOIN hub_order ho
   ON so.order_hk = ho.order_hk
 JOIN hub_customer hc
-  ON lo.customer_hk = hc.customer_hk</sourceSql>
+  ON lo.customer_hk = hc.customer_hk
+WHERE so.x_load_ts &gt; {DmLoadFrom}</sourceSql>
+      <load_strategy>
+        <strategy>INCREMENTAL</strategy>
+        <baseline_kind>TARGET_COLUMN</baseline_kind>
+        <baseline_column>source_load_ts</baseline_column>
+        <value_binding>JDBC_PARAMETERS</value_binding>
+      </load_strategy>
       <sourcePipelineFile/>
       <sourcePipelineTransform/>
       <sourcePipelineRunConfiguration/>

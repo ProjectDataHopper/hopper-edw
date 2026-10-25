@@ -96,6 +96,8 @@ import org.hopper.edw.datavault.metadata.dimensional.DmJunkDimensionSupport;
 import org.hopper.edw.datavault.metadata.dimensional.DmJunkHashCodeStrategy;
 import org.hopper.edw.datavault.metadata.dimensional.DmJunkSurrogateKeyStrategy;
 import org.hopper.edw.datavault.metadata.dimensional.DmLayoutSupport;
+import org.hopper.edw.datavault.metadata.dimensional.DmLoadStrategy;
+import org.hopper.edw.datavault.metadata.dimensional.DmLoadStrategySupport;
 import org.hopper.edw.datavault.metadata.dimensional.DmModelLoadSupport;
 import org.hopper.edw.datavault.metadata.dimensional.DmNaturalKeyField;
 import org.hopper.edw.datavault.metadata.dimensional.DmPeriodicSnapshotFact;
@@ -109,6 +111,7 @@ import org.hopper.edw.datavault.metadata.dimensional.DmSurrogateKeyStrategy;
 import org.hopper.edw.datavault.metadata.dimensional.DmSurrogateKeySupport;
 import org.hopper.edw.datavault.metadata.dimensional.DmTableBase;
 import org.hopper.edw.datavault.metadata.dimensional.DmTableType;
+import org.hopper.edw.datavault.metadata.dimensional.DmTargetDatabaseSupport;
 import org.hopper.edw.datavault.metadata.dimensional.IDmFactLikeTable;
 import org.hopper.edw.datavault.metadata.dimensional.IDmTable;
 import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
@@ -140,6 +143,9 @@ public class HopGuiDmTableDialog {
   private Combo wProcessLevel3;
   private BusinessProcessCatalogSupport.ResolvedCatalog processCatalog;
   private Combo wSourceType;
+  private Text wLoadStrategySummary;
+  private Button wEditLoadStrategy;
+  private DmLoadStrategy editedLoadStrategy;
   private Label wlLogicalSource;
   private MetaSelectionLine<DatabaseMeta> wSourceConnection;
   private Label wlSourceSql;
@@ -986,12 +992,41 @@ public class HopGuiDmTableDialog {
     wSourceType.setLayoutData(
         new FormDataBuilder().left(middle, 0).top(0, margin).right().result());
 
+    Label wlLoadStrategy = new Label(comp, SWT.RIGHT);
+    wlLoadStrategy.setText(
+        BaseMessages.getString(PKG, "HopGuiDmTableDialog.SourceLoadStrategy.Label"));
+    wlLoadStrategy.setToolTipText(
+        BaseMessages.getString(PKG, "HopGuiDmTableDialog.SourceLoadStrategy.ToolTip"));
+    PropsUi.setLook(wlLoadStrategy);
+    wlLoadStrategy.setLayoutData(
+        new FormDataBuilder().left().top(wSourceType, margin).right(middle, -margin).result());
+
+    wEditLoadStrategy = new Button(comp, SWT.PUSH);
+    wEditLoadStrategy.setText(
+        BaseMessages.getString(PKG, "HopGuiDmTableDialog.SourceLoadStrategy.Edit"));
+    wEditLoadStrategy.setToolTipText(
+        BaseMessages.getString(PKG, "HopGuiDmTableDialog.SourceLoadStrategy.Edit.ToolTip"));
+    PropsUi.setLook(wEditLoadStrategy);
+    wEditLoadStrategy.setLayoutData(
+        new FormDataBuilder().right().top(wSourceType, margin).result());
+    wEditLoadStrategy.addListener(SWT.Selection, e -> editLoadStrategy());
+
+    wLoadStrategySummary = new Text(comp, SWT.SINGLE | SWT.LEFT | SWT.READ_ONLY | SWT.BORDER);
+    PropsUi.setLook(wLoadStrategySummary);
+    wLoadStrategySummary.setEditable(false);
+    wLoadStrategySummary.setLayoutData(
+        new FormDataBuilder()
+            .left(middle, 0)
+            .top(wSourceType, margin)
+            .right(wEditLoadStrategy, -margin)
+            .result());
+
     wlLogicalSource = new Label(comp, SWT.WRAP);
     wlLogicalSource.setText(
         BaseMessages.getString(PKG, "HopGuiDmTableDialog.LogicalSource.Message"));
     PropsUi.setLook(wlLogicalSource);
     wlLogicalSource.setLayoutData(
-        new FormDataBuilder().left().top(wSourceType, margin).right().result());
+        new FormDataBuilder().left().top(wLoadStrategySummary, margin).right().result());
 
     wlSourceFactTable = new Label(comp, SWT.RIGHT);
     wlSourceFactTable.setText(
@@ -1000,12 +1035,12 @@ public class HopGuiDmTableDialog {
         BaseMessages.getString(PKG, "HopGuiDmTableDialog.SourceFactTable.ToolTip"));
     PropsUi.setLook(wlSourceFactTable);
     wlSourceFactTable.setLayoutData(
-        new FormDataBuilder().left().top(wSourceType, margin).right(middle, -margin).result());
+        new FormDataBuilder().left().top(wLoadStrategySummary, margin).right(middle, -margin).result());
 
     wSourceFactTable = new Combo(comp, SWT.READ_ONLY | SWT.BORDER);
     PropsUi.setLook(wSourceFactTable);
     wSourceFactTable.setLayoutData(
-        new FormDataBuilder().left(middle, 0).top(wSourceType, margin).right().result());
+        new FormDataBuilder().left(middle, 0).top(wLoadStrategySummary, margin).right().result());
 
     wSourceConnection =
         new MetaSelectionLine<>(
@@ -1017,7 +1052,7 @@ public class HopGuiDmTableDialog {
             BaseMessages.getString(PKG, "HopGuiDmTableDialog.SourceConnection.Label"),
             BaseMessages.getString(PKG, "HopGuiDmTableDialog.SourceConnection.ToolTip"));
     wSourceConnection.setLayoutData(
-        new FormDataBuilder().left().top(wSourceType, margin).right().result());
+        new FormDataBuilder().left().top(wLoadStrategySummary, margin).right().result());
     try {
       wSourceConnection.fillItems();
     } catch (HopException e) {
@@ -1066,7 +1101,7 @@ public class HopGuiDmTableDialog {
         BaseMessages.getString(PKG, "HopGuiDmTableDialog.SourcePipelineFile.ToolTip"));
     PropsUi.setLook(wlSourcePipelineFile);
     wlSourcePipelineFile.setLayoutData(
-        new FormDataBuilder().left().top(wSourceType, margin).right(middle, -margin).result());
+        new FormDataBuilder().left().top(wLoadStrategySummary, margin).right(middle, -margin).result());
 
     wOpenSourcePipeline = new Button(comp, SWT.PUSH);
     wOpenSourcePipeline.setText(
@@ -1075,7 +1110,7 @@ public class HopGuiDmTableDialog {
         BaseMessages.getString(PKG, "HopGuiDmTableDialog.SourcePipelineFile.Open.ToolTip"));
     PropsUi.setLook(wOpenSourcePipeline);
     wOpenSourcePipeline.setLayoutData(
-        new FormDataBuilder().right().top(wSourceType, margin).result());
+        new FormDataBuilder().right().top(wLoadStrategySummary, margin).result());
     wOpenSourcePipeline.addListener(SWT.Selection, e -> openSourcePipelineFile());
 
     wBrowseSourcePipeline = new Button(comp, SWT.PUSH);
@@ -1087,7 +1122,7 @@ public class HopGuiDmTableDialog {
     wBrowseSourcePipeline.setLayoutData(
         new FormDataBuilder()
             .right(wOpenSourcePipeline, -margin)
-            .top(wSourceType, margin)
+            .top(wLoadStrategySummary, margin)
             .result());
     wBrowseSourcePipeline.addListener(SWT.Selection, e -> browseSourcePipelineFile());
 
@@ -1102,7 +1137,7 @@ public class HopGuiDmTableDialog {
     wSourcePipelineFile.setLayoutData(
         new FormDataBuilder()
             .left(middle, 0)
-            .top(wSourceType, margin)
+            .top(wLoadStrategySummary, margin)
             .right(wBrowseSourcePipeline, -margin)
             .result());
 
@@ -1172,7 +1207,7 @@ public class HopGuiDmTableDialog {
             BaseMessages.getString(PKG, "HopGuiDmTableDialog.SourceCatalogConnection.Label"),
             BaseMessages.getString(PKG, "HopGuiDmTableDialog.SourceCatalogConnection.ToolTip"));
     wSourceCatalogConnection.setLayoutData(
-        new FormDataBuilder().left().top(wSourceType, margin).right().result());
+        new FormDataBuilder().left().top(wLoadStrategySummary, margin).right().result());
     try {
       wSourceCatalogConnection.fillItems();
     } catch (HopException e) {
@@ -1255,7 +1290,8 @@ public class HopGuiDmTableDialog {
     String loadDateField =
         model != null ? model.getConfigurationOrDefault().resolveLoadDateField(variables) : null;
     dateGeneratorWidgets =
-        DmSourceDateGeneratorGuiSupport.create(comp, variables, wSourceType, margin, loadDateField);
+        DmSourceDateGeneratorGuiSupport.create(
+            comp, variables, wLoadStrategySummary, margin, loadDateField);
 
     refreshSourcePanelVisibility();
   }
@@ -2269,6 +2305,11 @@ public class HopGuiDmTableDialog {
     }
     if (!dimensionAlias && !range) {
       EnumDialogSupport.selectCombo(wSourceType, input.getSourceOrDefault().resolveSourceType());
+      editedLoadStrategy =
+          input instanceof DmTableBase loadStrategyTable && loadStrategyTable.getLoadStrategy() != null
+              ? loadStrategyTable.getLoadStrategy().copy()
+              : null;
+      refreshLoadStrategySummary();
       if (!Utils.isEmpty(input.getSourceOrDefault().getSourceConnection())) {
         wSourceConnection.setText(input.getSourceOrDefault().getSourceConnection());
       }
@@ -2629,6 +2670,9 @@ public class HopGuiDmTableDialog {
               EnumDialogSupport.readCombo(wSourceType, DmSourceType.class, DmSourceType.SQL));
       target.getSourceOrDefault().setSourceConnection(wSourceConnection.getText());
       target.getSourceOrDefault().setSourceSql(wSourceSql.getText());
+      if (target instanceof DmTableBase loadStrategyTable) {
+        loadStrategyTable.setLoadStrategy(DmLoadStrategySupport.normalize(editedLoadStrategy));
+      }
       target.getSourceOrDefault().setSourcePipelineFile(wSourcePipelineFile.getText());
       target.getSourceOrDefault().setSourcePipelineTransform(wSourcePipelineTransform.getText());
       target
@@ -2858,9 +2902,49 @@ public class HopGuiDmTableDialog {
     }
   }
 
+  private void editLoadStrategy() {
+    DmLoadStrategy draft =
+        editedLoadStrategy != null ? editedLoadStrategy.copy() : new DmLoadStrategy();
+    HopGuiDmLoadStrategyDialog dialog = new HopGuiDmLoadStrategyDialog(shell, variables, draft);
+    if (!dialog.open()) {
+      return;
+    }
+    editedLoadStrategy = DmLoadStrategySupport.normalize(draft);
+    refreshLoadStrategySummary();
+  }
+
+  private void refreshLoadStrategySummary() {
+    if (wLoadStrategySummary == null || wLoadStrategySummary.isDisposed()) {
+      return;
+    }
+    wLoadStrategySummary.setText(DmLoadStrategySupport.summary(editedLoadStrategy));
+  }
+
   private void previewSourceSql() {
+    String sql = wSourceSql.getText();
+    if (input instanceof DmTableBase table) {
+      DmLoadStrategy previous = table.getLoadStrategy();
+      table.setLoadStrategy(editedLoadStrategy);
+      try {
+        DatabaseMeta targetDatabase = null;
+        try {
+          targetDatabase =
+              DmTargetDatabaseSupport.loadTargetDatabase(
+                  metadataProvider, model.getConfigurationOrDefault());
+        } catch (Exception ignored) {
+          targetDatabase = null;
+        }
+        DmLoadStrategySupport.Snapshot snapshot =
+            DmLoadStrategySupport.previewSnapshot(
+                table, targetDatabase, variables, new java.util.Date());
+        sql =
+            DmLoadStrategySupport.preparePreviewSql(sql, editedLoadStrategy, snapshot, variables);
+      } finally {
+        table.setLoadStrategy(previous);
+      }
+    }
     DmSourceSqlGuiSupport.previewSourceSql(
-        shell, variables, metadataProvider, resolveSourceDatabaseMeta(), wSourceSql.getText());
+        shell, variables, metadataProvider, resolveSourceDatabaseMeta(), sql);
   }
 
   private void getNaturalKeysFromSource() {

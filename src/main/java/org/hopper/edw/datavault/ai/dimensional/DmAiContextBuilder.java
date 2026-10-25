@@ -44,6 +44,7 @@ import org.hopper.edw.datavault.metadata.dimensional.DmFactDimensionRole;
 import org.hopper.edw.datavault.metadata.dimensional.DmFactMeasure;
 import org.hopper.edw.datavault.metadata.dimensional.DmNaturalKeyField;
 import org.hopper.edw.datavault.metadata.dimensional.DmSurrogateKeyStrategy;
+import org.hopper.edw.datavault.metadata.dimensional.DmTableBase;
 import org.hopper.edw.datavault.metadata.dimensional.DmSurrogateKeySupport;
 import org.hopper.edw.datavault.metadata.dimensional.IDmFactLikeTable;
 import org.hopper.edw.datavault.metadata.dimensional.IDmTable;
@@ -141,6 +142,13 @@ public final class DmAiContextBuilder {
       json.append(",\"type\":")
           .append(DvAiContextBuilder.jsonString(String.valueOf(table.getTableType())));
       json.append(",\"targetTable\":").append(DvAiContextBuilder.jsonString(table.getTableName()));
+      if (table instanceof DmTableBase loadStrategyTable
+          && loadStrategyTable.getLoadStrategy() != null) {
+        json.append(",\"sourceLoadStrategy\":")
+            .append(
+                DvAiContextBuilder.jsonString(
+                    loadStrategyTable.getLoadStrategy().resolveStrategy().getCode()));
+      }
       if (table instanceof DmDimension dimension) {
         json.append(",\"loadStrategy\":")
             .append(

@@ -69,6 +69,13 @@ public abstract class DmTableBase extends HopMetadataBase implements IHopMetadat
   private DmSourceConfiguration source = new DmSourceConfiguration();
 
   /**
+   * How much of the source each load reads. Null means Initial / Reload and is omitted from the
+   * model file.
+   */
+  @HopMetadataProperty(key = "load_strategy")
+  private DmLoadStrategy loadStrategy;
+
+  /**
    * Optional source stream date/timestamp used as the lookup effective date for fact dimension
    * joins (Dimension Lookup {@code DLDate.name}). When empty, generated lookups use the current
    * time.
@@ -93,6 +100,10 @@ public abstract class DmTableBase extends HopMetadataBase implements IHopMetadat
       source = new DmSourceConfiguration();
     }
     return source;
+  }
+
+  public DmLoadStrategy copyLoadStrategyOrDefault() {
+    return loadStrategy != null ? loadStrategy.copy() : new DmLoadStrategy();
   }
 
   public DmBusinessProcessRef getBusinessProcessOrEmpty() {

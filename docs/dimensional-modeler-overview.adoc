@@ -84,6 +84,40 @@ Each dimension or fact has a **Source** tab that defines how staging rows are ob
 
 Model validation requires a complete source configuration for the selected type before running **Dimensional Update**.
 
+On the **Source** tab, **Source load strategy** chooses how much of that source each load reads. It is separate from the dimension attribute load strategy (Type 1 overwrite or skip unchanged). Retail `f_orders` is incremental: the source SQL keeps rows with `so.x_load_ts > {DmLoadFrom}`, and each later load stays about the same length.
+
+image::images/dimensional-model-source-load-strategy.png[Source load strategy for f_orders. The Source tab shows the incremental SQL, the strategy dialog is set to Incremental with baseline source_load_ts and JDBC parameters, and the load durations for f_orders stay level across runs.,align="center"]
+
+[cols="1,3", options="header"]
+|===
+|Strategy |What runs
+
+|Initial / Reload
+|Default. Every run reads the full source. Facts stay insert-only. The load does not truncate the target.
+
+|Incremental
+|Reads rows after a baseline. An empty or missing target is an initial load. Later runs append the delta.
+
+|Initial / Load
+|Reserved. Not executed yet. Intended for a current picture such as `f_pit_inventory`.
+
+|Incremental with late arriving
+|Reserved. Not executed yet. Intended to delete and reload the last N days, weeks, or months. Not for a Type 2 dimension.
+|===
+
+**Edit...** on the Source tab opens the strategy dialog. Retail `f_orders` uses Incremental, baseline column `source_load_ts`, and JDBC parameters.
+
+image::images/dimensional-model-source-load-strategy-dialog.png[Source load strategy dialog for an incremental fact. Strategy is Incremental, the baseline is the target column source_load_ts, the sentinel is 1900-01-01 00:00:00.000, and values are passed as JDBC parameters.,align="center"]
+
+The baseline is `MAX` of a column on the target table (retail `f_orders` uses `source_load_ts`), or a fixed sentinel. A target that already has rows but an empty baseline column fails the load. Truncate or drop that table, run once so the column is filled, then run again.
+
+**Pass values as** offers two syntaxes, or both:
+
+* **Hop variables** — `'${DM_LOAD_FROM}'`, `'${DM_LOAD_MODE}'`, and `'${DM_LOAD_TO}'` are replaced in that table's SQL and passed to a source pipeline. `DM_LOAD_FROM` is text, so a comparison casts it.
+* **JDBC parameters** — `{DmLoadFrom}` on a generated Table Input is bound as a timestamp. `{DmLoadMode}` and `{DmLoadTo}` are the other fields. A one-row generator feeds the Table Input. This form is what retail `f_orders` uses: `WHERE so.x_load_ts > {DmLoadFrom}`.
+
+A source pipeline always receives the Hop variables. JDBC parameters apply to Database / SQL sources.
+
 [[date-dimension]]
 ==== Date dimension (`dim_date`)
 

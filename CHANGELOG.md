@@ -2,6 +2,14 @@
 
 All notable changes to Data Hopper EDW (formerly hop-datavault) are documented in this file.
 
+## [Unreleased]
+
+### Dimensional source load strategy (issue #236)
+
+- A fact or dimension has a **Source load strategy** on the Source tab. The default, **Initial / Reload**, reads the full source on every run and does not truncate the target. **Incremental** reads rows after a baseline: `MAX` of a target column, or a sentinel when the table is missing or empty. A table that already has rows but an empty baseline fails instead of appending a second full copy.
+- The same baseline is passed as Hop variables (`'${DM_LOAD_FROM}'`, `'${DM_LOAD_MODE}'`, `'${DM_LOAD_TO}'`) or as Table Input JDBC parameters (`{DmLoadFrom}` bound as a timestamp), or both. A source pipeline receives the variables. JDBC parameters apply to a generated SQL Table Input.
+- Retail `f_orders` is incremental. Its SQL keeps `so.x_load_ts > {DmLoadFrom}` and stores that timestamp in `source_load_ts`. **Initial / Load** and **Incremental with late arriving** are reserved and are rejected by Check model and Dimensional Update.
+
 ## [0.16.0] — 2026-10-23
 
 Requires **Apache Hop 2.20.0-SNAPSHOT** and **Java 21**.

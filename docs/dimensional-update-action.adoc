@@ -17,6 +17,7 @@ Reads a dimensional model (`.hdm` file) and:
 * Skips tables whose source is **None (logical)** — they are contracts, not loads. If every selected table is logical, the action fails.
 * Optionally generates CREATE TABLE DDL on the target database (not for logical tables)
 * Generates per-table update pipelines using native Hop warehouse transforms
+* For an **Incremental** source load strategy, reads `COUNT(*)` and `MAX(baseline column)` on the target before generation. A missing or empty table loads from the sentinel. A non-empty table with an empty baseline fails that table. **Initial / Reload** does not query and does not truncate. Reserved strategies (Initial / Load, Incremental with late arriving) fail that table instead of falling back to a full reload.
 * Stages pipelines and runs them through the **parallel orchestrator**
 * Cleans up the staging folder after a successful run
 

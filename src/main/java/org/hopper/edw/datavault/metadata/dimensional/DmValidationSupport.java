@@ -2235,6 +2235,90 @@ public final class DmValidationSupport {
     }
   }
 
+  private static void validateLoadStrategy(
+      List<ICheckResult> remarks,
+      IDmTable table,
+      DmSourceConfiguration source,
+      IVariables variables) {
+    if (!(table instanceof DmTableBase base)) {
+      return;
+    }
+    DmLoadStrategy strategy = base.getLoadStrategy();
+    if (strategy == null) {
+      return;
+    }
+    DmLoadStrategyType type = strategy.resolveStrategy();
+    if (!type.isExecutable()) {
+      remarks.add(
+          new CheckResult(
+              ICheckResult.TYPE_RESULT_ERROR,
+              BaseMessages.getString(
+                  PKG,
+                  "DmValidationSupport.CheckResult.ReservedLoadStrategy",
+                  table.getName(),
+                  type.getDescription()),
+              table));
+    }
+    if (type == DmLoadStrategyType.INCREMENTAL
+        && strategy.resolveBaselineKind() == DmLoadBaselineKind.TARGET_COLUMN
+        && Utils.isEmpty(resolve(strategy.getBaselineColumn(), variables))) {
+      remarks.add(
+          new CheckResult(
+              ICheckResult.TYPE_RESULT_ERROR,
+              BaseMessages.getString(
+                  PKG, "DmValidationSupport.CheckResult.MissingLoadBaselineColumn", table.getName()),
+              table));
+    }
+    if (type == DmLoadStrategyType.INCREMENTAL
+        && table instanceof DmDimension dimension
+        && DmDimensionLoadStrategySupport.resolveLoadStrategy(dimension)
+            == DmDimensionLoadStrategySupport.DmDimensionLoadStrategy.PURE_TYPE2) {
+      remarks.add(
+          new CheckResult(
+              ICheckResult.TYPE_RESULT_WARNING,
+              BaseMessages.getString(
+                  PKG, "DmValidationSupport.CheckResult.IncrementalType2Dimension", table.getName()),
+              table));
+    }
+    if (strategy.resolveValueBinding().includesJdbcParameters() && !source.isSqlSource()) {
+      remarks.add(
+          new CheckResult(
+              ICheckResult.TYPE_RESULT_WARNING,
+              BaseMessages.getString(
+                  PKG,
+                  "DmValidationSupport.CheckResult.JdbcBindingNeedsSqlSource",
+                  table.getName(),
+                  strategy.resolveLoadFromVariable()),
+              table));
+    }
+    if (type == DmLoadStrategyType.INCREMENTAL && source.isSqlSource()) {
+      String sql = source.getSourceSql();
+      boolean mentionsVariable =
+          DmLoadStrategySupport.sqlMentionsVariable(sql, strategy.resolveLoadFromVariable());
+      boolean mentionsParameter =
+          DmLoadStrategySupport.sqlMentionsJdbcParameter(sql, strategy.resolveJdbcFromParameter());
+      DmLoadValueBinding binding = strategy.resolveValueBinding();
+      boolean missing =
+          switch (binding) {
+            case VARIABLES -> !mentionsVariable;
+            case JDBC_PARAMETERS -> !mentionsParameter;
+            case BOTH -> !mentionsVariable && !mentionsParameter;
+          };
+      if (missing) {
+        remarks.add(
+            new CheckResult(
+                ICheckResult.TYPE_RESULT_WARNING,
+                BaseMessages.getString(
+                    PKG,
+                    "DmValidationSupport.CheckResult.LoadStrategyPredicateMissing",
+                    table.getName(),
+                    strategy.resolveLoadFromVariable(),
+                    strategy.resolveJdbcFromParameter()),
+                table));
+      }
+    }
+  }
+
   private static void validateSourceConfiguration(
       List<ICheckResult> remarks,
       IDmTable table,
@@ -2245,6 +2329,7 @@ public final class DmValidationSupport {
       return;
     }
     DmSourceConfiguration source = table.getSourceOrDefault();
+    validateLoadStrategy(remarks, table, source, variables);
     if (source.isLogicalSource()) {
       remarks.add(
           new CheckResult(
