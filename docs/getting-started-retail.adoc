@@ -173,6 +173,10 @@ Full parameter reference, GUI issue dialogs, and sample HTML reports: link:resou
 
 Repeat to simulate monthly batches. Vault table `retail_load_log` stores each finished load. The next run sets `LOAD_DATE` to that date plus one month and writes the row only after the vault update succeeds.
 
+Open `models/retail-f-orders.hdm` and show **Load durations**. After a few years of those updates, about 70,000 rows are on `f_orders`, and the fact plus `d_order` and `d_customer` still finish in about one second. The fact source reads only vault satellite rows newer than the `source_load_ts` already stored on the fact.
+
+image::images/retail-f-orders-incremental-load-durations.png[Retail f_orders model with the load durations pane. After several years of monthly updates, f_orders, d_order, and d_customer still finish in about one second.,align="center"]
+
 == Chapter 5c — Operational analytics
 
 After `run-retail-update-models`, both the initial and the update workflow call `models/ops-analytics/workflows/ops-analytics-incremental.hwf`. That reads OPS schema `dv_ops` into the operational-analytics warehouse on connection `OpsAnalytics` (database `test_ops_analytics`). The call does not create tables. Run `models/ops-analytics/workflows/ops-analytics-initial.hwf` once before you expect rows.

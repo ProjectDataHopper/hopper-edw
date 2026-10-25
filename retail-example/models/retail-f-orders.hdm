@@ -28,7 +28,7 @@ limitations under the License.
           <foreignKeyColumn>order_hk</foreignKeyColumn>
           <sourceFieldName>order_id</sourceFieldName>
           <truncateToDateKey>N</truncateToDateKey>
-          <preloadLookupCache>Y</preloadLookupCache>
+          <preloadLookupCache>N</preloadLookupCache>
           <skipDimensionLookup>N</skipDimensionLookup>
           <forceDimensionLookup>N</forceDimensionLookup>
           <lookupCopies>2</lookupCopies>
@@ -38,7 +38,7 @@ limitations under the License.
           <foreignKeyColumn>customer_hk</foreignKeyColumn>
           <sourceFieldName>customer_id</sourceFieldName>
           <truncateToDateKey>N</truncateToDateKey>
-          <preloadLookupCache>Y</preloadLookupCache>
+          <preloadLookupCache>N</preloadLookupCache>
           <skipDimensionLookup>N</skipDimensionLookup>
           <forceDimensionLookup>N</forceDimensionLookup>
           <lookupCopies>2</lookupCopies>

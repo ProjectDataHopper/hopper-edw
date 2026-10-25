@@ -14,6 +14,11 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 - A workflow run's log level is passed to the generated update workflows and pipelines started by a resource-group, Data Vault, Business Vault, or dimensional update. The Data Vault configuration execution log level applies only when that update has no parent workflow.
 
+### Retail execution info
+
+- The retail source-table pipeline skips `hop_executions`, so the demo drop and create does not remove the execution-info table.
+- The retail and AdventureWorks OPS scripts add `project_id` and `state_json` to `hop_executions` when those columns are missing, and index `project_id`. Hop probes those columns on every pipeline.
+
 ## [0.16.0] — 2026-10-23
 
 Requires **Apache Hop 2.20.0-SNAPSHOT** and **Java 21**.
