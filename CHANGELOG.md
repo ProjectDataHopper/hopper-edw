@@ -19,6 +19,10 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 - The retail source-table pipeline skips `hop_executions`, so the demo drop and create does not remove the execution-info table.
 - The retail and AdventureWorks OPS scripts add `project_id` and `state_json` to `hop_executions` when those columns are missing, and index `project_id`. Hop probes those columns on every pipeline.
 
+### Retail incremental update
+
+- `f_orders` does not preload `d_order` or `d_customer`. After a few years of monthly updates, about 70,000 fact rows, those loads still finish in about one second. The retail tour shows the load-duration pane.
+
 ## [0.16.0] — 2026-10-23
 
 Requires **Apache Hop 2.20.0-SNAPSHOT** and **Java 21**.
