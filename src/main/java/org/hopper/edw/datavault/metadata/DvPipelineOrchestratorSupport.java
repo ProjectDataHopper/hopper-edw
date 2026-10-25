@@ -243,16 +243,19 @@ public final class DvPipelineOrchestratorSupport {
       throws HopException {
     String modelName = resolveOrchestratorModelName(orchestrator);
     String metricsRunId = initializeMetricsRun(variables, modelName, metricsPublishContext);
+    LogLevel effectiveLogLevel = UpdateExecutionLogLevel.resolve(parent, parentWorkflow, logLevel);
 
     IPipelineEngine<PipelineMeta> engine =
         PipelineEngineFactory.createPipelineEngine(
             variables, runConfiguration, metadataProvider, orchestrator);
 
-    if (logLevel != null) {
-      engine.setLogLevel(logLevel);
-    }
+    // setParent on a remote engine copies the logging parent's level. Apply the run level after
+    // the parent is attached so that copy does not replace it.
     engine.setParent(parent);
     engine.setParentWorkflow(parentWorkflow);
+    if (effectiveLogLevel != null) {
+      engine.setLogLevel(effectiveLogLevel);
+    }
 
     UpdateRunLiveRunContext liveContext =
         UpdateRunLiveRunContext.from(
@@ -262,7 +265,7 @@ public final class DvPipelineOrchestratorSupport {
             stagingFolder,
             parent,
             parentWorkflow,
-            logLevel != null ? logLevel : parent != null ? parent.getLogLevel() : null);
+            effectiveLogLevel);
     UpdateRunLiveMonitor monitor = UpdateRunLiveMonitor.start(liveContext, engine);
     try {
       engine.execute();
@@ -281,7 +284,7 @@ public final class DvPipelineOrchestratorSupport {
         engine.getLogChannel(),
         metricsRunId,
         modelName,
-        logLevel,
+        effectiveLogLevel,
         metricsOutputFolder,
         engine.getLogChannelId(),
         variables,

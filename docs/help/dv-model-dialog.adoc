@@ -93,7 +93,7 @@ How generated pipelines write rows.
 - **Bulk load staging folder / delimiter / enclosure / encoding** — Used when the mode is staging file. Folder default `${java.io.tmpdir}/dv2/bulk/`.
 - **Bulk load requires local file** — Staging files must be on the local filesystem (needed for MySQL `LOAD DATA LOCAL INFILE`).
 - **Sort rows in memory** — Sort Rows buffer before disk spill (default 1000000). Used where a merge key is computed in Hop. Hub updates use SQL `ORDER BY` only.
-- **Execution logging level** — Log level for generated load pipelines (for example from Data Vault Update).
+- **Execution logging level** — Used when an update runs without a parent workflow. A workflow run passes that run's log level to every generated workflow and pipeline.
 - **Create shard key on hash key (SingleStore)** — Enabled automatically when the target is SingleStore unless you turn it off. Appends `SHARD KEY` on the hash key in CREATE TABLE.
 - **Include driving keys in shard key (SingleStore)** — For multi-active satellites, include the driving key with the parent hash in the shard key.
 

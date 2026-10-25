@@ -81,6 +81,7 @@ import org.hopper.edw.datavault.metadata.DvTableType;
 import org.hopper.edw.datavault.metadata.DvTargetLoadMode;
 import org.hopper.edw.datavault.metadata.DvUpdateExecutionSupport;
 import org.hopper.edw.datavault.metadata.DvUpdateWorkflowSupport;
+import org.hopper.edw.datavault.metadata.UpdateExecutionLogLevel;
 import org.hopper.edw.datavault.metadata.GeneratedPipelineMetadataConstants;
 import org.hopper.edw.datavault.metadata.IDvTable;
 import org.hopper.edw.datavault.metadata.ModelConfigurationResolver;
@@ -747,7 +748,9 @@ public class ActionDataVaultUpdate extends ActionBase implements Cloneable, IAct
         return result;
       }
 
-      LogLevel pipelineLogLevel = pipelineConfig.resolveExecutionLogLevel();
+      LogLevel pipelineLogLevel =
+          UpdateExecutionLogLevel.resolve(
+              this, getParentWorkflow(), pipelineConfig.resolveExecutionLogLevel());
       DvUpdateExecutionSupport.FreePipelineBuckets freePipelines =
           new DvUpdateExecutionSupport.FreePipelineBuckets();
       List<MultiSourceUpdateUnit> multiSourceUnits = new ArrayList<>();

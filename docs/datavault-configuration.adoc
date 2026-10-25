@@ -236,7 +236,7 @@ image::images/data-vault-model-configuration-editor-target-loading-tab.png[Data 
 |Number of rows Sort Rows keeps in memory before spilling to disk in generated update pipelines (default 1000000). Used where a merge key is computed in Hop (for example satellite/link hash sort). Hub updates rely on SQL `ORDER BY` only (no Sort Rows). Supports variables.
 
 |Execution logging level
-|Log level for the generated load pipelines.
+|Used when an update runs without a parent workflow. A workflow run passes that run's log level to every generated workflow and pipeline.
 
 |Create shard key on hash key (SingleStore)
 |When the target is SingleStore, CREATE TABLE can append `SHARD KEY` on the hash key.

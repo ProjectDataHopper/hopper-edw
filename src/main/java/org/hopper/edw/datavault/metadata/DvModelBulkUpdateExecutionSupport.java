@@ -95,6 +95,8 @@ public final class DvModelBulkUpdateExecutionSupport {
       IHopMetadataProvider metadataProvider)
       throws HopException {
     LogChannel log = new LogChannel(parent);
+    LogLevel effectiveLogLevel =
+        UpdateExecutionLogLevel.resolve(parent, parentWorkflow, pipelineLogLevel);
     metricsPublishContext = enrichPublishContext(metricsPublishContext, realRunConfig);
     String stagingFolder =
         variables.resolve(
@@ -137,7 +139,7 @@ public final class DvModelBulkUpdateExecutionSupport {
           DvPipelineOrchestratorSupport.runOrchestrator(
               orchestrator,
               realRunConfig,
-              pipelineLogLevel != null ? pipelineLogLevel : parent.getLogLevel(),
+              effectiveLogLevel,
               metricsOutputFolder,
               metricsPublishContext,
               stagingFolder,
@@ -274,6 +276,8 @@ public final class DvModelBulkUpdateExecutionSupport {
       IHopMetadataProvider metadataProvider)
       throws HopException {
     LogChannel log = new LogChannel(parent);
+    LogLevel effectiveLogLevel =
+        UpdateExecutionLogLevel.resolve(parent, parentWorkflow, pipelineLogLevel);
     metricsPublishContext = enrichPublishContext(metricsPublishContext, realRunConfig);
     if (targetDatabase == null || Utils.isEmpty(targetDbName)) {
       log.logError(
@@ -351,13 +355,13 @@ public final class DvModelBulkUpdateExecutionSupport {
               pipelineStagingFolderResolved + " | " + bulkStagingFolderResolved,
               parent,
               parentWorkflow,
-              pipelineLogLevel != null ? pipelineLogLevel : parent.getLogLevel());
+              effectiveLogLevel);
 
       DvUpdateWorkflowSupport.MasterWorkflowRunOutcome workflowOutcome =
           DvUpdateWorkflowSupport.runMasterWorkflowWithLogChannel(
               masterWorkflow,
               realWorkflowRunConfig,
-              pipelineLogLevel != null ? pipelineLogLevel : parent.getLogLevel(),
+              effectiveLogLevel,
               parent,
               liveContext,
               variables,
@@ -370,7 +374,7 @@ public final class DvModelBulkUpdateExecutionSupport {
           log,
           metricsRunId,
           modelName,
-          pipelineLogLevel != null ? pipelineLogLevel : parent.getLogLevel(),
+          effectiveLogLevel,
           metricsOutputFolder,
           workflowOutcome.workflowLogChannelId(),
           variables,

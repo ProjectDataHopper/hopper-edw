@@ -10,6 +10,10 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 - The same baseline is passed as Hop variables (`'${DM_LOAD_FROM}'`, `'${DM_LOAD_MODE}'`, `'${DM_LOAD_TO}'`) or as Table Input JDBC parameters (`{DmLoadFrom}` bound as a timestamp), or both. A source pipeline receives the variables. JDBC parameters apply to a generated SQL Table Input.
 - Retail `f_orders` is incremental. Its SQL keeps `so.x_load_ts > {DmLoadFrom}` and stores that timestamp in `source_load_ts`. **Initial / Load** and **Incremental with late arriving** are reserved and are rejected by Check model and Dimensional Update.
 
+### Logging (issue #237)
+
+- A workflow run's log level is passed to the generated update workflows and pipelines started by a resource-group, Data Vault, Business Vault, or dimensional update. The Data Vault configuration execution log level applies only when that update has no parent workflow.
+
 ## [0.16.0] — 2026-10-23
 
 Requires **Apache Hop 2.20.0-SNAPSHOT** and **Java 21**.

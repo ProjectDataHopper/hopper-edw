@@ -258,11 +258,21 @@ public final class DvUpdateWorkflowSupport {
       IVariables variables,
       org.apache.hop.metadata.api.IHopMetadataProvider metadataProvider)
       throws HopException {
+    LogLevel effectiveLogLevel = UpdateExecutionLogLevel.resolve(parent, null, logLevel);
     IWorkflowEngine<WorkflowMeta> engine =
         WorkflowEngineFactory.createWorkflowEngine(
             variables, workflowRunConfiguration, metadataProvider, workflowMeta, parent);
-    if (logLevel != null) {
-      engine.setLogLevel(logLevel);
+    if (effectiveLogLevel != null) {
+      // Local and remote engines replace this with the logging parent's level when they start.
+      // The parent action is aligned above. Re-apply once execution has started so nested
+      // pipeline actions still see the workflow run's level.
+      engine.setLogLevel(effectiveLogLevel);
+      engine.addExecutionStartedListener(
+          started -> {
+            if (started != null) {
+              started.setLogLevel(effectiveLogLevel);
+            }
+          });
     }
 
     UpdateRunLiveStagingWorkflowMonitor monitor =
