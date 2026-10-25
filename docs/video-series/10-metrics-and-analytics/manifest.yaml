@@ -1,0 +1,246 @@
+#
+# Copyright 2026 i-Bridge bv
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# Narration for video 10. English is the source.
+# Product words stay in English. See docs/video-series/glossary.yaml.
+video:
+  id: 10-metrics-and-analytics
+  title: "Metrics and analytics operations"
+  issue: 234
+  width: 1920
+  height: 1080
+  fps: 30
+  transition: fade
+  transition_ms: 400
+  padding_after_sec: 0.4
+  voice_id: ara
+  locales:
+    - en
+    - zh-CN
+    - es-ES
+    - pt-PT
+    - fr-FR
+    - de-DE
+    - it-IT
+  links:
+    - label: Getting started
+      url: https://github.com/ProjectDataHopper/hopper-edw/blob/main/docs/getting-started-edw.adoc
+    - label: Operational analytics
+      url: https://github.com/ProjectDataHopper/hopper-edw/blob/main/docs/ops-analytics.adoc
+    - label: Training
+      url: https://github.com/ProjectDataHopper/hopper-edw/blob/main/docs/training/index.adoc
+    - label: Data Hopper
+      url: https://data-hopper.com/
+
+scenes:
+  - id: welcome
+    title: Welcome
+    visual: images/welcome.png
+    visual_type: still
+    card_title: Metrics and analytics operations
+    card_subtitle: The warehouse of the warehouse
+    shot: >
+      Title card. Title "Metrics and analytics operations". Subtitle
+      "The warehouse of the warehouse". No GUI. Last video in the series.
+    narration:
+      en: |
+        This is the last video. A load writes timings into the OPS
+        database. You will open This run and History for a retail-sources
+        wave, then see Create operational analytics turn that database
+        into a small warehouse of its own. You will also see the path of
+        f_orders back to the source files, and the picture of one run.
+        retail-sources stays the warehouse. The new models go in a second
+        resource definition group.
+      zh-CN: |
+        这是最后一集。一次加载把计时写入 OPS 数据库。你会打开 retail-sources 这一波的 This run 和 History，然后看到 Create operational analytics 把那个数据库变成一个属于它自己的小仓库。你还会看到 f_orders 回到源文件的路径，以及一次运行的画面。retail-sources 仍是仓库。新模型放进第二个 resource definition group。
+      es-ES: |
+        Este es el último vídeo. Una carga escribe los tiempos en la base OPS. Abrirás This run y History de una oleada de retail-sources, y verás Create operational analytics convertir esa base en un pequeño almacén propio. También verás el camino de f_orders hasta los archivos de origen, y la imagen de una ejecución. retail-sources sigue siendo el almacén. Los modelos nuevos van a un segundo resource definition group.
+      pt-PT: |
+        Este é o último vídeo. Uma carga escreve os tempos na base OPS. Vais abrir This run e History de uma onda de retail-sources, e ver Create operational analytics transformar essa base num pequeno armazém próprio. Também vais ver o caminho de f_orders até aos ficheiros de origem, e a imagem de uma execução. retail-sources continua a ser o armazém. Os modelos novos vão para um segundo resource definition group.
+      fr-FR: |
+        C'est la dernière vidéo. Un chargement écrit les durées dans la base OPS. Tu ouvriras This run et History pour une vague de retail-sources, puis tu verras Create operational analytics transformer cette base en un petit entrepôt à elle. Tu verras aussi le chemin de f_orders vers les fichiers source, et l'image d'une exécution. retail-sources reste l'entrepôt. Les nouveaux modèles vont dans un second resource definition group.
+      de-DE: |
+        Dies ist das letzte Video. Ein Ladevorgang schreibt die Zeiten in die OPS-Datenbank. Du öffnest This run und History für eine retail-sources Welle und siehst, wie Create operational analytics diese Datenbank in ein eigenes kleines Warehouse verwandelt. Du siehst auch den Weg von f_orders zu den Quelldateien und das Bild eines Laufs. retail-sources bleibt das Warehouse. Die neuen Modelle kommen in eine zweite resource definition group.
+      it-IT: |
+        Questo è l'ultimo video. Un carico scrive i tempi nel database OPS. Aprirai This run e History per un'ondata di retail-sources, poi vedrai Create operational analytics trasformare quel database in un piccolo warehouse suo. Vedrai anche il percorso di f_orders fino ai file di origine, e l'immagine di un'esecuzione. retail-sources resta il warehouse. I modelli nuovi vanno in un secondo resource definition group.
+
+  - id: metrics
+    title: This run and History
+    visual: images/metrics.png
+    visual_type: still
+    shot: >
+      Resource group load metrics. Tabs This run and History, status line
+      retail-sources running, models 5 of 8, 0m 43s. Wave status phase
+      UPDATING, current model retail-f-orders, table f_orders. Composed
+      from docs/images/action-update-resource-group-load-metrics-dialog.png.
+      The model-path table and the staging folder are not in the frame.
+    narration:
+      en: |
+        Resource group load metrics has two tabs. This run is the wave in
+        front of you. The line reads retail-sources, running, models 5 of
+        8, at 43 seconds. History is the other tab. It lists earlier waves
+        of this same resource definition group, read back from OPS. The
+        lower pane is the wave status. The phase is updating. The current
+        model is retail-f-orders, and the current table is f_orders. This
+        video does not wait for model 8.
+      zh-CN: |
+        Resource group load metrics 有两个标签。This run 是你面前的这一波。那一行是 retail-sources，running，模型 8 个里的 5 个，43 秒。History 是另一个标签。它列出同一个 resource definition group 更早的波次，从 OPS 读回。下方是 Wave status。阶段是 updating。当前模型是 retail-f-orders，当前表是 f_orders。这一集不等到模型 8。
+      es-ES: |
+        Resource group load metrics tiene dos pestañas. This run es la oleada que tienes delante. La línea dice retail-sources, running, modelos 5 de 8, a los 43 segundos. History es la otra pestaña. Lista oleadas anteriores de este mismo resource definition group, leídas desde OPS. El panel de abajo es Wave status. La fase es updating. El modelo actual es retail-f-orders, y la tabla actual es f_orders. Este vídeo no espera al modelo 8.
+      pt-PT: |
+        Resource group load metrics tem dois separadores. This run é a onda à tua frente. A linha diz retail-sources, running, modelos 5 de 8, aos 43 segundos. History é o outro separador. Lista ondas anteriores deste mesmo resource definition group, lidas a partir de OPS. O painel de baixo é Wave status. A fase é updating. O modelo atual é retail-f-orders, e a tabela atual é f_orders. Este vídeo não espera pelo modelo 8.
+      fr-FR: |
+        Resource group load metrics a deux onglets. This run est la vague devant toi. La ligne dit retail-sources, running, modèles 5 sur 8, à 43 secondes. History est l'autre onglet. Il liste les vagues précédentes de ce même resource definition group, relues depuis OPS. Le panneau du bas est Wave status. La phase est updating. Le modèle en cours est retail-f-orders, et la table en cours est f_orders. Cette vidéo n'attend pas le modèle 8.
+      de-DE: |
+        Resource group load metrics hat zwei Reiter. This run ist die Welle vor dir. Die Zeile sagt retail-sources, running, Modelle 5 von 8, bei 43 Sekunden. History ist der andere Reiter. Er listet frühere Wellen derselben resource definition group, zurückgelesen aus OPS. Der untere Bereich ist Wave status. Die Phase ist updating. Das aktuelle Modell ist retail-f-orders, und die aktuelle Tabelle ist f_orders. Dieses Video wartet nicht auf Modell 8.
+      it-IT: |
+        Resource group load metrics ha due schede. This run è l'ondata davanti a te. La riga dice retail-sources, running, modelli 5 di 8, a 43 secondi. History è l'altra scheda. Elenca le ondate precedenti di questo stesso resource definition group, rilette da OPS. Il riquadro in basso è Wave status. La fase è updating. Il modello corrente è retail-f-orders, e la tabella corrente è f_orders. Questo video non aspetta il modello 8.
+
+  - id: create
+    title: Create operational analytics
+    visual: images/create.png
+    visual_type: still
+    shot: >
+      Create operational analytics dialog. OPS connection OPS, schema
+      dv_ops, three targets Vault, folder ${PROJECT_HOME}/models/ops-analytics,
+      group ops-analytics, Include hop_executions on, Replace off. The
+      committed still is docs/images/create-operational-analytics-dialog.png,
+      padded to 16:9. No personal path.
+    narration:
+      en: |
+        Create operational analytics is that same path, with OPS as the
+        source. The connection is OPS. The schema is dv_ops. The Data
+        Vault target, the Business Vault target, and the dimensional
+        target are all Vault. The folder is
+        ${PROJECT_HOME}/models/ops-analytics. The resource definition
+        group is ops-analytics, and it stays separate from retail-sources.
+        Include hop_executions is on. Replace existing models is off. OK
+        writes a source model, a raw Data Vault, a small Business Vault,
+        a dimensional model, a semantic layer, and two load workflows.
+        This video does not open those tables.
+      zh-CN: |
+        Create operational analytics 是同一条路，源是 OPS。连接是 OPS。模式是 dv_ops。Data Vault 目标、Business Vault 目标和维度目标都是 Vault。文件夹是 ${PROJECT_HOME}/models/ops-analytics。resource definition group 是 ops-analytics，它与 retail-sources 分开。Include hop_executions 是打开的。Replace existing models 是关闭的。OK 会写出源模型、一个原始 Data Vault、一个小的 Business Vault、一个维度模型、一个语义层，以及两个加载工作流。这一集不打开那些表。
+      es-ES: |
+        Create operational analytics es el mismo camino, con OPS como origen. La conexión es OPS. El esquema es dv_ops. El destino Data Vault, el destino Business Vault y el destino dimensional son Vault. La carpeta es ${PROJECT_HOME}/models/ops-analytics. El resource definition group es ops-analytics, y queda aparte de retail-sources. Include hop_executions está activo. Replace existing models está desactivado. OK escribe un modelo de origen, un Data Vault en bruto, un Business Vault pequeño, un modelo dimensional, una capa semántica y dos flujos de carga. Este vídeo no abre esas tablas.
+      pt-PT: |
+        Create operational analytics é o mesmo caminho, com OPS como origem. A ligação é OPS. O esquema é dv_ops. O destino Data Vault, o destino Business Vault e o destino dimensional são Vault. A pasta é ${PROJECT_HOME}/models/ops-analytics. O resource definition group é ops-analytics, e fica à parte de retail-sources. Include hop_executions está ligado. Replace existing models está desligado. OK escreve um modelo de origem, um Data Vault em bruto, um Business Vault pequeno, um modelo dimensional, uma camada semântica e dois fluxos de carga. Este vídeo não abre essas tabelas.
+      fr-FR: |
+        Create operational analytics est le même chemin, avec OPS comme source. La connexion est OPS. Le schéma est dv_ops. La cible Data Vault, la cible Business Vault et la cible dimensionnelle sont Vault. Le dossier est ${PROJECT_HOME}/models/ops-analytics. Le resource definition group est ops-analytics, et il reste à part de retail-sources. Include hop_executions est coché. Replace existing models est décoché. OK écrit un modèle source, un Data Vault brut, un petit Business Vault, un modèle dimensionnel, une couche sémantique et deux flux de chargement. Cette vidéo n'ouvre pas ces tables.
+      de-DE: |
+        Create operational analytics ist derselbe Weg, mit OPS als Quelle. Die Verbindung ist OPS. Das Schema ist dv_ops. Das Data Vault Ziel, das Business Vault Ziel und das dimensionale Ziel sind Vault. Der Ordner ist ${PROJECT_HOME}/models/ops-analytics. Die resource definition group ist ops-analytics, und sie bleibt getrennt von retail-sources. Include hop_executions ist an. Replace existing models ist aus. OK schreibt ein Quellmodell, einen rohen Data Vault, einen kleinen Business Vault, ein dimensionales Modell, eine semantische Schicht und zwei Ladeabläufe. Dieses Video öffnet diese Tabellen nicht.
+      it-IT: |
+        Create operational analytics è lo stesso percorso, con OPS come origine. La connessione è OPS. Lo schema è dv_ops. La destinazione Data Vault, la destinazione Business Vault e la destinazione dimensionale sono Vault. La cartella è ${PROJECT_HOME}/models/ops-analytics. Il resource definition group è ops-analytics, e resta separato da retail-sources. Include hop_executions è attivo. Replace existing models è spento. OK scrive un modello di origine, un Data Vault grezzo, un piccolo Business Vault, un modello dimensionale, uno strato semantico e due flussi di carico. Questo video non apre quelle tabelle.
+
+  - id: lineage
+    title: Where f_orders came from
+    visual: images/lineage.png
+    visual_type: still
+    shot: >
+      Hop Lineage View seeded on f_orders. Header reads structure from
+      Marquez with an OPS overlay. Details pane is open. Do not narrate
+      the JDBC URL. The committed still is
+      docs/images/lineage-view-with-information-pane.png, padded to 16:9.
+      The retail file is models/f_orders-upstream.hlv. Do not teach a
+      Marquez install.
+    narration:
+      en: |
+        The selected node is the fact f_orders. The graph is the path
+        back to the source files on the left. The header says the
+        structure comes from Marquez, and that an OPS overlay is on. The
+        retail file is f_orders-upstream.hlv. It stores which backend to
+        ask, and which table is the seed. The graph itself is not in the
+        file. This video does not install Marquez. Open the file when
+        that backend is already running.
+      zh-CN: |
+        选中的节点是事实 f_orders。图是回到左侧源文件的路径。标题说结构来自 Marquez，并且 OPS 叠加层是打开的。retail 文件是 f_orders-upstream.hlv。它保存要问哪个后端，以及种子是哪张表。图本身不在文件里。这一集不安装 Marquez。那个后端已经在运行时再打开这个文件。
+      es-ES: |
+        El nodo seleccionado es el hecho f_orders. El grafo es el camino de vuelta a los archivos de origen de la izquierda. La cabecera dice que la estructura viene de Marquez, y que una capa OPS está activa. El archivo de retail es f_orders-upstream.hlv. Guarda a qué backend preguntar, y qué tabla es la semilla. El grafo no está en el archivo. Este vídeo no instala Marquez. Abre el archivo cuando ese backend ya está en marcha.
+      pt-PT: |
+        O nó selecionado é o facto f_orders. O grafo é o caminho de volta aos ficheiros de origem à esquerda. O cabeçalho diz que a estrutura vem do Marquez, e que uma camada OPS está ligada. O ficheiro retail é f_orders-upstream.hlv. Guarda qual o backend a perguntar, e qual a tabela semente. O grafo não está no ficheiro. Este vídeo não instala o Marquez. Abre o ficheiro quando esse backend já está a correr.
+      fr-FR: |
+        Le nœud sélectionné est le fait f_orders. Le graphe est le chemin vers les fichiers source à gauche. L'en-tête dit que la structure vient de Marquez, et qu'une couche OPS est active. Le fichier retail est f_orders-upstream.hlv. Il garde quel backend interroger, et quelle table est la graine. Le graphe n'est pas dans le fichier. Cette vidéo n'installe pas Marquez. Ouvre le fichier quand ce backend tourne déjà.
+      de-DE: |
+        Der gewählte Knoten ist der Fakt f_orders. Der Graph ist der Weg zurück zu den Quelldateien links. Die Kopfzeile sagt, die Struktur kommt von Marquez, und dass eine OPS-Überlagerung an ist. Die Retail-Datei ist f_orders-upstream.hlv. Sie speichert, welches Backend gefragt wird, und welche Tabelle der Start ist. Der Graph selbst liegt nicht in der Datei. Dieses Video installiert Marquez nicht. Öffne die Datei, wenn dieses Backend schon läuft.
+      it-IT: |
+        Il nodo selezionato è il fatto f_orders. Il grafo è il percorso indietro verso i file di origine a sinistra. L'intestazione dice che la struttura viene da Marquez, e che un overlay OPS è attivo. Il file retail è f_orders-upstream.hlv. Conserva quale backend interrogare, e quale tabella è il seme. Il grafo non è nel file. Questo video non installa Marquez. Apri il file quando quel backend è già in esecuzione.
+
+  - id: map
+    title: The picture of one run
+    visual: images/map.png
+    visual_type: still
+    shot: >
+      Execution map. The node in the middle is the workflow
+      run-retail-update-models. Model nodes to the right include the
+      Data Vault, Business Vault models, and dimensional models, with
+      retail-f-orders at the bottom. Paths on the canvas are
+      ${PROJECT_HOME}, truncated. The committed still is
+      docs/images/execution-map-in-hop-gui-simulate-six-months.png. Do
+      not teach the .hem file name as a lesson of its own.
+    narration:
+      en: |
+        An execution map is a different picture. It shows how one run is
+        wired, not how fields map. The node in the middle is the workflow
+        run-retail-update-models. To the right are the models that update
+        covers: the Data Vault, the Business Vault models, and the
+        dimensional models, with retail-f-orders at the bottom. A .hem
+        file stores this graph. A Hop Lineage View does not. You open the
+        map to see the batch. You do not start the load again.
+      zh-CN: |
+        执行图是另一幅画面。它显示一次运行如何连线，而不是字段如何对应。中间的节点是 Workflow run-retail-update-models。右边是这次更新覆盖的模型：Data Vault、Business Vault 模型，以及维度模型，最下面是 retail-f-orders。一个 .hem 文件保存这张图。Hop Lineage View 不保存。你打开这张图来看这一批。你不必再次启动加载。
+      es-ES: |
+        Un mapa de ejecución es otra imagen. Muestra cómo se conecta una ejecución, no cómo se corresponden los campos. El nodo del centro es el Workflow run-retail-update-models. A la derecha están los modelos que cubre la actualización: el Data Vault, los modelos Business Vault y los modelos dimensionales, con retail-f-orders abajo. Un archivo .hem guarda este grafo. Una Hop Lineage View no. Abres el mapa para ver el lote. No vuelves a lanzar la carga.
+      pt-PT: |
+        Um mapa de execução é outra imagem. Mostra como uma execução está ligada, não como os campos se correspondem. O nó ao centro é o Workflow run-retail-update-models. À direita estão os modelos que a atualização cobre: o Data Vault, os modelos Business Vault e os modelos dimensionais, com retail-f-orders em baixo. Um ficheiro .hem guarda este grafo. Uma Hop Lineage View não. Abres o mapa para ver o lote. Não voltas a lançar a carga.
+      fr-FR: |
+        Une carte d'exécution est une autre image. Elle montre comment une exécution est reliée, pas comment les champs se correspondent. Le nœud au centre est le Workflow run-retail-update-models. À droite, les modèles que la mise à jour couvre : le Data Vault, les modèles Business Vault, et les modèles dimensionnels, avec retail-f-orders en bas. Un fichier .hem garde ce graphe. Une Hop Lineage View non. Tu ouvres la carte pour voir le lot. Tu ne relances pas le chargement.
+      de-DE: |
+        Eine Ausführungskarte ist ein anderes Bild. Sie zeigt, wie ein Lauf verdrahtet ist, nicht wie Felder sich entsprechen. Der Knoten in der Mitte ist der Workflow run-retail-update-models. Rechts liegen die Modelle, die das Update abdeckt: der Data Vault, die Business Vault Modelle und die dimensionalen Modelle, mit retail-f-orders unten. Eine .hem Datei speichert diesen Graph. Eine Hop Lineage View nicht. Du öffnest die Karte, um den Lauf zu sehen. Du startest das Laden nicht erneut.
+      it-IT: |
+        Una mappa di esecuzione è un'altra immagine. Mostra come un'esecuzione è collegata, non come i campi si corrispondono. Il nodo al centro è il Workflow run-retail-update-models. A destra ci sono i modelli che l'aggiornamento copre: il Data Vault, i modelli Business Vault e i modelli dimensionali, con retail-f-orders in basso. Un file .hem conserva questo grafo. Una Hop Lineage View no. Apri la mappa per vedere il lotto. Non rilanci il carico.
+
+  - id: where-next
+    title: Where next
+    visual: images/where-next.png
+    visual_type: still
+    card_title: Where next
+    card_subtitle: The guide, the training, the longer tutorials
+    shot: >
+      Title card. Title "Where next". Subtitle "The guide, the training,
+      the longer tutorials". No GUI. Close the series. Point at Getting
+      started, the training modules, and docs/video-tutorials/.
+    narration:
+      en: |
+        That is the series. You described sources, built a Data Vault,
+        put the models in a resource definition group, loaded them,
+        shaped a Business Vault, and published a dimensional model.
+        Metrics tell you what the load did. Operational analytics turns
+        those timings into a warehouse you can query. Lineage shows where
+        a table came from. The execution map shows how the batch is
+        wired. The written path is Getting started, building an EDW, at
+        data-hopper.com. The training modules go further, and the longer
+        tutorials stay in the documentation.
+      zh-CN: |
+        系列到此结束。你描述了源，建了一个 Data Vault，把模型放进一个 resource definition group，加载它们，做出一个 Business Vault，并发布了一个维度模型。指标告诉你加载做了什么。Operational analytics 把那些计时变成一个可以查询的仓库。血缘显示一张表从哪里来。执行图显示这一批如何连线。书面路径是 Getting started, building an EDW，在 data-hopper.com。培训模块走得更远，更长的教程留在文档里。
+      es-ES: |
+        Esa es la serie. Describiste orígenes, construiste un Data Vault, pusiste los modelos en un resource definition group, los cargaste, diste forma a un Business Vault y publicaste un modelo dimensional. Las métricas dicen qué hizo la carga. Operational analytics convierte esos tiempos en un almacén que puedes consultar. El linaje muestra de dónde vino una tabla. El mapa de ejecución muestra cómo se conecta el lote. La ruta escrita es Getting started, building an EDW, en data-hopper.com. Los módulos de formación van más lejos, y los tutoriales largos siguen en la documentación.
+      pt-PT: |
+        Esta é a série. Descreveste origens, construíste um Data Vault, puseste os modelos num resource definition group, carregaste-os, deste forma a um Business Vault e publicaste um modelo dimensional. As métricas dizem o que a carga fez. Operational analytics transforma esses tempos num armazém que podes consultar. A linhagem mostra de onde veio uma tabela. O mapa de execução mostra como o lote está ligado. O caminho escrito é Getting started, building an EDW, em data-hopper.com. Os módulos de formação vão mais longe, e os tutoriais longos ficam na documentação.
+      fr-FR: |
+        Voilà la série. Tu as décrit des sources, construit un Data Vault, mis les modèles dans un resource definition group, chargé, formé un Business Vault, et publié un modèle dimensionnel. Les métriques disent ce que le chargement a fait. Operational analytics transforme ces durées en un entrepôt que tu peux interroger. La lignée montre d'où vient une table. La carte d'exécution montre comment le lot est relié. Le chemin écrit est Getting started, building an EDW, sur data-hopper.com. Les modules de formation vont plus loin, et les tutoriels longs restent dans la documentation.
+      de-DE: |
+        Das ist die Reihe. Du hast Quellen beschrieben, einen Data Vault gebaut, die Modelle in eine resource definition group gelegt, sie geladen, einen Business Vault geformt und ein dimensionales Modell veröffentlicht. Metriken sagen, was das Laden getan hat. Operational analytics macht aus diesen Zeiten ein Warehouse, das du abfragen kannst. Die Herkunft zeigt, woher eine Tabelle kam. Die Ausführungskarte zeigt, wie der Lauf verdrahtet ist. Der schriftliche Weg ist Getting started, building an EDW, unter data-hopper.com. Die Trainingsmodule gehen weiter, und die längeren Tutorials bleiben in der Dokumentation.
+      it-IT: |
+        Questa è la serie. Hai descritto le origini, costruito un Data Vault, messo i modelli in un resource definition group, caricato, formato un Business Vault e pubblicato un modello dimensionale. Le metriche dicono che cosa ha fatto il carico. Operational analytics trasforma quei tempi in un warehouse che puoi interrogare. Il lignaggio mostra da dove è arrivata una tabella. La mappa di esecuzione mostra come il lotto è collegato. Il percorso scritto è Getting started, building an EDW, su data-hopper.com. I moduli di formazione vanno oltre, e i tutorial più lunghi restano nella documentazione.

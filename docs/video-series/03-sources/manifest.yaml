@@ -1,0 +1,256 @@
+#
+# Copyright 2026 i-Bridge bv
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# Narration for video 03. English is the source.
+# Product words stay in English. See docs/video-series/glossary.yaml.
+video:
+  id: 03-sources
+  title: "Sources"
+  issue: 227
+  width: 1920
+  height: 1080
+  fps: 30
+  transition: fade
+  transition_ms: 400
+  padding_after_sec: 0.4
+  voice_id: ara
+  locales:
+    - en
+    - zh-CN
+    - es-ES
+    - pt-PT
+    - fr-FR
+    - de-DE
+    - it-IT
+  links:
+    - label: Getting started
+      url: https://github.com/ProjectDataHopper/hopper-edw/blob/main/docs/getting-started-edw.adoc
+    - label: Sources
+      url: https://github.com/ProjectDataHopper/hopper-edw/blob/main/docs/datavault-source.adoc
+    - label: Data Hopper
+      url: https://data-hopper.com/
+
+scenes:
+  - id: welcome
+    title: Welcome
+    visual: images/welcome.png
+    visual_type: still
+    card_title: Sources
+    card_subtitle: The rows stay put. The catalog holds the contract.
+    shot: >
+      Title card. Title "Sources". Subtitle "The rows stay put. The catalog
+      holds the contract." No GUI.
+    narration:
+      en: |
+        This video is about sources. A source is the landing data your
+        warehouse reads. The rows stay where they are. The Data Catalog
+        keeps the contract: the feed name, the columns, and the keys. Later
+        models bind to that name. You already have Hop 2.20, Java 21, and
+        Configure EDW setup. The sample is still the retail-example project.
+        The next video draws the picture. This one names the feed.
+      zh-CN: |
+        这一集讲源。源是仓库读取的落地数据。行留在原地。Data Catalog 保存契约：供给的名字、列和键。后面的模型绑定这个名字。你已经有 Hop 2.20、Java 21 和 Configure EDW setup。示例仍是 retail-example 项目。下一集画那张图。这一集给供给起名。
+      es-ES: |
+        Este vídeo trata de las fuentes. Una fuente son los datos de aterrizaje que lee el almacén. Las filas se quedan donde están. El Data Catalog guarda el contrato: el nombre del feed, las columnas y las claves. Los modelos posteriores se enlazan a ese nombre. Ya tienes Hop 2.20, Java 21 y Configure EDW setup. El ejemplo sigue siendo el proyecto retail-example. El siguiente vídeo dibuja la imagen. Este pone nombre al feed.
+      pt-PT: |
+        Este vídeo é sobre origens. Uma origem são os dados de chegada que o armazém lê. As linhas ficam onde estão. O Data Catalog guarda o contrato: o nome do feed, as colunas e as chaves. Os modelos seguintes ligam-se a esse nome. Já tens Hop 2.20, Java 21 e Configure EDW setup. O exemplo continua a ser o projeto retail-example. O vídeo seguinte desenha a imagem. Este dá nome ao feed.
+      fr-FR: |
+        Cette vidéo parle des sources. Une source, ce sont les données d'atterrissage que l'entrepôt lit. Les lignes restent où elles sont. Le Data Catalog garde le contrat : le nom du flux, les colonnes et les clés. Les modèles suivants se lient à ce nom. Tu as déjà Hop 2.20, Java 21 et Configure EDW setup. L'exemple reste le projet retail-example. La vidéo suivante dessine l'image. Celle-ci nomme le flux.
+      de-DE: |
+        Dieses Video behandelt Quellen. Eine Quelle sind die Landedaten, die das Warehouse liest. Die Zeilen bleiben, wo sie sind. Der Data Catalog hält den Vertrag: den Feed-Namen, die Spalten und die Schlüssel. Spätere Modelle binden sich an diesen Namen. Du hast schon Hop 2.20, Java 21 und Configure EDW setup. Das Beispiel bleibt das Projekt retail-example. Das nächste Video zeichnet das Bild. Dieses benennt den Feed.
+      it-IT: |
+        Questo video parla delle sorgenti. Una sorgente sono i dati di atterraggio che il warehouse legge. Le righe restano dove sono. Il Data Catalog tiene il contratto: il nome del feed, le colonne e le chiavi. I modelli successivi si legano a quel nome. Hai già Hop 2.20, Java 21 e Configure EDW setup. L'esempio resta il progetto retail-example. Il video successivo disegna l'immagine. Questo dà il nome al feed.
+
+  - id: landing
+    title: Landing data
+    visual: images/landing.png
+    visual_type: still
+    card_title: Landing data
+    card_subtitle: Tables, files, and events
+    shot: >
+      Title card. Title "Landing data". Subtitle "Tables, files, and events".
+      No GUI.
+    narration:
+      en: |
+        Landing data arrives as database tables, files, or events.
+        retail-example lands its CRM tables on the connection named CRM.
+        A file feed can be CSV, Parquet, or Iceberg. An event feed can be
+        JSON inside a column. None of these copies the rows into the
+        catalog. The catalog stores the description. The database, the file,
+        or the event stream keeps the rows. Rename a table in the database
+        and the contract does not move with it.
+      zh-CN: |
+        落地数据以数据库表、文件或事件到来。retail-example 把 CRM 表落在名为 CRM 的连接上。文件供给可以是 CSV、Parquet 或 Iceberg。事件供给可以是列里的 JSON。这些都不会把行复制进目录。目录保存描述。数据库、文件或事件流保存行。在数据库里改表名，契约不会跟着走。
+      es-ES: |
+        Los datos de aterrizaje llegan como tablas de base de datos, archivos o eventos. retail-example deja sus tablas CRM en la conexión llamada CRM. Un feed de archivo puede ser CSV, Parquet o Iceberg. Un feed de eventos puede ser JSON dentro de una columna. Ninguno copia las filas al catálogo. El catálogo guarda la descripción. La base, el archivo o el flujo de eventos guarda las filas. Renombra una tabla en la base y el contrato no se mueve con ella.
+      pt-PT: |
+        Os dados de chegada chegam como tabelas de base de dados, ficheiros ou eventos. O retail-example deixa as tabelas CRM na ligação chamada CRM. Um feed de ficheiro pode ser CSV, Parquet ou Iceberg. Um feed de eventos pode ser JSON dentro de uma coluna. Nenhum copia as linhas para o catálogo. O catálogo guarda a descrição. A base, o ficheiro ou o fluxo de eventos guarda as linhas. Muda o nome de uma tabela na base e o contrato não se move com ela.
+      fr-FR: |
+        Les données d'atterrissage arrivent comme des tables, des fichiers ou des événements. retail-example pose ses tables CRM sur la connexion nommée CRM. Un flux fichier peut être du CSV, du Parquet ou de l'Iceberg. Un flux d'événements peut être du JSON dans une colonne. Aucun de ces cas ne copie les lignes dans le catalogue. Le catalogue garde la description. La base, le fichier ou le flux d'événements garde les lignes. Renomme une table dans la base et le contrat ne suit pas.
+      de-DE: |
+        Landedaten kommen als Datenbanktabellen, Dateien oder Ereignisse. retail-example legt seine CRM-Tabellen auf die Verbindung namens CRM. Ein Datei-Feed kann CSV, Parquet oder Iceberg sein. Ein Ereignis-Feed kann JSON in einer Spalte sein. Keiner davon kopiert die Zeilen in den Katalog. Der Katalog speichert die Beschreibung. Die Datenbank, die Datei oder der Ereignisstrom behält die Zeilen. Benennst du eine Tabelle in der Datenbank um, zieht der Vertrag nicht mit.
+      it-IT: |
+        I dati di atterraggio arrivano come tabelle di database, file o eventi. retail-example mette le tabelle CRM sulla connessione chiamata CRM. Un feed di file può essere CSV, Parquet o Iceberg. Un feed di eventi può essere JSON dentro una colonna. Nessuno di questi copia le righe nel catalogo. Il catalogo conserva la descrizione. Il database, il file o il flusso di eventi conserva le righe. Rinomini una tabella nel database e il contratto non si sposta con essa.
+
+  - id: one-feed
+    title: One feed
+    visual: images/one-feed.png
+    visual_type: still
+    shot: >
+      Source table dialog for order_header. Catalog source name and the CRM
+      connection are readable. The committed still is
+      docs/images/source-modeler-source-table.png, padded to 16:9. A Data
+      Catalog perspective capture of the same feed can replace it.
+    narration:
+      en: |
+        Open a feed far enough to read its name. This is the source table
+        order_header. The catalog source name is order_header. That name is
+        what a hub or a satellite will cite. The database connection is CRM,
+        the schema is public, and the table is order_header. The JDBC URL
+        stays on that connection. The Columns tab lists the fields and the
+        primary key. Those fields are the contract. The connection only says
+        where the rows live.
+      zh-CN: |
+        把一份供给打开到能读出名字。这是源表 order_header。目录源名称是 order_header。枢纽或卫星引用的就是这个名字。数据库连接是 CRM，模式是 public，表是 order_header。JDBC URL 留在这个连接上。Columns 页列出字段和主键。这些字段是契约。连接只说明行放在哪里。
+      es-ES: |
+        Abre un feed lo bastante para leer su nombre. Esta es la tabla de origen order_header. El nombre de origen en el catálogo es order_header. Ese nombre es el que citará un hub o un satélite. La conexión de base de datos es CRM, el esquema es public y la tabla es order_header. La URL JDBC permanece en esa conexión. La pestaña Columns lista los campos y la clave primaria. Esos campos son el contrato. La conexión solo dice dónde están las filas.
+      pt-PT: |
+        Abre um feed o suficiente para ler o nome. Esta é a tabela de origem order_header. O nome de origem no catálogo é order_header. Esse nome é o que um hub ou um satélite vai citar. A ligação de base de dados é CRM, o esquema é public e a tabela é order_header. O URL JDBC fica nessa ligação. O separador Columns lista os campos e a chave primária. Esses campos são o contrato. A ligação só diz onde estão as linhas.
+      fr-FR: |
+        Ouvre un flux assez loin pour lire son nom. Voici la table source order_header. Le nom de source dans le catalogue est order_header. C'est ce nom qu'un hub ou un satellite citera. La connexion de base de données est CRM, le schéma est public et la table est order_header. L'URL JDBC reste sur cette connexion. L'onglet Columns liste les champs et la clé primaire. Ces champs sont le contrat. La connexion dit seulement où sont les lignes.
+      de-DE: |
+        Öffne einen Feed weit genug, um den Namen zu lesen. Das ist die Quelltabelle order_header. Der Katalog-Quellname ist order_header. Diesen Namen nennt ein Hub oder ein Satellite. Die Datenbankverbindung ist CRM, das Schema ist public und die Tabelle ist order_header. Die JDBC URL bleibt an dieser Verbindung. Der Reiter Columns listet die Felder und den Primärschlüssel. Diese Felder sind der Vertrag. Die Verbindung sagt nur, wo die Zeilen liegen.
+      it-IT: |
+        Apri un feed abbastanza da leggerne il nome. Questa è la tabella di origine order_header. Il nome di origine nel catalogo è order_header. Quel nome è ciò che un hub o un satellite citerà. La connessione di database è CRM, lo schema è public e la tabella è order_header. L'URL JDBC resta su quella connessione. La scheda Columns elenca i campi e la chiave primaria. Quei campi sono il contratto. La connessione dice solo dove stanno le righe.
+
+  - id: namespace
+    title: Where feeds live
+    visual: images/namespace.png
+    visual_type: still
+    shot: >
+      Data Catalog perspective, Show set to Sources, namespace
+      hop/retail-example/sources expanded, customer_address selected, Fields
+      tab with customer_id. Padded to 16:9.
+    narration:
+      en: |
+        Here is the Data Catalog, filtered to Sources. Under local-catalog,
+        open Working catalog, then hop/retail-example/sources.
+        customer_address is selected. The Fields tab lists customer_id, the
+        address lines, and the primary key. Those fields are the contract.
+        Refresh with F5 when the files change on disk. A load writes target
+        layouts under models. The source feeds stay in this list.
+      zh-CN: |
+        这是 Data Catalog，筛选为 Sources。在 local-catalog 下打开 Working catalog，然后是 hop/retail-example/sources。选中的是 customer_address。Fields 页列出 customer_id、地址行和主键。这些字段是契约。文件在磁盘上变化时按 F5 刷新。加载把目标布局写到 models 下面。源供给留在这份清单里。
+      es-ES: |
+        Aquí está el Data Catalog, filtrado a Sources. Bajo local-catalog, abre Working catalog y luego hop/retail-example/sources. customer_address está seleccionado. La pestaña Fields lista customer_id, las líneas de dirección y la clave primaria. Esos campos son el contrato. Pulsa F5 cuando los archivos cambien en disco. Una carga escribe los diseños de destino bajo models. Los feeds de origen se quedan en esta lista.
+      pt-PT: |
+        Aqui está o Data Catalog, filtrado para Sources. Sob local-catalog, abre Working catalog e depois hop/retail-example/sources. customer_address está selecionado. O separador Fields lista customer_id, as linhas de morada e a chave primária. Esses campos são o contrato. Prime F5 quando os ficheiros mudarem no disco. Uma carga escreve os layouts de destino sob models. Os feeds de origem ficam nesta lista.
+      fr-FR: |
+        Voici le Data Catalog, filtré sur Sources. Sous local-catalog, ouvre Working catalog, puis hop/retail-example/sources. customer_address est sélectionné. L'onglet Fields liste customer_id, les lignes d'adresse et la clé primaire. Ces champs sont le contrat. Appuie sur F5 quand les fichiers changent sur le disque. Un chargement écrit les dispositions cibles sous models. Les flux source restent dans cette liste.
+      de-DE: |
+        Hier ist der Data Catalog, gefiltert auf Sources. Unter local-catalog öffnest du Working catalog und dann hop/retail-example/sources. customer_address ist ausgewählt. Der Reiter Fields listet customer_id, die Adresszeilen und den Primärschlüssel. Diese Felder sind der Vertrag. Drücke F5, wenn sich die Dateien auf der Platte ändern. Ein Ladevorgang schreibt Ziel-Layouts unter models. Die Quell-Feeds bleiben in dieser Liste.
+      it-IT: |
+        Ecco il Data Catalog, filtrato su Sources. Sotto local-catalog apri Working catalog, poi hop/retail-example/sources. customer_address è selezionato. La scheda Fields elenca customer_id, le righe dell'indirizzo e la chiave primaria. Quei campi sono il contratto. Premi F5 quando i file cambiano sul disco. Un carico scrive i layout di destinazione sotto models. I feed di origine restano in questo elenco.
+
+  - id: import-tables
+    title: Import tables
+    visual: images/import-tables.png
+    visual_type: still
+    card_title: Import tables
+    card_subtitle: One physical table, one feed
+    shot: >
+      Title card. Title "Import tables". Subtitle "One physical table, one
+      feed". No GUI. A later capture can show the catalog Import tables
+      dialog.
+    narration:
+      en: |
+        When every feed is one physical table, Import tables in the Data
+        Catalog perspective is the short path. It creates catalog entries
+        from the live database. This series does not stop there. Generate
+        Data Vault needs the keys and the relationships, and those are drawn
+        on a source model. Import tables is the right tool when you only
+        need the contract, and you will not generate a vault from a picture.
+      zh-CN: |
+        当每份供给都是一张物理表时，Data Catalog 透视图里的 Import tables 是短路径。它根据正在使用的数据库创建目录条目。这个系列不会停在这里。Generate Data Vault 需要键和关系，那些画在源模型上。只有当你只要契约、并且不从一张图生成 vault 时，Import tables 才是合适的工具。
+      es-ES: |
+        Cuando cada feed es una sola tabla física, Import tables en la perspectiva Data Catalog es el camino corto. Crea entradas de catálogo desde la base de datos en uso. Esta serie no se detiene ahí. Generate Data Vault necesita las claves y las relaciones, y esas se dibujan en un modelo de origen. Import tables es la herramienta correcta cuando solo necesitas el contrato y no vas a generar un vault desde un dibujo.
+      pt-PT: |
+        Quando cada feed é uma única tabela física, Import tables na perspetiva Data Catalog é o caminho curto. Cria entradas de catálogo a partir da base de dados em uso. Esta série não fica por aqui. Generate Data Vault precisa das chaves e das relações, e essas desenham-se num modelo de origem. Import tables é a ferramenta certa quando só precisas do contrato e não vais gerar um vault a partir de uma imagem.
+      fr-FR: |
+        Quand chaque flux est une seule table physique, Import tables dans la perspective Data Catalog est le chemin court. Il crée des entrées de catalogue depuis la base en service. Cette série ne s'arrête pas là. Generate Data Vault a besoin des clés et des relations, et celles-ci se dessinent sur un modèle source. Import tables est le bon outil quand tu n'as besoin que du contrat, et que tu ne généreras pas un vault depuis un dessin.
+      de-DE: |
+        Wenn jeder Feed eine einzige physische Tabelle ist, ist Import tables in der Data Catalog Perspektive der kurze Weg. Er legt Katalogeinträge aus der verwendeten Datenbank an. Diese Reihe bleibt nicht dort stehen. Generate Data Vault braucht die Schlüssel und die Beziehungen, und die werden auf einem Quellenmodell gezeichnet. Import tables ist das richtige Werkzeug, wenn du nur den Vertrag brauchst und keinen Vault aus einem Bild erzeugst.
+      it-IT: |
+        Quando ogni feed è una sola tabella fisica, Import tables nella prospettiva Data Catalog è la strada breve. Crea voci di catalogo dal database in uso. Questa serie non si ferma lì. Generate Data Vault ha bisogno delle chiavi e delle relazioni, e quelle si disegnano su un modello di origine. Import tables è lo strumento giusto quando ti serve solo il contratto e non genererai un vault da un disegno.
+
+  - id: push
+    title: Push to catalog
+    visual: images/push.png
+    visual_type: still
+    shot: >
+      Source model canvas for source-tables-crm.hsm. Tables, a query, a JSON
+      card, and a pipeline are readable. The committed still is
+      docs/images/source-modeler-example.png.
+    narration:
+      en: |
+        This is the source model source-tables-crm.hsm. Each card is a feed.
+        You can see tables such as customer_address and order_header, a
+        query, a JSON extraction, and a pipeline. Push to catalog writes
+        them under hop/retail-example/sources. A feed that already has that
+        name is overwritten. The next video walks this canvas. For now, the
+        picture and the catalog list are the same feeds.
+      zh-CN: |
+        这是源模型 source-tables-crm.hsm。每张卡片都是一份供给。你能看到 customer_address 和 order_header 这样的表、一个查询、一次 JSON 抽取，以及一个 Pipeline。Push to catalog 把它们写到 hop/retail-example/sources 下面。已有同名供给会被覆盖。下一集走过这块画布。现在，这张图和目录清单是同一批供给。
+      es-ES: |
+        Este es el modelo de origen source-tables-crm.hsm. Cada tarjeta es un feed. Ves tablas como customer_address y order_header, una consulta, una extracción JSON y un Pipeline. Push to catalog las escribe bajo hop/retail-example/sources. Un feed que ya tiene ese nombre se sobrescribe. El siguiente vídeo recorre este lienzo. Por ahora, la imagen y la lista del catálogo son los mismos feeds.
+      pt-PT: |
+        Este é o modelo de origem source-tables-crm.hsm. Cada cartão é um feed. Vês tabelas como customer_address e order_header, uma consulta, uma extração JSON e um Pipeline. Push to catalog escreve-os sob hop/retail-example/sources. Um feed que já tenha esse nome é substituído. O vídeo seguinte percorre esta tela. Por agora, a imagem e a lista do catálogo são os mesmos feeds.
+      fr-FR: |
+        Voici le modèle source source-tables-crm.hsm. Chaque carte est un flux. Tu vois des tables comme customer_address et order_header, une requête, une extraction JSON et un Pipeline. Push to catalog les écrit sous hop/retail-example/sources. Un flux qui porte déjà ce nom est écrasé. La vidéo suivante parcourt ce canevas. Pour l'instant, l'image et la liste du catalogue sont les mêmes flux.
+      de-DE: |
+        Das ist das Quellenmodell source-tables-crm.hsm. Jede Karte ist ein Feed. Du siehst Tabellen wie customer_address und order_header, eine Abfrage, eine JSON-Extraktion und eine Pipeline. Push to catalog schreibt sie unter hop/retail-example/sources. Ein Feed mit diesem Namen wird überschrieben. Das nächste Video geht über diese Zeichenfläche. Vorerst sind das Bild und die Katalogliste dieselben Feeds.
+      it-IT: |
+        Questo è il modello di origine source-tables-crm.hsm. Ogni scheda è un feed. Vedi tabelle come customer_address e order_header, una query, un'estrazione JSON e un Pipeline. Push to catalog le scrive sotto hop/retail-example/sources. Un feed che ha già quel nome viene sovrascritto. Il video successivo percorre questa area. Per ora, l'immagine e l'elenco del catalogo sono gli stessi feed.
+
+  - id: where-next
+    title: Where next
+    visual: images/where-next.png
+    visual_type: still
+    card_title: Where next
+    card_subtitle: Draw the source model
+    shot: >
+      Title card. Title "Where next". Subtitle "Draw the source model". No
+      GUI. The next episode is source models.
+    narration:
+      en: |
+        The next video is source models. You will import a schema, see the
+        relationships, and push the feeds you just heard about. The written
+        guide for this video is Getting started, building an EDW, chapter 1,
+        at data-hopper.com. If the Data Catalog perspective is empty, open
+        retail-example and press F5. The feeds are files under the project
+        catalog, not rows in the Vault database. Bring a feed name with you.
+      zh-CN: |
+        下一集是源模型。你会导入一个模式，看到关系，并推送你刚听到的供给。这一集的书面指南是 Getting started, building an EDW 的第 1 章，在 data-hopper.com。如果 Data Catalog 透视图是空的，打开 retail-example 并按 F5。供给是项目目录下的文件，不是 Vault 数据库里的行。带上一个供给的名字。
+      es-ES: |
+        El siguiente vídeo son los modelos de origen. Importarás un esquema, verás las relaciones y publicarás los feeds de los que acabas de oír hablar. La guía escrita de este vídeo es Getting started, building an EDW, capítulo 1, en data-hopper.com. Si la perspectiva Data Catalog está vacía, abre retail-example y pulsa F5. Los feeds son archivos bajo el catálogo del proyecto, no filas en la base Vault. Trae contigo un nombre de feed.
+      pt-PT: |
+        O vídeo seguinte são os modelos de origem. Vais importar um esquema, ver as relações e publicar os feeds de que acabaste de ouvir falar. O guia escrito deste vídeo é Getting started, building an EDW, capítulo 1, em data-hopper.com. Se a perspetiva Data Catalog estiver vazia, abre o retail-example e prime F5. Os feeds são ficheiros sob o catálogo do projeto, não linhas na base Vault. Traz um nome de feed contigo.
+      fr-FR: |
+        La vidéo suivante porte sur les modèles source. Tu importeras un schéma, tu verras les relations et tu publieras les flux dont tu viens d'entendre parler. Le guide écrit de cette vidéo est Getting started, building an EDW, chapitre 1, sur data-hopper.com. Si la perspective Data Catalog est vide, ouvre retail-example et appuie sur F5. Les flux sont des fichiers sous le catalogue du projet, pas des lignes dans la base Vault. Emporte un nom de flux.
+      de-DE: |
+        Das nächste Video behandelt Quellenmodelle. Du importierst ein Schema, siehst die Beziehungen und veröffentlichst die Feeds, von denen du gerade gehört hast. Die schriftliche Anleitung für dieses Video ist Getting started, building an EDW, Kapitel 1, unter data-hopper.com. Wenn die Data Catalog Perspektive leer ist, öffne retail-example und drücke F5. Die Feeds sind Dateien unter dem Projektkatalog, keine Zeilen in der Vault-Datenbank. Nimm einen Feed-Namen mit.
+      it-IT: |
+        Il prossimo video parla dei modelli di origine. Importerai uno schema, vedrai le relazioni e pubblicherai i feed di cui hai appena sentito parlare. La guida scritta di questo video è Getting started, building an EDW, capitolo 1, su data-hopper.com. Se la prospettiva Data Catalog è vuota, apri retail-example e premi F5. I feed sono file sotto il catalogo del progetto, non righe nel database Vault. Porta con te un nome di feed.

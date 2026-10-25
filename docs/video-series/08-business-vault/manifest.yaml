@@ -1,0 +1,195 @@
+#
+# Copyright 2026 i-Bridge bv
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# Narration for video 08. English is the source.
+# Product words stay in English. See docs/video-series/glossary.yaml.
+video:
+  id: 08-business-vault
+  title: "Business Vault"
+  issue: 232
+  width: 1920
+  height: 1080
+  fps: 30
+  transition: fade
+  transition_ms: 400
+  padding_after_sec: 0.4
+  voice_id: ara
+  locales:
+    - en
+    - zh-CN
+    - es-ES
+    - pt-PT
+    - fr-FR
+    - de-DE
+    - it-IT
+  links:
+    - label: Getting started
+      url: https://github.com/ProjectDataHopper/hopper-edw/blob/main/docs/getting-started-edw.adoc
+    - label: Business Vault
+      url: https://github.com/ProjectDataHopper/hopper-edw/blob/main/docs/business-vault-overview.adoc
+    - label: Data Hopper
+      url: https://data-hopper.com/
+
+scenes:
+  - id: welcome
+    title: Welcome
+    visual: images/welcome.png
+    visual_type: still
+    card_title: Business Vault
+    card_subtitle: Rules as their own tables
+    shot: >
+      Title card. Title "Business Vault". Subtitle "Rules as their own
+      tables". No GUI.
+    narration:
+      en: |
+        The raw Data Vault keeps source history. The Business Vault stores
+        business rules as their own tables, so every report does not
+        rebuild them. A Business Vault file ends in .hbv, and it points at
+        a raw vault, a .hdv. In retail-example that file is retail-360.hbv.
+        It reads hub_customer and the customer satellites you generated in
+        the last videos. The rules live here. The history stays in the raw
+        vault.
+      zh-CN: |
+        原始 Data Vault 保留源的历史。Business Vault 把业务规则存成自己的表，这样每份报表就不必重新构造它们。Business Vault 文件以 .hbv 结尾，并指向一个原始 vault，也就是一个 .hdv。在 retail-example 里，这个文件是 retail-360.hbv。它读取 hub_customer 和你在前面几集生成的客户卫星。规则放在这里。历史留在原始 vault 里。
+      es-ES: |
+        El Data Vault en bruto guarda la historia de la fuente. El Business Vault guarda las reglas de negocio como tablas propias, así cada informe no las reconstruye. Un archivo Business Vault termina en .hbv, y apunta a un vault en bruto, un .hdv. En retail-example ese archivo es retail-360.hbv. Lee hub_customer y los satélites de cliente que generaste en los vídeos anteriores. Las reglas están aquí. La historia se queda en el vault en bruto.
+      pt-PT: |
+        O Data Vault em bruto guarda a história da origem. O Business Vault guarda as regras de negócio como tabelas próprias, para cada relatório não as reconstruir. Um ficheiro Business Vault termina em .hbv, e aponta para um vault em bruto, um .hdv. No retail-example esse ficheiro é retail-360.hbv. Lê hub_customer e os satélites de cliente que geraste nos vídeos anteriores. As regras ficam aqui. A história fica no vault em bruto.
+      fr-FR: |
+        Le Data Vault brut garde l'historique de la source. Le Business Vault range les règles métier dans leurs propres tables, pour que chaque rapport ne les reconstruise pas. Un fichier Business Vault se termine par .hbv, et il pointe vers un vault brut, un .hdv. Dans retail-example ce fichier est retail-360.hbv. Il lit hub_customer et les satellites client générés dans les vidéos précédentes. Les règles sont ici. L'historique reste dans le vault brut.
+      de-DE: |
+        Der rohe Data Vault behält die Quellhistorie. Der Business Vault speichert Geschäftsregeln als eigene Tabellen, damit nicht jeder Bericht sie neu baut. Eine Business Vault Datei endet auf .hbv und zeigt auf einen rohen Vault, eine .hdv. In retail-example ist das die Datei retail-360.hbv. Sie liest hub_customer und die Kunden-Satellites aus den vorigen Videos. Die Regeln liegen hier. Die Historie bleibt im rohen Vault.
+      it-IT: |
+        Il Data Vault grezzo tiene la storia della sorgente. Il Business Vault conserva le regole di business come tabelle proprie, così ogni report non le ricostruisce. Un file Business Vault finisce con .hbv e punta a un vault grezzo, un .hdv. In retail-example quel file è retail-360.hbv. Legge hub_customer e i satelliti cliente generati nei video precedenti. Le regole stanno qui. La storia resta nel vault grezzo.
+
+  - id: canvas
+    title: Customer 360
+    visual: images/canvas.png
+    visual_type: still
+    shot: >
+      Business Vault canvas. customer_360_bv SCD2 in the center, hub_customer
+      on the right, four raw satellites around it. The committed still is
+      docs/images/business-vault-model-customer-360.png, padded to 16:9.
+    narration:
+      en: |
+        This is that canvas. The blue card is customer_360_bv, an SCD2
+        table. It is a historized business view of the customer. On the
+        right is hub_customer. Around it are the raw satellites:
+        sat_customer_demo, sat_customer_contact, sat_customer_address, and
+        sat_customer_prefs. The SCD2 reads those satellites and writes one
+        timeline. A PIT is a different table: one row per hub key, with the
+        load dates of the related satellites. A bridge is a relationship,
+        with an optional weight. Neither is on this picture.
+      zh-CN: |
+        这就是那块画布。蓝色卡片是 customer_360_bv，一张 SCD2 表。它是客户的历史化业务视图。右边是 hub_customer。周围是原始卫星：sat_customer_demo、sat_customer_contact、sat_customer_address 和 sat_customer_prefs。SCD2 读取这些卫星并写出一条时间线。PIT 是另一种表：每个枢纽键一行，带着相关卫星的加载日期。bridge 是一种关系，可以带一个权重。这张图上没有它们。
+      es-ES: |
+        Este es ese lienzo. La tarjeta azul es customer_360_bv, una tabla SCD2. Es una vista de negocio historizada del cliente. A la derecha está hub_customer. Alrededor están los satélites en bruto: sat_customer_demo, sat_customer_contact, sat_customer_address y sat_customer_prefs. El SCD2 lee esos satélites y escribe una línea de tiempo. Un PIT es otra tabla: una fila por clave de hub, con las fechas de carga de los satélites relacionados. Un bridge es una relación, con un peso opcional. Ninguno de los dos está en esta imagen.
+      pt-PT: |
+        Esta é essa tela. O cartão azul é customer_360_bv, uma tabela SCD2. É uma vista de negócio historiada do cliente. À direita está hub_customer. À volta estão os satélites em bruto: sat_customer_demo, sat_customer_contact, sat_customer_address e sat_customer_prefs. O SCD2 lê esses satélites e escreve uma linha de tempo. Um PIT é outra tabela: uma linha por chave de hub, com as datas de carga dos satélites relacionados. Um bridge é uma relação, com um peso opcional. Nenhum dos dois está nesta imagem.
+      fr-FR: |
+        Voici ce canevas. La carte bleue est customer_360_bv, une table SCD2. C'est une vue métier historisée du client. À droite se trouve hub_customer. Autour, les satellites bruts : sat_customer_demo, sat_customer_contact, sat_customer_address et sat_customer_prefs. Le SCD2 lit ces satellites et écrit une chronologie. Un PIT est une autre table : une ligne par clé de hub, avec les dates de chargement des satellites liés. Un bridge est une relation, avec un poids facultatif. Ni l'un ni l'autre n'est sur cette image.
+      de-DE: |
+        Das ist diese Zeichenfläche. Die blaue Karte ist customer_360_bv, eine SCD2-Tabelle. Sie ist eine historisierte Geschäftssicht des Kunden. Rechts steht hub_customer. Darum liegen die rohen Satellites: sat_customer_demo, sat_customer_contact, sat_customer_address und sat_customer_prefs. Das SCD2 liest diese Satellites und schreibt eine Zeitlinie. Ein PIT ist eine andere Tabelle: eine Zeile je Hub-Schlüssel, mit den Ladedaten der zugehörigen Satellites. Eine Bridge ist eine Beziehung, mit einem optionalen Gewicht. Keines von beiden ist auf diesem Bild.
+      it-IT: |
+        Questa è quell'area. La scheda blu è customer_360_bv, una tabella SCD2. È una vista di business storicizzata del cliente. A destra c'è hub_customer. Intorno ci sono i satelliti grezzi: sat_customer_demo, sat_customer_contact, sat_customer_address e sat_customer_prefs. L'SCD2 legge quei satelliti e scrive una linea temporale. Un PIT è un'altra tabella: una riga per chiave di hub, con le date di carico dei satelliti collegati. Un bridge è una relazione, con un peso facoltativo. Nessuno dei due è in questa immagine.
+
+  - id: scd2
+    title: The SCD2 table
+    visual: images/scd2.png
+    visual_type: still
+    shot: >
+      Edit Business Vault SCD2 table for customer_360_bv. General tab.
+      Parent hub hub_customer. Build mode Full rebuild. Description says
+      the view is merged from four satellites. No personal paths.
+    narration:
+      en: |
+        Open the card and the General tab names the table customer_360_bv.
+        The description says it is a functional customer 360 view, merged
+        from four satellites. The parent hub is hub_customer. Build mode is
+        full rebuild, so each run rebuilds the timeline from the raw
+        satellite history. You do not write that load by hand. Check
+        model and the Business Vault update generate it. The Derivatives
+        tab is where those four satellites are listed.
+      zh-CN: |
+        打开这张卡片，General 页写出表名 customer_360_bv。说明写着它是功能上的客户 360 视图，由四颗卫星合并而成。父枢纽是 hub_customer。构建模式是完全重建，所以每次运行都从原始卫星历史重建时间线。你不用亲手写这次加载。Check model 和 Business Vault 更新会生成它。Derivatives 页列出那四颗卫星。
+      es-ES: |
+        Abre la tarjeta y la pestaña General nombra la tabla customer_360_bv. La descripción dice que es una vista funcional de cliente 360, unida a partir de cuatro satélites. El hub padre es hub_customer. El modo de construcción es reconstrucción completa, así cada ejecución reconstruye la línea de tiempo desde la historia de los satélites en bruto. No escribes esa carga a mano. Check model y la actualización del Business Vault la generan. La pestaña Derivatives es donde están listados esos cuatro satélites.
+      pt-PT: |
+        Abre o cartão e o separador General nomeia a tabela customer_360_bv. A descrição diz que é uma vista funcional de cliente 360, fundida a partir de quatro satélites. O hub pai é hub_customer. O modo de construção é reconstrução completa, por isso cada execução reconstrói a linha de tempo a partir da história dos satélites em bruto. Não escreves essa carga à mão. Check model e a atualização do Business Vault geram-na. O separador Derivatives é onde esses quatro satélites estão listados.
+      fr-FR: |
+        Ouvre la carte et l'onglet General nomme la table customer_360_bv. La description dit que c'est une vue fonctionnelle client 360, fusionnée à partir de quatre satellites. Le hub parent est hub_customer. Le mode de construction est reconstruction complète, donc chaque exécution reconstruit la chronologie depuis l'historique des satellites bruts. Tu n'écris pas ce chargement à la main. Check model et la mise à jour du Business Vault le génèrent. L'onglet Derivatives est l'endroit où ces quatre satellites sont listés.
+      de-DE: |
+        Öffne die Karte. Der Reiter General nennt die Tabelle customer_360_bv. Die Beschreibung sagt, es sei eine funktionale Kunden-360-Sicht, zusammengeführt aus vier Satellites. Der Eltern-Hub ist hub_customer. Der Baumodus ist vollständiger Neuaufbau, also baut jeder Lauf die Zeitlinie aus der rohen Satellite-Historie neu. Du schreibst diesen Ladevorgang nicht von Hand. Check model und die Business Vault Aktualisierung erzeugen ihn. Der Reiter Derivatives listet diese vier Satellites.
+      it-IT: |
+        Apri la scheda e la scheda General nomina la tabella customer_360_bv. La descrizione dice che è una vista funzionale cliente 360, unita da quattro satelliti. L'hub padre è hub_customer. La modalità di costruzione è ricostruzione completa, quindi ogni esecuzione ricostruisce la linea temporale dalla storia dei satelliti grezzi. Non scrivi quel carico a mano. Check model e l'aggiornamento del Business Vault lo generano. La scheda Derivatives è dove sono elencati quei quattro satelliti.
+
+  - id: group
+    title: Same group
+    visual: images/group.png
+    visual_type: still
+    shot: >
+      Update resource definition group dialog from the previous episode.
+      Include Business Vault models is checked. Group retail-sources.
+    narration:
+      en: |
+        Add retail-360.hbv to the same resource definition group,
+        retail-sources. Do not create a second group. A second group is a
+        different warehouse. On the update action, Include Business Vault
+        models is the box for this layer. The load still runs every Data
+        Vault model first, then every Business Vault model. The raw history
+        is loaded before the rules that read it.
+      zh-CN: |
+        把 retail-360.hbv 加进同一个 resource definition group，也就是 retail-sources。不要创建第二个组。第二个组是另一个仓库。在更新动作上，Include Business Vault models 是这一层的框。加载仍然先跑每一个 Data Vault 模型，再跑每一个 Business Vault 模型。原始历史先加载，读取它的规则后加载。
+      es-ES: |
+        Añade retail-360.hbv al mismo resource definition group, retail-sources. No crees un segundo grupo. Un segundo grupo es otro almacén. En la Action de actualización, Include Business Vault models es la casilla de esta capa. La carga sigue ejecutando primero cada modelo Data Vault, y después cada modelo Business Vault. La historia en bruto se carga antes que las reglas que la leen.
+      pt-PT: |
+        Acrescenta retail-360.hbv ao mesmo resource definition group, retail-sources. Não cries um segundo grupo. Um segundo grupo é outro armazém. Na Action de atualização, Include Business Vault models é a caixa desta camada. A carga continua a correr primeiro cada modelo Data Vault, e depois cada modelo Business Vault. A história em bruto é carregada antes das regras que a leem.
+      fr-FR: |
+        Ajoute retail-360.hbv au même resource definition group, retail-sources. Ne crée pas un second groupe. Un second groupe est un autre entrepôt. Sur l'Action de mise à jour, Include Business Vault models est la case de cette couche. Le chargement exécute toujours chaque modèle Data Vault d'abord, puis chaque modèle Business Vault. L'historique brut est chargé avant les règles qui le lisent.
+      de-DE: |
+        Füge retail-360.hbv derselben resource definition group hinzu, retail-sources. Lege keine zweite Gruppe an. Eine zweite Gruppe ist ein anderes Warehouse. Auf der Update-Action ist Include Business Vault models das Feld für diese Schicht. Der Ladevorgang führt weiter zuerst jedes Data Vault Modell aus, dann jedes Business Vault Modell. Die rohe Historie wird geladen, bevor die Regeln sie lesen.
+      it-IT: |
+        Aggiungi retail-360.hbv allo stesso resource definition group, retail-sources. Non creare un secondo gruppo. Un secondo gruppo è un altro warehouse. Sull'Action di aggiornamento, Include Business Vault models è la casella di questo strato. Il carico esegue ancora prima ogni modello Data Vault, poi ogni modello Business Vault. La storia grezza viene caricata prima delle regole che la leggono.
+
+  - id: where-next
+    title: Where next
+    visual: images/where-next.png
+    visual_type: still
+    card_title: Where next
+    card_subtitle: Facts and dimensions
+    shot: >
+      Title card. Title "Where next". Subtitle "Facts and dimensions". No
+      GUI. The next episode is the dimensional model.
+    narration:
+      en: |
+        The next video opens the dimensional model. Facts and dimensions
+        are what a report reads, usually fed from this Business Vault or
+        from the raw vault. You add the .hdm to retail-sources as well. The
+        written guide for this video is Getting started, building an EDW,
+        chapter 5, at data-hopper.com. If customer_360_bv is missing, open
+        retail-360.hbv and look for the blue SCD2 card.
+      zh-CN: |
+        下一集打开维度模型。事实和维度是报表所读的内容，通常来自这个 Business Vault，或者来自原始 vault。你把 .hdm 也加进 retail-sources。这一集的书面指南是 Getting started, building an EDW 的第 5 章，在 data-hopper.com。如果找不到 customer_360_bv，打开 retail-360.hbv，找那张蓝色的 SCD2 卡片。
+      es-ES: |
+        El siguiente vídeo abre el modelo dimensional. Los hechos y las dimensiones son lo que lee un informe, normalmente alimentado desde este Business Vault o desde el vault en bruto. Añades el .hdm a retail-sources también. La guía escrita de este vídeo es Getting started, building an EDW, capítulo 5, en data-hopper.com. Si falta customer_360_bv, abre retail-360.hbv y busca la tarjeta azul SCD2.
+      pt-PT: |
+        O vídeo seguinte abre o modelo dimensional. Os factos e as dimensões são o que um relatório lê, normalmente alimentados a partir deste Business Vault ou do vault em bruto. Acrescentas o .hdm a retail-sources também. O guia escrito deste vídeo é Getting started, building an EDW, capítulo 5, em data-hopper.com. Se customer_360_bv faltar, abre retail-360.hbv e procura o cartão azul SCD2.
+      fr-FR: |
+        La vidéo suivante ouvre le modèle dimensionnel. Les faits et les dimensions sont ce qu'un rapport lit, en général alimentés par ce Business Vault ou par le vault brut. Tu ajoutes aussi le .hdm à retail-sources. Le guide écrit de cette vidéo est Getting started, building an EDW, chapitre 5, sur data-hopper.com. Si customer_360_bv manque, ouvre retail-360.hbv et cherche la carte bleue SCD2.
+      de-DE: |
+        Das nächste Video öffnet das dimensionale Modell. Fakten und Dimensionen sind das, was ein Bericht liest, meist gespeist aus diesem Business Vault oder aus dem rohen Vault. Du fügst die .hdm ebenfalls zu retail-sources hinzu. Die schriftliche Anleitung für dieses Video ist Getting started, building an EDW, Kapitel 5, unter data-hopper.com. Wenn customer_360_bv fehlt, öffne retail-360.hbv und suche die blaue SCD2-Karte.
+      it-IT: |
+        Il prossimo video apre il modello dimensionale. Fatti e dimensioni sono ciò che un report legge, di solito alimentati da questo Business Vault o dal vault grezzo. Aggiungi anche il .hdm a retail-sources. La guida scritta di questo video è Getting started, building an EDW, capitolo 5, su data-hopper.com. Se manca customer_360_bv, apri retail-360.hbv e cerca la scheda blu SCD2.

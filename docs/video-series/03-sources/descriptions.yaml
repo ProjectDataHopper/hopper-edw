@@ -1,0 +1,159 @@
+#
+# Copyright 2026 i-Bridge bv
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# Product words stay in English. The first line of each rendered description is the title.
+series:
+  en: Part of the Data Hopper EDW getting started series.
+  zh-CN: Data Hopper EDW 入门系列的一部分。
+  es-ES: Parte de la serie de introducción a Data Hopper EDW.
+  pt-PT: Parte da série de introdução ao Data Hopper EDW.
+  fr-FR: Fait partie de la série de prise en main de Data Hopper EDW.
+  de-DE: Teil der Einführungsreihe zu Data Hopper EDW.
+  it-IT: Parte della serie introduttiva a Data Hopper EDW.
+chapters_label:
+  en: Chapters
+  zh-CN: 章节
+  es-ES: Capítulos
+  pt-PT: Capítulos
+  fr-FR: Chapitres
+  de-DE: Kapitel
+  it-IT: Capitoli
+issue_label:
+  en: Issue
+  zh-CN: 议题
+  es-ES: Incidencia
+  pt-PT: Incidência
+  fr-FR: Ticket
+  de-DE: Ticket
+  it-IT: Segnalazione
+title:
+  en: Sources and the Data Catalog
+  zh-CN: 源与 Data Catalog
+  es-ES: Fuentes y el Data Catalog
+  pt-PT: Origens e o Data Catalog
+  fr-FR: Sources et le Data Catalog
+  de-DE: Quellen und der Data Catalog
+  it-IT: Sorgenti e il Data Catalog
+summary:
+  en: >
+    A source is landing data. The rows stay where they are. The Data Catalog
+    holds the feed name, the columns, and the keys. Retail feeds live under
+    hop/retail-example/sources.
+  zh-CN: >
+    源是落地数据。行留在原地。Data Catalog 保存供给的名字、列和键。Retail 的供给在
+    hop/retail-example/sources 下面。
+  es-ES: >
+    Una fuente son datos de aterrizaje. Las filas se quedan donde están. El
+    Data Catalog guarda el nombre del feed, las columnas y las claves. Los
+    feeds de retail viven bajo hop/retail-example/sources.
+  pt-PT: >
+    Uma origem são dados de chegada. As linhas ficam onde estão. O Data Catalog
+    guarda o nome do feed, as colunas e as chaves. Os feeds retail ficam sob
+    hop/retail-example/sources.
+  fr-FR: >
+    Une source, ce sont des données d'atterrissage. Les lignes restent où elles
+    sont. Le Data Catalog garde le nom du flux, les colonnes et les clés. Les
+    flux retail sont sous hop/retail-example/sources.
+  de-DE: >
+    Eine Quelle sind Landedaten. Die Zeilen bleiben, wo sie sind. Der Data
+    Catalog hält den Feed-Namen, die Spalten und die Schlüssel. Retail-Feeds
+    liegen unter hop/retail-example/sources.
+  it-IT: >
+    Una sorgente sono dati di atterraggio. Le righe restano dove sono. Il Data
+    Catalog tiene il nome del feed, le colonne e le chiavi. I feed retail stanno
+    sotto hop/retail-example/sources.
+link_labels:
+  Getting started:
+    en: Getting started
+    zh-CN: 入门
+    es-ES: Primeros pasos
+    pt-PT: Primeiros passos
+    fr-FR: Prise en main
+    de-DE: Erste Schritte
+    it-IT: Per iniziare
+  Sources:
+    en: Sources
+    zh-CN: 源
+    es-ES: Fuentes
+    pt-PT: Origens
+    fr-FR: Sources
+    de-DE: Quellen
+    it-IT: Sorgenti
+  Data Hopper:
+    en: Data Hopper
+    zh-CN: Data Hopper
+    es-ES: Data Hopper
+    pt-PT: Data Hopper
+    fr-FR: Data Hopper
+    de-DE: Data Hopper
+    it-IT: Data Hopper
+chapters:
+  welcome:
+    en: Welcome
+    zh-CN: 欢迎
+    es-ES: Bienvenida
+    pt-PT: Boas-vindas
+    fr-FR: Bienvenue
+    de-DE: Willkommen
+    it-IT: Benvenuto
+  landing:
+    en: Landing data
+    zh-CN: 落地数据
+    es-ES: Datos de aterrizaje
+    pt-PT: Dados de chegada
+    fr-FR: Données d'atterrissage
+    de-DE: Landedaten
+    it-IT: Dati di atterraggio
+  one-feed:
+    en: One feed
+    zh-CN: 一份供给
+    es-ES: Un feed
+    pt-PT: Um feed
+    fr-FR: Un flux
+    de-DE: Ein Feed
+    it-IT: Un feed
+  namespace:
+    en: Where feeds live
+    zh-CN: 供给放在哪里
+    es-ES: Dónde viven los feeds
+    pt-PT: Onde ficam os feeds
+    fr-FR: Où sont les flux
+    de-DE: Wo die Feeds liegen
+    it-IT: Dove stanno i feed
+  import-tables:
+    en: Import tables
+    zh-CN: Import tables
+    es-ES: Import tables
+    pt-PT: Import tables
+    fr-FR: Import tables
+    de-DE: Import tables
+    it-IT: Import tables
+  push:
+    en: Push to catalog
+    zh-CN: Push to catalog
+    es-ES: Push to catalog
+    pt-PT: Push to catalog
+    fr-FR: Push to catalog
+    de-DE: Push to catalog
+    it-IT: Push to catalog
+  where-next:
+    en: Where next
+    zh-CN: 接下来
+    es-ES: Qué sigue
+    pt-PT: O que vem a seguir
+    fr-FR: Et ensuite
+    de-DE: Wie es weitergeht
+    it-IT: Che cosa viene dopo
