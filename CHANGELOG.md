@@ -4,6 +4,10 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## [Unreleased]
 
+### Hop Web documentation
+
+- Component explorer screenshots load through the documentation handler. Paths the page builds in script (`../images/…`) are rewritten to the same handler URLs as ordinary image links, so Hop Web no longer requests them from `/images/`.
+
 ### Configure EDW setup prompt (issue #238)
 
 - **Configuration → Hopper EDW → Offer to configure EDW setup when opening a model** controls the automatic prompt. It is off by default, so new Hop Web users are not shown the dialog on a project that is already set up. **Tools → Configure EDW setup…** still opens the dialog. **Do not show this message again** turns the same option off.

@@ -222,4 +222,63 @@ class EdwDocsWebSupportTest {
     String id = EdwDocsWebSupport.registerSiteRoot(site);
     assertEquals(site.toAbsolutePath().normalize(), EdwDocsWebSupport.rootForId(id));
   }
+
+  @Test
+  void rewriteEmbeddedImagePrefixKeepsTrailingSlashForConcatenation() {
+    String html =
+        """
+        const IMG = "../images/";
+        if (src.indexOf("../images/") !== 0 && src.indexOf("http") !== 0) src = IMG + name;
+        [IMG+"source-modeler-retail-example-with-query-dialog-generated-sql.png","caption"]
+        openLightbox('../images/source-modeler-retail-example-with-query-dialog-generated-sql.png', 'SQL');
+        """;
+    String rewritten =
+        EdwDocsWebSupport.rewriteRelativeUrls(
+            html, "./ui?servicehandler=hopperEdwDocs", "presentations/edw-component-explorer.html");
+    String prefix = "./ui?servicehandler=hopperEdwDocs&file=images%2F";
+    assertTrue(rewritten.contains("const IMG = \"" + prefix + "\";"));
+    assertTrue(rewritten.contains("src.indexOf(\"" + prefix + "\")"));
+    assertFalse(rewritten.contains("\"../images/\""));
+    assertFalse(rewritten.contains("'../images/"));
+    assertTrue(
+        rewritten.contains(
+            "file=images%2Fsource-modeler-retail-example-with-query-dialog-generated-sql.png"));
+    assertTrue(
+        rewritten.contains(
+            "IMG+\"source-modeler-retail-example-with-query-dialog-generated-sql.png\""));
+  }
+
+  @Test
+  void rewriteEmbeddedRelativeRefsLeavesEscapesAndAbsoluteStrings() {
+    String html =
+        """
+        <a href="https://example.test/images/shot.png">ext</a>
+        var keep = "../../secret.png";
+        var note = "images live under docs";
+        """;
+    String rewritten =
+        EdwDocsWebSupport.rewriteRelativeUrls(
+            html, "./ui?servicehandler=hopperEdwDocs", "presentations/edw-component-explorer.html");
+    assertTrue(rewritten.contains("https://example.test/images/shot.png"));
+    assertTrue(rewritten.contains("\"../../secret.png\""));
+    assertTrue(rewritten.contains("images live under docs"));
+    assertFalse(rewritten.contains("file=secret.png"));
+  }
+
+  @Test
+  void componentExplorerPageRewritesScreenshotPrefix() throws Exception {
+    String html = Files.readString(Path.of("docs/presentations/edw-component-explorer.html"));
+    String rewritten =
+        EdwDocsWebSupport.rewriteRelativeUrls(
+            html, "./ui?servicehandler=hopperEdwDocs", "presentations/edw-component-explorer.html");
+    String prefix = "./ui?servicehandler=hopperEdwDocs&file=images%2F";
+    assertTrue(rewritten.contains("const IMG = \"" + prefix + "\";"));
+    assertTrue(rewritten.contains("src.indexOf(\"" + prefix + "\")"));
+    assertFalse(rewritten.contains("\"../images/\""));
+    assertTrue(rewritten.contains("file=images%2Fedw-logo.svg"));
+    assertTrue(
+        rewritten.contains(
+            "IMG+\"source-modeler-retail-example-with-query-dialog-generated-sql.png\""));
+    assertTrue(rewritten.contains("const COMPONENTS"));
+  }
 }

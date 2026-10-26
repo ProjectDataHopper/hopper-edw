@@ -58,6 +58,14 @@ public final class EdwDocsWebSupport {
       Pattern.compile("(?i)(\\s(?:href|src)\\s*=\\s*)(['\"])([^'\"]+)\\2");
   private static final Pattern CSS_URL =
       Pattern.compile("(?i)(url\\(\\s*)(['\"]?)([^'\")]+)\\2(\\s*\\))");
+
+  /**
+   * Quoted {@code ./} or {@code ../} paths in scripts and event handlers. {@code href}/{@code src}
+   * rewriting does not see these. The character class stops at a query string so a handler URL
+   * already written into the page is left alone.
+   */
+  private static final Pattern EMBEDDED_RELATIVE_REF =
+      Pattern.compile("(['\"])((?:\\./|\\.\\./)[A-Za-z0-9._~%+/-]*)\\1");
   private static final Set<String> ALLOWED_EXTENSIONS =
       Set.of(
           "html", "htm", "css", "js", "png", "jpg", "jpeg", "gif", "svg", "ico", "webp", "woff",
@@ -212,8 +220,9 @@ public final class EdwDocsWebSupport {
   }
 
   /**
-   * HTML with {@code href}/{@code src} rewritten to RAP handler URLs so {@code Browser.setText()}
-   * can still load CSS when the explorer iframe has no document base.
+   * HTML with {@code href}/{@code src}, CSS {@code url()}, and quoted script paths rewritten to
+   * RAP handler URLs. Hop Web's document URL is the UI entry ({@code /hop/ui}), so a script path
+   * such as {@code ../images/shot.png} would otherwise be requested as {@code /images/shot.png}.
    */
   public static String rewrittenPageHtml(String htmlFilename) {
     if (Utils.isEmpty(htmlFilename) || !isHtmlPath(htmlFilename)) {
@@ -551,7 +560,66 @@ public final class EdwDocsWebSupport {
               css.group(1) + css.group(2) + rewritten + css.group(2) + css.group(4)));
     }
     css.appendTail(cssOut);
-    return cssOut.toString();
+    return rewriteEmbeddedRelativeRefs(cssOut.toString(), handlerUrl, currentFile);
+  }
+
+  /**
+   * Rewrite quoted relative paths that scripts concatenate or pass to {@code img.src}. A directory
+   * prefix such as {@code ../images/} keeps a trailing encoded slash so {@code IMG + "shot.png"}
+   * stays one {@code file=} parameter.
+   */
+  static String rewriteEmbeddedRelativeRefs(
+      String content, String handlerUrl, String currentFile) {
+    Matcher matcher = EMBEDDED_RELATIVE_REF.matcher(content);
+    StringBuffer out = new StringBuffer();
+    while (matcher.find()) {
+      String rewritten = rewriteEmbeddedRef(handlerUrl, currentFile, matcher.group(2));
+      matcher.appendReplacement(
+          out, Matcher.quoteReplacement(matcher.group(1) + rewritten + matcher.group(1)));
+    }
+    matcher.appendTail(out);
+    return out.toString();
+  }
+
+  static String rewriteEmbeddedRef(String handlerUrl, String currentFile, String ref) {
+    if (!isRewritableEmbeddedRef(ref)) {
+      return ref;
+    }
+    if (ref.endsWith("/")) {
+      String directory = ref.substring(0, ref.length() - 1);
+      if (directory.isEmpty() || ".".equals(directory) || "..".equals(directory)) {
+        return ref;
+      }
+      String rewritten = rewriteRef(handlerUrl, currentFile, directory);
+      if (Utils.isEmpty(rewritten)
+          || rewritten.equals(directory)
+          || rewritten.equals(ref)
+          || !rewritten.contains(FILE_PARAM + "=")) {
+        return ref;
+      }
+      if (rewritten.endsWith("%2F") || rewritten.endsWith("/")) {
+        return rewritten;
+      }
+      return rewritten + "%2F";
+    }
+    String rewritten = rewriteRef(handlerUrl, currentFile, ref);
+    return rewritten == null ? ref : rewritten;
+  }
+
+  static boolean isRewritableEmbeddedRef(String ref) {
+    if (Utils.isEmpty(ref) || !(ref.startsWith("./") || ref.startsWith("../"))) {
+      return false;
+    }
+    if (ref.endsWith("/")) {
+      return ref.length() > 3;
+    }
+    int slash = ref.lastIndexOf('/');
+    String name = slash >= 0 ? ref.substring(slash + 1) : ref;
+    int dot = name.lastIndexOf('.');
+    if (dot <= 0 || dot == name.length() - 1) {
+      return false;
+    }
+    return ALLOWED_EXTENSIONS.contains(name.substring(dot + 1).toLowerCase(Locale.ROOT));
   }
 
   static String rewriteRef(String handlerUrl, String currentFile, String ref) {
