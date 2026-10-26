@@ -16,6 +16,8 @@
 package org.hopper.edw.datavault.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -32,5 +34,15 @@ class DataVaultConfigTest {
     config.setMetricsPanelMaxRuns(8);
     DataVaultConfig copy = new DataVaultConfig(config);
     assertEquals(8, copy.getMetricsPanelMaxRuns());
+  }
+
+  @Test
+  void configureEdwSetupOfferIsOffByDefaultAndCopies() {
+    DataVaultConfig config = new DataVaultConfig();
+    assertFalse(config.isOfferConfigureEdwSetup());
+
+    config.setOfferConfigureEdwSetup(true);
+    DataVaultConfig copy = new DataVaultConfig(config);
+    assertTrue(copy.isOfferConfigureEdwSetup());
   }
 }

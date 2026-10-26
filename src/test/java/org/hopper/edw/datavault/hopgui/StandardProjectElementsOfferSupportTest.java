@@ -24,6 +24,7 @@ import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.core.plugins.PluginRegistry;
 import org.apache.hop.core.variables.Variables;
 import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
+import org.hopper.edw.datavault.config.DataVaultConfigSingleton;
 import org.hopper.edw.datavault.metadata.DataVaultConfiguration;
 import org.hopper.edw.datavault.metadata.ModelConfigurationResolver;
 import org.hopper.edw.datavault.metadata.xp.RegisterModelConfigurationMetadataExtensionPoint;
@@ -68,5 +69,19 @@ class StandardProjectElementsOfferSupportTest {
   @Test
   void activeModelWithoutHopGuiIsNull() {
     assertNull(StandardProjectElementsOfferSupport.activeModel(null));
+  }
+
+  @Test
+  void automaticOfferFollowsHopperEdwOption() {
+    var config = DataVaultConfigSingleton.getConfig();
+    boolean previous = config.isOfferConfigureEdwSetup();
+    try {
+      config.setOfferConfigureEdwSetup(false);
+      assertFalse(StandardProjectElementsOfferSupport.isAutomaticOfferEnabled());
+      config.setOfferConfigureEdwSetup(true);
+      assertTrue(StandardProjectElementsOfferSupport.isAutomaticOfferEnabled());
+    } finally {
+      config.setOfferConfigureEdwSetup(previous);
+    }
   }
 }

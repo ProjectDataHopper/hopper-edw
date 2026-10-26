@@ -4,6 +4,10 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## [Unreleased]
 
+### Configure EDW setup prompt (issue #238)
+
+- **Configuration → Hopper EDW → Offer to configure EDW setup when opening a model** controls the automatic prompt. It is off by default, so new Hop Web users are not shown the dialog on a project that is already set up. **Tools → Configure EDW setup…** still opens the dialog. **Do not show this message again** turns the same option off.
+
 ### Dimensional source load strategy (issue #236)
 
 - A fact or dimension has a **Source load strategy** on the Source tab. The default, **Initial / Reload**, reads the full source on every run and does not truncate the target. **Incremental** reads rows after a baseline: `MAX` of a target column, or a sentinel when the table is missing or empty. A table that already has rows but an empty baseline fails instead of appending a second full copy.

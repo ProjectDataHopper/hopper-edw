@@ -62,6 +62,14 @@ public class DataVaultConfig {
   private int maxUndoOperations = DEFAULT_MAX_UNDO_OPERATIONS;
   private DmDefaultFieldNames dimensionalDefaultFieldNames = new DmDefaultFieldNames();
   private ElkLayout elkLayout = ElkLayout.createDefault();
+
+  /**
+   * When true, opening a source, Data Vault, Business Vault, or dimensional model offers to create
+   * missing standard project elements. Default false, so Hop Web users and projects that are
+   * already set up are not prompted. Tools → Configure EDW setup still opens the dialog.
+   */
+  private boolean offerConfigureEdwSetup;
+
   private boolean suppressLocalCatalogOffer;
   private String defaultPipelineRunConfiguration;
   private String defaultWorkflowRunConfiguration;
@@ -83,6 +91,7 @@ public class DataVaultConfig {
     warnTimestampFractionalPrecisionLoss = config.warnTimestampFractionalPrecisionLoss;
     remindUnpublishedCatalogOnSourceModelSave =
         config.isRemindUnpublishedCatalogOnSourceModelSave();
+    offerConfigureEdwSetup = config.offerConfigureEdwSetup;
     suppressLocalCatalogOffer = config.suppressLocalCatalogOffer;
     setMaxUndoOperations(config.maxUndoOperations);
     setDimensionalDefaultFieldNames(

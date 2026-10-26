@@ -18,7 +18,6 @@ package org.hopper.edw.datavault.metadata.dimensional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Path;
 import org.apache.hop.core.HopEnvironment;
@@ -26,6 +25,7 @@ import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.row.IValueMeta;
 import org.apache.hop.core.variables.Variables;
 import org.apache.hop.metadata.serializer.memory.MemoryMetadataProvider;
+import org.apache.hop.pipeline.transforms.metainject.ConditionStreamBehavior;
 import org.apache.hop.pipeline.transforms.metainject.MetaInjectMeta;
 import org.apache.hop.pipeline.transforms.metainject.MetaInjectOutputField;
 import org.junit.jupiter.api.BeforeAll;
@@ -74,7 +74,8 @@ class DmSourcePipelineSupportTest {
     assertEquals(STREAMING_SOURCE.toString(), metaInjectMeta.getTemplateFileName());
     assertEquals("id", metaInjectMeta.getSourceTransformName());
     assertEquals("local", metaInjectMeta.getRunConfigurationName());
-    assertTrue(metaInjectMeta.isAllowEmptyStreamOnExecution());
+    assertEquals(
+        ConditionStreamBehavior.AT_LEAST_ONE_NON_EMPTY, metaInjectMeta.getConditionStreamBehavior());
     assertFalse(metaInjectMeta.isNoExecution());
 
     assertEquals(1, metaInjectMeta.getSourceOutputFields().size());

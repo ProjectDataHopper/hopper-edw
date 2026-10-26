@@ -67,7 +67,7 @@ public final class StandardProjectElementsOfferSupport {
     if (hopGui == null) {
       return;
     }
-    if (!fromMenu && (model == null || isSuppressed())) {
+    if (!fromMenu && (model == null || !isAutomaticOfferEnabled())) {
       return;
     }
     IHopMetadataProvider provider = hopGui.getMetadataProvider();
@@ -95,7 +95,7 @@ public final class StandardProjectElementsOfferSupport {
         StandardProjectElementsOfferDialog.open(
             hopGui.getShell(),
             fromMenu,
-            isSuppressed(),
+            !isAutomaticOfferEnabled(),
             missingCatalog,
             missingSource,
             missingDv,
@@ -261,12 +261,14 @@ public final class StandardProjectElementsOfferSupport {
     }
   }
 
-  private static boolean isSuppressed() {
-    return DataVaultConfigSingleton.getConfig().isSuppressLocalCatalogOffer();
+  /** Hopper EDW option. Off by default, including for new Hop Web users. */
+  static boolean isAutomaticOfferEnabled() {
+    return DataVaultConfigSingleton.getConfig().isOfferConfigureEdwSetup();
   }
 
   private static void setSuppressed(boolean suppressed) {
     DataVaultConfig config = DataVaultConfigSingleton.getConfig();
+    config.setOfferConfigureEdwSetup(!suppressed);
     config.setSuppressLocalCatalogOffer(suppressed);
     try {
       DataVaultConfigSingleton.saveConfig();

@@ -77,6 +77,8 @@ public class DataVaultConfigOptionPlugin
       "10110-schema-remediation-folder";
   private static final String WIDGET_ID_REMIND_UNPUBLISHED_CATALOG_ON_SAVE =
       "10120-remind-unpublished-catalog-on-save";
+  private static final String WIDGET_ID_OFFER_CONFIGURE_EDW_SETUP =
+      "10130-offer-configure-edw-setup";
 
   @GuiWidgetElement(
       id = WIDGET_ID_DRAW_HASH_KEYS_IN_MODEL,
@@ -209,8 +211,7 @@ public class DataVaultConfigOptionPlugin
       toolTip = "i18n::DataVaultConfigOptionPlugin.MetricsPanelMaxRuns.ToolTip")
   @CommandLine.Option(
       names = {"--dv-metrics-panel-max-runs"},
-      description =
-          "How many recent executions the model metrics panel lists (default 20)")
+      description = "How many recent executions the model metrics panel lists (default 20)")
   private String metricsPanelMaxRuns;
 
   @GuiWidgetElement(
@@ -237,6 +238,18 @@ public class DataVaultConfigOptionPlugin
           "When true (default), saving a source model asks to publish catalog feeds that lag the canvas")
   private Boolean remindUnpublishedCatalogOnSourceModelSave;
 
+  @GuiWidgetElement(
+      id = WIDGET_ID_OFFER_CONFIGURE_EDW_SETUP,
+      parentId = ConfigPluginOptionsTab.GUI_WIDGETS_PARENT_ID,
+      type = GuiElementType.CHECKBOX,
+      label = "i18n::DataVaultConfigOptionPlugin.OfferConfigureEdwSetup.Message",
+      toolTip = "i18n::DataVaultConfigOptionPlugin.OfferConfigureEdwSetup.ToolTip")
+  @CommandLine.Option(
+      names = {"--dv-offer-configure-edw-setup"},
+      description =
+          "When true, opening a model offers to create missing standard EDW project elements. Default false")
+  private Boolean offerConfigureEdwSetup;
+
   public static DataVaultConfigOptionPlugin getInstance() {
     DataVaultConfigOptionPlugin instance = new DataVaultConfigOptionPlugin();
     DataVaultConfig config = DataVaultConfigSingleton.getConfig();
@@ -259,6 +272,7 @@ public class DataVaultConfigOptionPlugin
     instance.schemaRemediationFolder = config.getSchemaRemediationFolderOrDefault();
     instance.remindUnpublishedCatalogOnSourceModelSave =
         config.isRemindUnpublishedCatalogOnSourceModelSave();
+    instance.offerConfigureEdwSetup = config.isOfferConfigureEdwSetup();
     return instance;
   }
 
@@ -311,8 +325,7 @@ public class DataVaultConfigOptionPlugin
       }
       if (metricsPanelMaxRuns != null) {
         config.setMetricsPanelMaxRuns(parseMetricsPanelMaxRuns(metricsPanelMaxRuns));
-        log.logBasic(
-            "Set model metrics panel run limit to " + config.getMetricsPanelMaxRuns());
+        log.logBasic("Set model metrics panel run limit to " + config.getMetricsPanelMaxRuns());
         changed = true;
       }
       if (remindUnpublishedCatalogOnSourceModelSave != null) {
@@ -322,6 +335,14 @@ public class DataVaultConfigOptionPlugin
             remindUnpublishedCatalogOnSourceModelSave
                 ? "Enabled reminder to publish stale catalog feeds when saving a source model"
                 : "Disabled reminder to publish stale catalog feeds when saving a source model");
+        changed = true;
+      }
+      if (offerConfigureEdwSetup != null) {
+        applyOfferConfigureEdwSetup(config, offerConfigureEdwSetup);
+        log.logBasic(
+            offerConfigureEdwSetup
+                ? "Enabled the Configure EDW setup prompt when opening a model"
+                : "Disabled the Configure EDW setup prompt when opening a model");
         changed = true;
       }
       if (changed) {
@@ -421,6 +442,10 @@ public class DataVaultConfigOptionPlugin
           config.setRemindUnpublishedCatalogOnSourceModelSave(
               remindUnpublishedCatalogOnSourceModelSave);
           break;
+        case WIDGET_ID_OFFER_CONFIGURE_EDW_SETUP:
+          offerConfigureEdwSetup = ((Button) control).getSelection();
+          applyOfferConfigureEdwSetup(config, offerConfigureEdwSetup);
+          break;
         default:
           break;
       }
@@ -436,6 +461,15 @@ public class DataVaultConfigOptionPlugin
               PKG, "DataVaultConfigOptionPlugin.SavingOption.ErrorDialog.Message"),
           e);
     }
+  }
+
+  /**
+   * The prompt and "Do not show this message again" are one switch. Turning the prompt on clears a
+   * previous dismissal. Turning it off records that dismissal.
+   */
+  private static void applyOfferConfigureEdwSetup(DataVaultConfig config, boolean offer) {
+    config.setOfferConfigureEdwSetup(offer);
+    config.setSuppressLocalCatalogOffer(!offer);
   }
 
   private static String getTextValue(Control control) {

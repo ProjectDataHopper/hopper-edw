@@ -15,9 +15,11 @@ The same pattern exists for source models, Business Vault, and dimensional model
 [[configure-edw-setup]]
 == Configure EDW setup
 
-A new Hop project is offered the standard catalog and the four configuration objects the first time you open a source, Data Vault, Business Vault, or dimensional model.
+Open **Tools → Configure EDW setup...** to create the standard catalog and the four configuration objects, or to review the ones the project already has.
 
-If you dismissed that prompt, or want to create only the elements that are still missing, open **Tools → Configure EDW setup...**. The same dialog is shown even when “Do not show this message again” was checked. Existing elements stay selected and disabled; missing ones can still be created. Uncheck **Do not show this message again** to restore the automatic first-time prompt.
+The same dialog can open by itself when you open a source, Data Vault, Business Vault, or dimensional model. That prompt is **off** by default, so Hop Web users and projects that are already set up are not interrupted. Turn it on under **Configuration → Hopper EDW → Offer to configure EDW setup when opening a model**.
+
+Existing elements stay selected and disabled; missing ones can still be created. **Do not show this message again** turns that Hopper EDW option off. Uncheck it to turn the automatic prompt back on.
 
 The dialog does **not** create a link:resource-definition-group.adoc[resource definition group]. After you have a `.hdv`, create the group yourself — link:getting-started-edw.adoc#chapter-3[Getting started, chapter 3].
 
@@ -308,6 +310,9 @@ image::images/hopgui-configuration-perspecive-data-vault-options.png[Hopper EDW 
 
 |Remind to publish catalog feeds when saving a source model
 |When enabled (**default**), saving a `.hsm` file compares published catalog feeds to the canvas (effective layout, including data type mappings). If any published feed is stale, a dialog asks whether to publish those feeds. **Don't remind me after save** turns this option off; re-enable it here.
+
+|Offer to configure EDW setup when opening a model
+|When enabled, opening a source, Data Vault, Business Vault, or dimensional model offers to create missing standard project elements. **Off** by default, including for Hop Web. **Tools → Configure EDW setup...** still opens the dialog. **Do not show this message again** in that dialog turns this option off.
 
 |Maximum undo/redo operations kept in memory
 |Number of gzip-compressed XML snapshots kept for undo/redo on `.hdv` files (default 200). Older snapshots are discarded when the limit is exceeded.

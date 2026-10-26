@@ -30,7 +30,7 @@ The generated load processes follow the standard Data Vault 2.0 "insert-only" ap
 
 Recommended order (full walkthrough: link:getting-started-edw.adoc[Getting started — building an EDW]; pictures: link:architecture.adoc[Architecture]):
 
-1. **Tools → Configure EDW setup...** (or the first-time prompt) — FILE catalog and shared source / DV / BV / DM configurations.
+1. **Tools → Configure EDW setup...** — FILE catalog and shared source / DV / BV / DM configurations. The same dialog can open when you open a model if **Configuration → Hopper EDW → Offer to configure EDW setup when opening a model** is enabled (off by default).
 2. Model landing tables in a **source model** (`.hsm`): **Import schema**, draw relationships, then toolbar **Push to catalog**. Feeds become catalog `DV_SOURCE` / `COMPOSITE` / `JSON` / `PIPELINE` records under `hop/{project}/sources`.
 3. **Generate Data Vault…** from the `.hsm` into a `.hdv` (review hubs, links, satellites). Prefer the shared **Data Vault configuration** on **Edit model**. **Check model**.
 4. Create a **Resource definition group**, list the `.hdv` (BV/DM later), set the default catalog connection. See link:resource-definition-group.adoc[Resource definition group].
@@ -217,6 +217,7 @@ image::images/hopgui-configuration-perspecive-data-vault-options.png[Hopper EDW 
 
 * **Draw hash keys in model** – When enabled, hash key column names are shown on table cards in the visual editor.
 * **Remind to publish catalog feeds when saving a source model** – When enabled (default), saving a `.hsm` whose published catalog feeds lag the canvas asks whether to publish them. The dialog has **Don't remind me after save**; you can turn the option back on here.
+* **Offer to configure EDW setup when opening a model** – When enabled, opening a model offers to create missing standard project elements. Off by default. **Tools → Configure EDW setup...** still opens the dialog.
 * **Maximum undo/redo operations kept in memory** – Size of the snapshot undo stack for `.hdv` files (default 200).
 * **Load runs shown in the model metrics panel** – How many recent executions the panel to the right of a model lists (default 20).
 

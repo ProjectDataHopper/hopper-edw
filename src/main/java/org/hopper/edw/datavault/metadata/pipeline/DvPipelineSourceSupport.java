@@ -33,6 +33,7 @@ import org.apache.hop.pipeline.PipelineMeta;
 import org.apache.hop.pipeline.engines.local.LocalPipelineEngine;
 import org.apache.hop.pipeline.transform.ITransform;
 import org.apache.hop.pipeline.transform.RowAdapter;
+import org.apache.hop.pipeline.transforms.metainject.ConditionStreamBehavior;
 import org.apache.hop.pipeline.transforms.metainject.MetaInjectMeta;
 import org.apache.hop.pipeline.transforms.metainject.MetaInjectOutputField;
 import org.hopper.edw.datavault.metadata.SourceField;
@@ -152,7 +153,8 @@ public final class DvPipelineSourceSupport {
     metaInjectMeta.setTemplateFileName(pipelineFile);
     metaInjectMeta.setSourceTransformName(transformName);
     metaInjectMeta.setSourceOutputFields(outputFields);
-    metaInjectMeta.setAllowEmptyStreamOnExecution(true);
+    // Legacy allowEmptyStreamOnExecution=true: run when at least one injection stream has rows.
+    metaInjectMeta.setConditionStreamBehavior(ConditionStreamBehavior.AT_LEAST_ONE_NON_EMPTY);
     metaInjectMeta.setRunConfigurationName(resolveRunConfiguration(source, variables));
     metaInjectMeta.setNoExecution(false);
     return metaInjectMeta;

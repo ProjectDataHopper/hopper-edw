@@ -85,8 +85,7 @@ The chapters below use these short names. Each row is a model file you open in H
 ** A **source** connection (landing / CRM).
 ** A **Vault** connection (where DV / BV / DM tables will live).
 ** Optional **OPS** if you want harvest history, quality history, or load-run metrics.
-. Create an empty source model or Data Vault model file (Explorer → New) so the first-time prompt can run — or skip ahead to the menu in the next step.
-. Accept **Configure EDW setup**, or open **Tools → Configure EDW setup...** if you dismissed it.
+. Open **Tools → Configure EDW setup...**. The dialog can also appear when you open a model if **Configuration → Hopper EDW → Offer to configure EDW setup when opening a model** is enabled. That option is off by default.
 
 image::images/configure-edw-dialog.png[Configure EDW setup — standard catalog and model-configuration elements,align="center"]
 
@@ -275,7 +274,7 @@ The action always loads **all DV, then all BV, then all DM** listed on the group
 |Symptom |What to check
 
 |Configure EDW never appears
-|**Tools → Configure EDW setup...**. Uncheck “Do not show this message again” if you want the automatic prompt back.
+|**Tools → Configure EDW setup...**. The automatic prompt is off unless **Configuration → Hopper EDW → Offer to configure EDW setup when opening a model** is enabled. Uncheck **Do not show this message again** in the dialog to turn that option on.
 
 |Push to catalog does nothing / wrong place
 |Source model **Edit model** → catalog connection. Namespace is `hop/{project-folder-name}/sources`. Refresh the catalog (F5).

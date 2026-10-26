@@ -53,10 +53,11 @@ Jinja SQL.
 
 === What Configure EDW setup creates
 
-A new Hop project is offered the standard catalog and the four shared configuration objects the
-first time you open a source, Data Vault, Business Vault, or dimensional model. Accept that
-first-time prompt, or run **Tools → Configure EDW setup...** from the menu if you dismissed it — the
-same dialog appears either way, and it creates, when missing:
+Run **Tools → Configure EDW setup...** to create the standard catalog and the four shared
+configuration objects. The same dialog can open when you open a source, Data Vault, Business Vault,
+or dimensional model, but only when **Configuration → Hopper EDW → Offer to configure EDW setup when
+opening a model** is enabled. That option is off by default, including for Hop Web users. The dialog
+creates, when missing:
 
 * the Data catalog connection **`local-catalog`** — a FILE catalog with default storage
   `${PROJECT_HOME}/catalog-data` (`retail-example` uses a gitignored `work/edw-catalog/` instead),
@@ -145,10 +146,9 @@ image::../images/configure-edw-dialog.png[Configure EDW setup — standard catal
 . Open the toolbar **EDW** button (or **Help → EDW documentation**) and confirm the offline
 documentation opens — the guides and these training modules ship inside the plugin at
 `plugins/misc/hopper-edw/docs/` and load with no network.
-. Optional, only on a fresh project: create an empty source model or Data Vault model file
-(**Explorer → New**) so the first-time prompt can appear; if you dismissed it, reopen
-**Tools → Configure EDW setup...** from the menu. Uncheck **Do not show this message again** if you
-want the automatic prompt back.
+. Optional: enable **Configuration → Hopper EDW → Offer to configure EDW setup when opening a
+model** if you want that dialog when a model opens. It is off by default. Uncheck **Do not show
+this message again** in the dialog to turn the same option on.
 
 == Try it yourself
 
