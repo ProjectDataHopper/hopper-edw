@@ -3,7 +3,9 @@ target
 integration-tests
 adventureworks
 retail-example
-hop-hsm-jdbc
+# scripts/docker/Dockerfile copies this module and packages it. Keep the
+# sources; leave out the host Maven output.
+hop-hsm-jdbc/target
 docs/images
 **/*.csv
 mcp/harvester/output
