@@ -30,8 +30,6 @@ import lombok.Setter;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.Props;
-import org.apache.hop.core.action.GuiContextAction;
-import org.apache.hop.core.action.GuiContextActionFilter;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.AreaOwner;
@@ -40,7 +38,6 @@ import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.gui.SnapAllignDistribute;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.IGuiRefresher;
-import org.apache.hop.core.gui.plugin.action.GuiActionType;
 import org.apache.hop.core.gui.plugin.key.GuiKeyboardShortcut;
 import org.apache.hop.core.gui.plugin.key.GuiOsxKeyboardShortcut;
 import org.apache.hop.core.gui.plugin.menu.GuiMenuElement;
@@ -1533,15 +1530,6 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
   // click.
   // Location is taken from the click point passed in the context (de-magnified model coords).
 
-  @GuiContextAction(
-      id = "vault-graph-add-hub",
-      parentId = HopGuiVaultContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "Add Hub",
-      tooltip = "Add a new Hub table at the click location",
-      image = "datavault-hub.svg",
-      category = "Data Vault",
-      categoryOrder = "1")
   public void addHub(HopGuiVaultContext context) {
     Point click = context.getClick();
     HopGuiVaultGraph realGraph = context.getVaultGraph();
@@ -1556,15 +1544,6 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     realGraph.setChanged();
   }
 
-  @GuiContextAction(
-      id = "vault-graph-add-satellite",
-      parentId = HopGuiVaultContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "Add Satellite",
-      tooltip = "Add a new Satellite table at the click location",
-      image = "datavault-satellite.svg",
-      category = "Data Vault",
-      categoryOrder = "2")
   public void addSatellite(HopGuiVaultContext context) {
     Point click = context.getClick();
     HopGuiVaultGraph realGraph = context.getVaultGraph();
@@ -1579,15 +1558,6 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     realGraph.setChanged();
   }
 
-  @GuiContextAction(
-      id = "vault-graph-add-link",
-      parentId = HopGuiVaultContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "Add Link",
-      tooltip = "Add a new Link table at the click location",
-      image = "datavault-link.svg",
-      category = "Data Vault",
-      categoryOrder = "3")
   public void addLink(HopGuiVaultContext context) {
     Point click = context.getClick();
     HopGuiVaultGraph realGraph = context.getVaultGraph();
@@ -1602,16 +1572,6 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     realGraph.setChanged();
   }
 
-  @GuiContextAction(
-      id = "vault-graph-add-reference",
-      parentId = HopGuiVaultContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "Add Reference table",
-      tooltip = "Add a natural-key reference/code table (no hub hash key) at the click location",
-      image = "datavault-reference.svg",
-      keywords = {"reference", "ref", "code", "lookup", "catalog"},
-      category = "Data Vault",
-      categoryOrder = "4")
   public void addReferenceTable(HopGuiVaultContext context) {
     Point click = context.getClick();
     HopGuiVaultGraph realGraph = context.getVaultGraph();
@@ -1702,15 +1662,6 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "vault-graph-add-hub-reference",
-      parentId = HopGuiVaultContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiVaultGraph.Context.AddHubReference.Name",
-      tooltip = "i18n::HopGuiVaultGraph.Context.AddHubReference.Tooltip",
-      image = "datavault-hub.svg",
-      category = "Data Vault",
-      categoryOrder = "4")
   public void addHubReference(HopGuiVaultContext context) {
     HopGuiVaultGraph graph = context.getVaultGraph();
     if (graph == null || context.getModel() == null) {
@@ -1720,15 +1671,6 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     graph.addTableReferenceAtClick(DvTableType.HUB, context.getClick());
   }
 
-  @GuiContextAction(
-      id = "vault-graph-add-hub-alias",
-      parentId = HopGuiVaultContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiVaultGraph.Context.AddHubAlias.Name",
-      tooltip = "i18n::HopGuiVaultGraph.Context.AddHubAlias.Tooltip",
-      image = "datavault-hub.svg",
-      category = "Data Vault",
-      categoryOrder = "4")
   public void addHubAlias(HopGuiVaultContext context) {
     HopGuiVaultGraph graph = context.getVaultGraph();
     if (graph == null || context.getModel() == null) {
@@ -1817,15 +1759,6 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     redraw();
   }
 
-  @GuiContextAction(
-      id = "vault-graph-add-link-reference",
-      parentId = HopGuiVaultContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiVaultGraph.Context.AddLinkReference.Name",
-      tooltip = "i18n::HopGuiVaultGraph.Context.AddLinkReference.Tooltip",
-      image = "datavault-link.svg",
-      category = "Data Vault",
-      categoryOrder = "5")
   public void addLinkReference(HopGuiVaultContext context) {
     HopGuiVaultGraph graph = context.getVaultGraph();
     if (graph == null || context.getModel() == null) {
@@ -1835,15 +1768,6 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     graph.addTableReferenceAtClick(DvTableType.LINK, context.getClick());
   }
 
-  @GuiContextAction(
-      id = "vault-graph-add-satellite-reference",
-      parentId = HopGuiVaultContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiVaultGraph.Context.AddSatelliteReference.Name",
-      tooltip = "i18n::HopGuiVaultGraph.Context.AddSatelliteReference.Tooltip",
-      image = "datavault-satellite.svg",
-      category = "Data Vault",
-      categoryOrder = "6")
   public void addSatelliteReference(HopGuiVaultContext context) {
     HopGuiVaultGraph graph = context.getVaultGraph();
     if (graph == null || context.getModel() == null) {
@@ -1853,15 +1777,6 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     graph.addTableReferenceAtClick(DvTableType.SATELLITE, context.getClick());
   }
 
-  @GuiContextAction(
-      id = "vault-graph-paste-clipboard",
-      parentId = HopGuiVaultContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiVaultGraph.PasteFromClipboard.Name",
-      tooltip = "i18n::HopGuiVaultGraph.PasteFromClipboard.Tooltip",
-      image = "ui/images/paste.svg",
-      category = "Data Vault",
-      categoryOrder = "4")
   public void pasteFromClipboard(HopGuiVaultContext context) {
     HopGuiVaultGraph realGraph = context.getVaultGraph();
     if (realGraph != null) {
@@ -1869,15 +1784,6 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "vault-graph-copy-update-action",
-      parentId = HopGuiVaultContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiVaultGraph.Context.CopyUpdateAction.Name",
-      tooltip = "i18n::HopGuiVaultGraph.Context.CopyUpdateAction.Tooltip",
-      image = "ui/images/copy.svg",
-      category = "Workflow",
-      categoryOrder = "1")
   public void copyUpdateActionToClipboard(HopGuiVaultContext context) {
     HopGuiVaultGraph realGraph = context.getVaultGraph();
     if (realGraph != null) {
@@ -1885,15 +1791,6 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "vault-graph-compose-multi-table-source",
-      parentId = HopGuiVaultContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiVaultGraph.Context.ComposeMultiTableSource.Name",
-      tooltip = "i18n::HopGuiVaultGraph.Context.ComposeMultiTableSource.Tooltip",
-      image = "source-model.svg",
-      category = "Data Vault",
-      categoryOrder = "6")
   public void composeMultiTableSource(HopGuiVaultContext context) {
     HopGuiVaultGraph realGraph = context != null ? context.getVaultGraph() : this;
     if (realGraph == null) {
@@ -1903,15 +1800,6 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
         .composeAndPublish(realGraph.hopGui, realGraph.getShell());
   }
 
-  @GuiContextAction(
-      id = "vault-graph-generate-from-source",
-      parentId = HopGuiVaultContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiVaultGraph.Context.GenerateFromSource.Name",
-      tooltip = "i18n::HopGuiVaultGraph.Context.GenerateFromSource.Tooltip",
-      image = "source-model.svg",
-      category = "Data Vault",
-      categoryOrder = "6")
   public void generateFromSourceModel(HopGuiVaultContext context) {
     HopGuiVaultGraph realGraph = context != null ? context.getVaultGraph() : this;
     if (realGraph != null) {
@@ -1919,15 +1807,6 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "vault-graph-add-note",
-      parentId = HopGuiVaultContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiVaultGraph.AddNote.Name",
-      tooltip = "i18n::HopGuiVaultGraph.AddNote.Tooltip",
-      image = "ui/images/note.svg",
-      category = "Data Vault",
-      categoryOrder = "5")
   public void addNote(HopGuiVaultContext context) {
     Point click = context.getClick();
     HopGuiVaultGraph realGraph = context.getVaultGraph();
@@ -1946,15 +1825,6 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     realGraph.setChanged();
   }
 
-  @GuiContextAction(
-      id = "vault-graph-edit-model",
-      parentId = HopGuiVaultContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "Edit model properties",
-      tooltip = "Edit the properties of this Data Vault model",
-      image = "datavault-model.svg",
-      category = "Data Vault",
-      categoryOrder = "10")
   public void editModelProperties(HopGuiVaultContext context) {
     HopGuiVaultGraph realGraph = context.getVaultGraph();
     DataVaultModel realModel = context.getModel();
@@ -1963,15 +1833,6 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "vault-graph-publish-dimensional-draft",
-      parentId = HopGuiVaultContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiVaultGraph.PublishDimensional.Name",
-      tooltip = "i18n::HopGuiVaultGraph.PublishDimensional.Tooltip",
-      image = "dimensional-model.svg",
-      category = "Export",
-      categoryOrder = "2")
   public void publishDimensionalDraft(HopGuiVaultContext context) {
     DataVaultModel realModel = context.getModel();
     if (realModel != null) {
@@ -1979,28 +1840,10 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "vault-graph-import-record-definitions",
-      parentId = HopGuiVaultContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiVaultGraph.ImportSources.Name",
-      tooltip = "i18n::HopGuiVaultGraph.ImportSources.Tooltip",
-      image = "data-catalog.svg",
-      category = "Import",
-      categoryOrder = "1")
   public void importDatabaseSourceTables(HopGuiVaultContext context) {
     importCatalogRecordDefinitions();
   }
 
-  @GuiContextAction(
-      id = "vault-graph-ai-help",
-      parentId = HopGuiVaultContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiVaultGraph.AiHelp.Name",
-      tooltip = "i18n::HopGuiVaultGraph.AiHelp.Tooltip",
-      image = "ai-provider.svg",
-      category = "Help",
-      categoryOrder = "1")
   public void openAiAdvisorContext(HopGuiVaultContext context) {
     HopGuiVaultGraph realGraph = context.getVaultGraph();
     if (realGraph != null) {
@@ -2008,15 +1851,6 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "vault-graph-table-ai-help",
-      parentId = HopGuiVaultTableContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiVaultGraph.AiHelp.Name",
-      tooltip = "i18n::HopGuiVaultGraph.AiHelp.Tooltip",
-      image = "ai-provider.svg",
-      category = "Help",
-      categoryOrder = "1")
   public void openAiAdvisorTableContext(HopGuiVaultTableContext context) {
     HopGuiVaultGraph realGraph = context.getVaultGraph();
     if (realGraph != null) {
@@ -2029,18 +1863,8 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
   // The parentId links to HopGuiVaultTableContext. Edit does same as name-click; Delete removes
   // table.
 
-  private static final String ACTION_ID_GO_TO_REFERENCED_TABLE =
-      "vault-graph-go-to-referenced-table";
+  static final String ACTION_ID_GO_TO_REFERENCED_TABLE = "vault-graph-go-to-referenced-table";
 
-  @GuiContextAction(
-      id = ACTION_ID_GO_TO_REFERENCED_TABLE,
-      parentId = HopGuiVaultTableContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiVaultGraph.Context.GoToReferencedTable.Name",
-      tooltip = "i18n::HopGuiVaultGraph.Context.GoToReferencedTable.Tooltip",
-      image = "ui/images/location.svg",
-      category = "Data Vault",
-      categoryOrder = "0")
   public void goToReferencedTableAction(HopGuiVaultTableContext context) {
     IDvTable table = context.getTable();
     HopGuiVaultGraph graph = context.getVaultGraph();
@@ -2051,7 +1875,6 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     graph.navigateToReferencedTable(reference);
   }
 
-  @GuiContextActionFilter(parentId = HopGuiVaultTableContext.CONTEXT_ID)
   public boolean filterTableContextActions(
       String contextActionId, HopGuiVaultTableContext context) {
     if (ACTION_ID_GO_TO_REFERENCED_TABLE.equals(contextActionId)) {
@@ -2073,15 +1896,6 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     return true;
   }
 
-  @GuiContextAction(
-      id = "vault-graph-edit-table",
-      parentId = HopGuiVaultTableContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "Edit",
-      tooltip = "Edit the properties of this table",
-      image = "ui/images/edit.svg",
-      category = "Data Vault",
-      categoryOrder = "1")
   public void editTableAction(HopGuiVaultTableContext context) {
     IDvTable t = context.getTable();
     HopGuiVaultGraph realGraph = context.getVaultGraph();
@@ -2090,15 +1904,6 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "vault-graph-delete-table",
-      parentId = HopGuiVaultTableContext.CONTEXT_ID,
-      type = GuiActionType.Delete,
-      name = "Delete",
-      tooltip = "Delete this table from the model",
-      image = "ui/images/delete.svg",
-      category = "Data Vault",
-      categoryOrder = "2")
   public void deleteTable(HopGuiVaultTableContext context) {
     IDvTable t = context.getTable();
     HopGuiVaultGraph realGraph = context.getVaultGraph();
@@ -2112,15 +1917,6 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "vault-graph-show-table-pipeline",
-      parentId = HopGuiVaultTableContext.CONTEXT_ID,
-      type = GuiActionType.Info,
-      name = "Show update pipeline",
-      tooltip = "Generate and show the pipeline used to update this table",
-      image = "ui/images/debug.svg",
-      category = "Data Vault",
-      categoryOrder = "3")
   public void debugTablePipeline(HopGuiVaultTableContext context) {
     IDvTable t = context.getTable();
     HopGuiVaultGraph realGraph = context.getVaultGraph();
@@ -2129,15 +1925,6 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "vault-graph-preview-target-table",
-      parentId = HopGuiVaultTableContext.CONTEXT_ID,
-      type = GuiActionType.Info,
-      name = "i18n::HopGuiVaultGraph.Context.PreviewTargetTable.Name",
-      tooltip = "i18n::HopGuiVaultGraph.Context.PreviewTargetTable.Tooltip",
-      image = "ui/images/preview.svg",
-      category = "Data Vault",
-      categoryOrder = "5")
   public void previewTargetTableAction(HopGuiVaultTableContext context) {
     IDvTable table = context.getTable();
     DataVaultModel dvModel = context.getModel();
@@ -2153,15 +1940,6 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
         table);
   }
 
-  @GuiContextAction(
-      id = "vault-graph-preview-target-layout",
-      parentId = HopGuiVaultTableContext.CONTEXT_ID,
-      type = GuiActionType.Info,
-      name = "i18n::HopGuiVaultGraph.Context.PreviewTargetLayout.Name",
-      tooltip = "i18n::HopGuiVaultGraph.Context.PreviewTargetLayout.Tooltip",
-      image = "ui/images/preview.svg",
-      category = "Data Vault",
-      categoryOrder = "6")
   public void previewTargetLayoutAction(HopGuiVaultTableContext context) {
     IDvTable table = context.getTable();
     DataVaultModel dvModel = context.getModel();
@@ -2177,15 +1955,6 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
         table);
   }
 
-  @GuiContextAction(
-      id = "vault-graph-edit-note",
-      parentId = HopGuiVaultNoteContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiVaultGraph.EditNote.Name",
-      tooltip = "i18n::HopGuiVaultGraph.EditNote.Tooltip",
-      image = "ui/images/edit.svg",
-      category = "Data Vault",
-      categoryOrder = "1")
   public void editNoteAction(HopGuiVaultNoteContext context) {
     DvNote note = context.getNote();
     HopGuiVaultGraph realGraph = context.getVaultGraph();
@@ -2194,15 +1963,6 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "vault-graph-delete-note",
-      parentId = HopGuiVaultNoteContext.CONTEXT_ID,
-      type = GuiActionType.Delete,
-      name = "i18n::HopGuiVaultGraph.DeleteNote.Name",
-      tooltip = "i18n::HopGuiVaultGraph.DeleteNote.Tooltip",
-      image = "ui/images/delete.svg",
-      category = "Data Vault",
-      categoryOrder = "2")
   public void deleteNoteAction(HopGuiVaultNoteContext context) {
     DvNote note = context.getNote();
     HopGuiVaultGraph realGraph = context.getVaultGraph();

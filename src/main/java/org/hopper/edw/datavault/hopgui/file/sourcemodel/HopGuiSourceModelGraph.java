@@ -23,7 +23,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.Props;
-import org.apache.hop.core.action.GuiContextAction;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.AreaOwner;
 import org.apache.hop.core.gui.DPoint;
@@ -32,7 +31,6 @@ import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.gui.SnapAllignDistribute;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.IGuiRefresher;
-import org.apache.hop.core.gui.plugin.action.GuiActionType;
 import org.apache.hop.core.gui.plugin.key.GuiKeyboardShortcut;
 import org.apache.hop.core.gui.plugin.key.GuiOsxKeyboardShortcut;
 import org.apache.hop.core.gui.plugin.toolbar.GuiToolbarElement;
@@ -2468,41 +2466,14 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "source-model-graph-add-table",
-      parentId = HopGuiSourceModelContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiSourceModelGraph.Context.AddTable.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.Context.AddTable.Tooltip",
-      image = "source-model.svg",
-      category = "Basic",
-      categoryOrder = "1")
   public void addTable(HopGuiSourceModelContext context) {
     addTableAt(context != null ? context.getClick() : new Point(50, 50));
   }
 
-  @GuiContextAction(
-      id = "source-model-graph-import-schema",
-      parentId = HopGuiSourceModelContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiSourceModelGraph.Context.ImportSchema.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.Context.ImportSchema.Tooltip",
-      image = "ui/images/schema.svg",
-      category = "Basic",
-      categoryOrder = "2")
   public void importSchemaFromContext(HopGuiSourceModelContext context) {
     importSchema();
   }
 
-  @GuiContextAction(
-      id = "source-model-graph-ai-help",
-      parentId = HopGuiSourceModelContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiSourceModelGraph.AiHelp.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.AiHelp.Tooltip",
-      image = "ai-provider.svg",
-      category = "Help",
-      categoryOrder = "1")
   public void openAiAdvisorContext(HopGuiSourceModelContext context) {
     HopGuiSourceModelGraph graph = context != null ? context.getSourceModelGraph() : this;
     if (graph != null) {
@@ -2510,15 +2481,6 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "source-model-table-ai-help",
-      parentId = HopGuiSourceTableContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiSourceModelGraph.AiHelp.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.AiHelp.Tooltip",
-      image = "ai-provider.svg",
-      category = "Help",
-      categoryOrder = "1")
   public void openAiAdvisorTableContext(HopGuiSourceTableContext context) {
     HopGuiSourceModelGraph graph = context != null ? context.getSourceModelGraph() : this;
     if (graph != null) {
@@ -2527,15 +2489,6 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "source-model-table-browse",
-      parentId = HopGuiSourceTableContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiSourceModelGraph.Context.Browse.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.Context.Browse.Tooltip",
-      image = "ui/images/view.svg",
-      category = "Basic",
-      categoryOrder = "0")
   public void browseFromTable(HopGuiSourceTableContext context) {
     if (context != null && context.getTable() != null) {
       HopGuiSourceModelGraph graph =
@@ -2544,15 +2497,6 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "source-model-query-browse",
-      parentId = HopGuiSourceQueryContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiSourceModelGraph.Context.Browse.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.Context.Browse.Tooltip",
-      image = "ui/images/view.svg",
-      category = "Basic",
-      categoryOrder = "0")
   public void browseFromQuery(HopGuiSourceQueryContext context) {
     if (context != null && context.getQuery() != null) {
       HopGuiSourceModelGraph graph =
@@ -2561,15 +2505,6 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "source-model-json-browse",
-      parentId = HopGuiSourceJsonContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiSourceModelGraph.Context.Browse.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.Context.Browse.Tooltip",
-      image = "ui/images/view.svg",
-      category = "Basic",
-      categoryOrder = "0")
   public void browseFromJson(HopGuiSourceJsonContext context) {
     if (context != null && context.getJsonSource() != null) {
       HopGuiSourceModelGraph graph =
@@ -2578,15 +2513,6 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "source-model-pipeline-browse",
-      parentId = HopGuiSourcePipelineContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiSourceModelGraph.Context.Browse.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.Context.Browse.Tooltip",
-      image = "ui/images/view.svg",
-      category = "Basic",
-      categoryOrder = "0")
   public void browseFromPipeline(HopGuiSourcePipelineContext context) {
     if (context != null && context.getPipelineSource() != null) {
       HopGuiSourceModelGraph graph =
@@ -2595,15 +2521,6 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "source-model-masking-browse",
-      parentId = HopGuiSourceMaskingContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiSourceModelGraph.Context.Browse.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.Context.Browse.Tooltip",
-      image = "ui/images/view.svg",
-      category = "Basic",
-      categoryOrder = "0")
   public void browseFromMasking(HopGuiSourceMaskingContext context) {
     if (context != null && context.getMaskingSource() != null) {
       HopGuiSourceModelGraph graph =
@@ -2612,15 +2529,6 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "source-model-query-ai-help",
-      parentId = HopGuiSourceQueryContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiSourceModelGraph.AiHelp.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.AiHelp.Tooltip",
-      image = "ai-provider.svg",
-      category = "Help",
-      categoryOrder = "1")
   public void openAiAdvisorQueryContext(HopGuiSourceQueryContext context) {
     HopGuiSourceModelGraph graph = context != null ? context.getSourceModelGraph() : this;
     if (graph != null) {
@@ -2629,15 +2537,6 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "source-model-json-ai-help",
-      parentId = HopGuiSourceJsonContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiSourceModelGraph.AiHelp.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.AiHelp.Tooltip",
-      image = "ai-provider.svg",
-      category = "Help",
-      categoryOrder = "1")
   public void openAiAdvisorJsonContext(HopGuiSourceJsonContext context) {
     HopGuiSourceModelGraph graph = context != null ? context.getSourceModelGraph() : this;
     if (graph != null) {
@@ -2646,15 +2545,6 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "source-model-pipeline-ai-help",
-      parentId = HopGuiSourcePipelineContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiSourceModelGraph.AiHelp.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.AiHelp.Tooltip",
-      image = "ai-provider.svg",
-      category = "Help",
-      categoryOrder = "1")
   public void openAiAdvisorPipelineContext(HopGuiSourcePipelineContext context) {
     HopGuiSourceModelGraph graph = context != null ? context.getSourceModelGraph() : this;
     if (graph != null) {
@@ -2664,15 +2554,6 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "source-model-relationship-ai-help",
-      parentId = HopGuiSourceRelationshipContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiSourceModelGraph.AiHelp.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.AiHelp.Tooltip",
-      image = "ai-provider.svg",
-      category = "Help",
-      categoryOrder = "1")
   public void openAiAdvisorRelationshipContext(HopGuiSourceRelationshipContext context) {
     HopGuiSourceModelGraph graph = context != null ? context.getSourceModelGraph() : this;
     if (graph != null) {
@@ -2681,95 +2562,32 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "source-model-graph-generate-vault",
-      parentId = HopGuiSourceModelContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiSourceModelGraph.Context.GenerateVault.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.Context.GenerateVault.Tooltip",
-      image = "datavault-model.svg",
-      category = "Basic",
-      categoryOrder = "3")
   public void generateDataVaultFromContext(HopGuiSourceModelContext context) {
     generateDataVaultFromToolbar();
   }
 
-  @GuiContextAction(
-      id = "source-model-graph-add-query",
-      parentId = HopGuiSourceModelContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiSourceModelGraph.Context.AddQuery.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.Context.AddQuery.Tooltip",
-      image = "source-model.svg",
-      category = "Basic",
-      categoryOrder = "4")
   public void addQuery(HopGuiSourceModelContext context) {
     addQueryAt(lastClick != null ? lastClick : new Point(50, 50));
   }
 
-  @GuiContextAction(
-      id = "source-model-graph-add-json",
-      parentId = HopGuiSourceModelContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiSourceModelGraph.Context.AddJson.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.Context.AddJson.Tooltip",
-      image = "source-model.svg",
-      category = "Basic",
-      categoryOrder = "5")
   public void addJson(HopGuiSourceModelContext context) {
     addJsonAt(lastClick != null ? lastClick : new Point(50, 50));
   }
 
-  @GuiContextAction(
-      id = "source-model-graph-add-masking",
-      parentId = HopGuiSourceModelContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiSourceModelGraph.Context.AddMasking.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.Context.AddMasking.Tooltip",
-      image = "source-model.svg",
-      category = "Basic",
-      categoryOrder = "5")
   public void addMasking(HopGuiSourceModelContext context) {
     addMaskingAt(lastClick != null ? lastClick : new Point(50, 50));
   }
 
-  @GuiContextAction(
-      id = "source-model-graph-add-pipeline",
-      parentId = HopGuiSourceModelContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiSourceModelGraph.Context.AddPipeline.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.Context.AddPipeline.Tooltip",
-      image = "source-model.svg",
-      category = "Basic",
-      categoryOrder = "6")
   public void addPipeline(HopGuiSourceModelContext context) {
     addPipelineAt(lastClick != null ? lastClick : new Point(50, 50));
   }
 
-  @GuiContextAction(
-      id = "source-model-pipeline-edit",
-      parentId = HopGuiSourcePipelineContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiSourceModelGraph.Context.Pipeline.Edit.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.Context.Pipeline.Edit.Tooltip",
-      image = "ui/images/edit.svg",
-      category = "Basic",
-      categoryOrder = "1")
   public void editPipelineAction(HopGuiSourcePipelineContext context) {
     if (context != null) {
       editPipelineSource(context.getPipelineSource());
     }
   }
 
-  @GuiContextAction(
-      id = "source-model-pipeline-open",
-      parentId = HopGuiSourcePipelineContext.CONTEXT_ID,
-      type = GuiActionType.Info,
-      name = "i18n::HopGuiSourceModelGraph.Context.Pipeline.Open.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.Context.Pipeline.Open.Tooltip",
-      image = "ui/images/open.svg",
-      category = "Basic",
-      categoryOrder = "2")
   public void openPipelineAction(HopGuiSourcePipelineContext context) {
     if (context != null && context.getPipelineSource() != null) {
       DmSourcePipelineOpenSupport.openSourcePipelineFile(
@@ -2777,15 +2595,6 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "source-model-pipeline-publish",
-      parentId = HopGuiSourcePipelineContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiSourceModelGraph.Context.Pipeline.Publish.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.Context.Pipeline.Publish.Tooltip",
-      image = "ui/images/publish.svg",
-      category = "Basic",
-      categoryOrder = "3")
   public void publishPipelineAction(HopGuiSourcePipelineContext context) {
     if (context != null && context.getPipelineSource() != null) {
       publishPipelineSource(context.getPipelineSource());
@@ -2817,75 +2626,30 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "source-model-json-edit",
-      parentId = HopGuiSourceJsonContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiSourceModelGraph.Context.Json.Edit.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.Context.Json.Edit.Tooltip",
-      image = "ui/images/edit.svg",
-      category = "Basic",
-      categoryOrder = "1")
   public void editJsonAction(HopGuiSourceJsonContext context) {
     if (context != null) {
       editJsonSource(context.getJsonSource());
     }
   }
 
-  @GuiContextAction(
-      id = "source-model-masking-edit",
-      parentId = HopGuiSourceMaskingContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiSourceModelGraph.Context.Masking.Edit.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.Context.Masking.Edit.Tooltip",
-      image = "ui/images/edit.svg",
-      category = "Basic",
-      categoryOrder = "1")
   public void editMaskingAction(HopGuiSourceMaskingContext context) {
     if (context != null) {
       editMaskingSource(context.getMaskingSource());
     }
   }
 
-  @GuiContextAction(
-      id = "source-model-masking-preview",
-      parentId = HopGuiSourceMaskingContext.CONTEXT_ID,
-      type = GuiActionType.Info,
-      name = "i18n::HopGuiSourceModelGraph.Context.Masking.Preview.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.Context.Masking.Preview.Tooltip",
-      image = "ui/images/preview.svg",
-      category = "Basic",
-      categoryOrder = "2")
   public void previewMaskingAction(HopGuiSourceMaskingContext context) {
     if (context != null) {
       previewMaskingSource(context.getMaskingSource());
     }
   }
 
-  @GuiContextAction(
-      id = "source-model-masking-publish",
-      parentId = HopGuiSourceMaskingContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiSourceModelGraph.Context.Masking.Publish.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.Context.Masking.Publish.Tooltip",
-      image = "ui/images/publish.svg",
-      category = "Basic",
-      categoryOrder = "3")
   public void publishMaskingAction(HopGuiSourceMaskingContext context) {
     if (context != null && context.getMaskingSource() != null) {
       publishMaskingSource(context.getMaskingSource());
     }
   }
 
-  @GuiContextAction(
-      id = "source-model-masking-delete",
-      parentId = HopGuiSourceMaskingContext.CONTEXT_ID,
-      type = GuiActionType.Delete,
-      name = "i18n::HopGuiSourceModelGraph.Context.Masking.Delete.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.Context.Masking.Delete.Tooltip",
-      image = "ui/images/delete.svg",
-      category = "Basic",
-      categoryOrder = "4")
   public void deleteMaskingAction(HopGuiSourceMaskingContext context) {
     if (context == null || context.getMaskingSource() == null || model == null) {
       return;
@@ -2899,30 +2663,12 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     redraw();
   }
 
-  @GuiContextAction(
-      id = "source-model-json-preview",
-      parentId = HopGuiSourceJsonContext.CONTEXT_ID,
-      type = GuiActionType.Info,
-      name = "i18n::HopGuiSourceModelGraph.Context.Json.Preview.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.Context.Json.Preview.Tooltip",
-      image = "ui/images/preview.svg",
-      category = "Basic",
-      categoryOrder = "2")
   public void previewJsonAction(HopGuiSourceJsonContext context) {
     if (context != null) {
       previewJsonSource(context.getJsonSource());
     }
   }
 
-  @GuiContextAction(
-      id = "source-model-json-publish",
-      parentId = HopGuiSourceJsonContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiSourceModelGraph.Context.Json.Publish.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.Context.Json.Publish.Tooltip",
-      image = "ui/images/publish.svg",
-      category = "Basic",
-      categoryOrder = "3")
   public void publishJsonAction(HopGuiSourceJsonContext context) {
     if (context != null && context.getJsonSource() != null) {
       publishJsonSource(context.getJsonSource());
@@ -2991,15 +2737,6 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "source-model-json-delete",
-      parentId = HopGuiSourceJsonContext.CONTEXT_ID,
-      type = GuiActionType.Delete,
-      name = "i18n::HopGuiSourceModelGraph.Context.Json.Delete.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.Context.Json.Delete.Tooltip",
-      image = "ui/images/delete.svg",
-      category = "Basic",
-      categoryOrder = "4")
   public void deleteJsonAction(HopGuiSourceJsonContext context) {
     if (context == null || context.getJsonSource() == null || model == null) {
       return;
@@ -3136,60 +2873,24 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "source-model-query-edit",
-      parentId = HopGuiSourceQueryContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiSourceModelGraph.Context.Query.Edit.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.Context.Query.Edit.Tooltip",
-      image = "ui/images/edit.svg",
-      category = "Basic",
-      categoryOrder = "1")
   public void editQueryAction(HopGuiSourceQueryContext context) {
     if (context != null) {
       editQuery(context.getQuery());
     }
   }
 
-  @GuiContextAction(
-      id = "source-model-query-preview",
-      parentId = HopGuiSourceQueryContext.CONTEXT_ID,
-      type = GuiActionType.Info,
-      name = "i18n::HopGuiSourceModelGraph.Context.Query.Preview.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.Context.Query.Preview.Tooltip",
-      image = "ui/images/preview.svg",
-      category = "Basic",
-      categoryOrder = "2")
   public void previewQueryAction(HopGuiSourceQueryContext context) {
     if (context != null) {
       previewQuery(context.getQuery());
     }
   }
 
-  @GuiContextAction(
-      id = "source-model-query-publish",
-      parentId = HopGuiSourceQueryContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiSourceModelGraph.Context.Query.Publish.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.Context.Query.Publish.Tooltip",
-      image = "ui/images/publish.svg",
-      category = "Basic",
-      categoryOrder = "3")
   public void publishQueryAction(HopGuiSourceQueryContext context) {
     if (context != null && context.getQuery() != null) {
       publishQuery(context.getQuery());
     }
   }
 
-  @GuiContextAction(
-      id = "source-model-query-delete",
-      parentId = HopGuiSourceQueryContext.CONTEXT_ID,
-      type = GuiActionType.Delete,
-      name = "i18n::HopGuiSourceModelGraph.Context.Query.Delete.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.Context.Query.Delete.Tooltip",
-      image = "ui/images/delete.svg",
-      category = "Basic",
-      categoryOrder = "4")
   public void deleteQueryAction(HopGuiSourceQueryContext context) {
     if (context == null || context.getQuery() == null || model == null) {
       return;
@@ -3596,15 +3297,6 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "source-model-graph-add-note",
-      parentId = HopGuiSourceModelContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiSourceModelGraph.Context.AddNote.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.Context.AddNote.Tooltip",
-      image = "ui/images/note-add.svg",
-      category = "Basic",
-      categoryOrder = "3")
   public void addNote(HopGuiSourceModelContext context) {
     if (model == null) {
       return;
@@ -3621,45 +3313,18 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     redraw();
   }
 
-  @GuiContextAction(
-      id = "source-model-table-edit",
-      parentId = HopGuiSourceTableContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiSourceModelGraph.Context.Table.Edit.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.Context.Table.Edit.Tooltip",
-      image = "ui/images/edit.svg",
-      category = "Basic",
-      categoryOrder = "1")
   public void editTableAction(HopGuiSourceTableContext context) {
     if (context != null) {
       editTable(context.getTable());
     }
   }
 
-  @GuiContextAction(
-      id = "source-model-table-preview",
-      parentId = HopGuiSourceTableContext.CONTEXT_ID,
-      type = GuiActionType.Info,
-      name = "i18n::HopGuiSourceModelGraph.Context.Table.Preview.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.Context.Table.Preview.Tooltip",
-      image = "ui/images/preview.svg",
-      category = "Basic",
-      categoryOrder = "2")
   public void previewTableAction(HopGuiSourceTableContext context) {
     if (context != null) {
       previewTable(context.getTable());
     }
   }
 
-  @GuiContextAction(
-      id = "source-model-table-delete",
-      parentId = HopGuiSourceTableContext.CONTEXT_ID,
-      type = GuiActionType.Delete,
-      name = "i18n::HopGuiSourceModelGraph.Context.Table.Delete.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.Context.Table.Delete.Tooltip",
-      image = "ui/images/delete.svg",
-      category = "Basic",
-      categoryOrder = "3")
   public void deleteTableAction(HopGuiSourceTableContext context) {
     if (context == null || context.getTable() == null || model == null) {
       return;
@@ -3673,15 +3338,6 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     redraw();
   }
 
-  @GuiContextAction(
-      id = "source-model-pipeline-delete",
-      parentId = HopGuiSourcePipelineContext.CONTEXT_ID,
-      type = GuiActionType.Delete,
-      name = "i18n::HopGuiSourceModelGraph.Context.Pipeline.Delete.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.Context.Pipeline.Delete.Tooltip",
-      image = "ui/images/delete.svg",
-      category = "Basic",
-      categoryOrder = "4")
   public void deletePipelineAction(HopGuiSourcePipelineContext context) {
     if (context == null || context.getPipelineSource() == null || model == null) {
       return;
@@ -3695,30 +3351,12 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     redraw();
   }
 
-  @GuiContextAction(
-      id = "source-model-relationship-edit",
-      parentId = HopGuiSourceRelationshipContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiSourceModelGraph.Context.Relationship.Edit.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.Context.Relationship.Edit.Tooltip",
-      image = "ui/images/edit.svg",
-      category = "Basic",
-      categoryOrder = "1")
   public void editRelationshipAction(HopGuiSourceRelationshipContext context) {
     if (context != null) {
       editRelationship(context.getRelationship());
     }
   }
 
-  @GuiContextAction(
-      id = "source-model-relationship-delete",
-      parentId = HopGuiSourceRelationshipContext.CONTEXT_ID,
-      type = GuiActionType.Delete,
-      name = "i18n::HopGuiSourceModelGraph.Context.Relationship.Delete.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.Context.Relationship.Delete.Tooltip",
-      image = "ui/images/delete.svg",
-      category = "Basic",
-      categoryOrder = "2")
   public void deleteRelationshipAction(HopGuiSourceRelationshipContext context) {
     if (context == null || context.getRelationship() == null || model == null) {
       return;
@@ -3729,30 +3367,12 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
     redraw();
   }
 
-  @GuiContextAction(
-      id = "source-model-note-edit",
-      parentId = HopGuiSourceNoteContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiSourceModelGraph.Context.Note.Edit.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.Context.Note.Edit.Tooltip",
-      image = "ui/images/edit.svg",
-      category = "Basic",
-      categoryOrder = "1")
   public void editNoteAction(HopGuiSourceNoteContext context) {
     if (context != null) {
       editNote(context.getNote());
     }
   }
 
-  @GuiContextAction(
-      id = "source-model-note-delete",
-      parentId = HopGuiSourceNoteContext.CONTEXT_ID,
-      type = GuiActionType.Delete,
-      name = "i18n::HopGuiSourceModelGraph.Context.Note.Delete.Name",
-      tooltip = "i18n::HopGuiSourceModelGraph.Context.Note.Delete.Tooltip",
-      image = "ui/images/delete.svg",
-      category = "Basic",
-      categoryOrder = "2")
   public void deleteNoteAction(HopGuiSourceNoteContext context) {
     if (context == null || context.getNote() == null || model == null) {
       return;

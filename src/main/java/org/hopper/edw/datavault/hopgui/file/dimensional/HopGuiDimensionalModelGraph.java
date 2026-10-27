@@ -25,8 +25,6 @@ import lombok.Setter;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.Props;
-import org.apache.hop.core.action.GuiContextAction;
-import org.apache.hop.core.action.GuiContextActionFilter;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.AreaOwner;
@@ -35,7 +33,6 @@ import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.gui.SnapAllignDistribute;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.IGuiRefresher;
-import org.apache.hop.core.gui.plugin.action.GuiActionType;
 import org.apache.hop.core.gui.plugin.key.GuiKeyboardShortcut;
 import org.apache.hop.core.gui.plugin.key.GuiOsxKeyboardShortcut;
 import org.apache.hop.core.gui.plugin.toolbar.GuiToolbarElement;
@@ -1048,15 +1045,6 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "dm-graph-ai-help",
-      parentId = HopGuiDimensionalContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiDimensionalModelGraph.AiHelp.Name",
-      tooltip = "i18n::HopGuiDimensionalModelGraph.AiHelp.Tooltip",
-      image = "ai-provider.svg",
-      category = "Help",
-      categoryOrder = "2")
   public void openAiAdvisorContext(HopGuiDimensionalContext context) {
     HopGuiDimensionalModelGraph graph = context.getDimensionalGraph();
     if (graph != null) {
@@ -1064,15 +1052,6 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "dm-graph-table-ai-help",
-      parentId = HopGuiDimensionalTableContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiDimensionalModelGraph.AiHelp.Name",
-      tooltip = "i18n::HopGuiDimensionalModelGraph.AiHelp.Tooltip",
-      image = "ai-provider.svg",
-      category = "Help",
-      categoryOrder = "2")
   public void openAiAdvisorTableContext(HopGuiDimensionalTableContext context) {
     HopGuiDimensionalModelGraph graph = context.getDimensionalGraph();
     if (graph != null) {
@@ -1081,15 +1060,6 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "dm-graph-import-database-tables",
-      parentId = HopGuiDimensionalContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiDimensionalModelGraph.Context.ImportDatabaseTables.Name",
-      tooltip = "i18n::HopGuiDimensionalModelGraph.Context.ImportDatabaseTables.Tooltip",
-      image = "ui/images/database.svg",
-      category = "Import",
-      categoryOrder = "1")
   public void importDatabaseTables(HopGuiDimensionalContext context) {
     DimensionalModel dmModel = context.getModel();
     HopGuiDimensionalModelGraph graph = context.getDimensionalGraph();
@@ -1106,15 +1076,6 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
         });
   }
 
-  @GuiContextAction(
-      id = "dm-graph-add-dimension",
-      parentId = HopGuiDimensionalContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiDimensionalModelGraph.Context.AddDimension.Name",
-      tooltip = "i18n::HopGuiDimensionalModelGraph.Context.AddDimension.Tooltip",
-      image = "dimension.svg",
-      category = "Dimensional",
-      categoryOrder = "1")
   public void addDimension(HopGuiDimensionalContext context) {
     HopGuiDimensionalModelGraph graph = context.getDimensionalGraph();
     if (graph == null || context.getModel() == null) {
@@ -1124,15 +1085,6 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     graph.addTableAtClick(new DmDimension(), context.getClick());
   }
 
-  @GuiContextAction(
-      id = "dm-graph-add-dimension-alias",
-      parentId = HopGuiDimensionalContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiDimensionalModelGraph.Context.AddDimensionAlias.Name",
-      tooltip = "i18n::HopGuiDimensionalModelGraph.Context.AddDimensionAlias.Tooltip",
-      image = "dimension-alias.svg",
-      category = "Dimensional",
-      categoryOrder = "1")
   public void addDimensionAlias(HopGuiDimensionalContext context) {
     HopGuiDimensionalModelGraph graph = context.getDimensionalGraph();
     if (graph == null || context.getModel() == null) {
@@ -1145,15 +1097,6 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     graph.editDmTable(alias);
   }
 
-  @GuiContextAction(
-      id = "dm-graph-add-date-dimension",
-      parentId = HopGuiDimensionalContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiDimensionalModelGraph.Context.AddDateDimension.Name",
-      tooltip = "i18n::HopGuiDimensionalModelGraph.Context.AddDateDimension.Tooltip",
-      image = "dimension.svg",
-      category = "Dimensional",
-      categoryOrder = "1")
   public void addDateDimension(HopGuiDimensionalContext context) {
     HopGuiDimensionalModelGraph graph = context.getDimensionalGraph();
     DimensionalModel dmModel = context.getModel();
@@ -1195,15 +1138,6 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "dm-graph-add-fact",
-      parentId = HopGuiDimensionalContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiDimensionalModelGraph.Context.AddFact.Name",
-      tooltip = "i18n::HopGuiDimensionalModelGraph.Context.AddFact.Tooltip",
-      image = "fact.svg",
-      category = "Dimensional",
-      categoryOrder = "2")
   public void addFact(HopGuiDimensionalContext context) {
     HopGuiDimensionalModelGraph graph = context.getDimensionalGraph();
     if (graph == null || context.getModel() == null) {
@@ -1213,15 +1147,6 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     graph.addTableAtClick(new DmFact(), context.getClick());
   }
 
-  @GuiContextAction(
-      id = "dm-graph-add-junk-dimension",
-      parentId = HopGuiDimensionalContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiDimensionalModelGraph.Context.AddJunkDimension.Name",
-      tooltip = "i18n::HopGuiDimensionalModelGraph.Context.AddJunkDimension.Tooltip",
-      image = "dimension-junk.svg",
-      category = "Dimensional",
-      categoryOrder = "3")
   public void addJunkDimension(HopGuiDimensionalContext context) {
     HopGuiDimensionalModelGraph graph = context.getDimensionalGraph();
     if (graph == null || context.getModel() == null) {
@@ -1231,15 +1156,6 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     graph.addTableAtClick(new DmJunkDimension(), context.getClick());
   }
 
-  @GuiContextAction(
-      id = "dm-graph-add-range-dimension",
-      parentId = HopGuiDimensionalContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiDimensionalModelGraph.Context.AddRangeDimension.Name",
-      tooltip = "i18n::HopGuiDimensionalModelGraph.Context.AddRangeDimension.Tooltip",
-      image = "dimension-range.svg",
-      category = "Dimensional",
-      categoryOrder = "3")
   public void addRangeDimension(HopGuiDimensionalContext context) {
     HopGuiDimensionalModelGraph graph = context.getDimensionalGraph();
     if (graph == null || context.getModel() == null) {
@@ -1249,15 +1165,6 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     graph.addTableAtClick(new DmRangeDimension(), context.getClick());
   }
 
-  @GuiContextAction(
-      id = "dm-graph-add-factless-fact",
-      parentId = HopGuiDimensionalContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiDimensionalModelGraph.Context.AddFactlessFact.Name",
-      tooltip = "i18n::HopGuiDimensionalModelGraph.Context.AddFactlessFact.Tooltip",
-      image = "fact-factless.svg",
-      category = "Dimensional",
-      categoryOrder = "4")
   public void addFactlessFact(HopGuiDimensionalContext context) {
     HopGuiDimensionalModelGraph graph = context.getDimensionalGraph();
     if (graph == null || context.getModel() == null) {
@@ -1267,15 +1174,6 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     graph.addTableAtClick(new DmFactlessFact(), context.getClick());
   }
 
-  @GuiContextAction(
-      id = "dm-graph-add-bridge",
-      parentId = HopGuiDimensionalContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiDimensionalModelGraph.Context.AddBridge.Name",
-      tooltip = "i18n::HopGuiDimensionalModelGraph.Context.AddBridge.Tooltip",
-      image = "bridge.svg",
-      category = "Dimensional",
-      categoryOrder = "5")
   public void addBridge(HopGuiDimensionalContext context) {
     HopGuiDimensionalModelGraph graph = context.getDimensionalGraph();
     if (graph == null || context.getModel() == null) {
@@ -1285,15 +1183,6 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     graph.addTableAtClick(new DmBridge(), context.getClick());
   }
 
-  @GuiContextAction(
-      id = "dm-graph-add-note",
-      parentId = HopGuiDimensionalContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiDimensionalModelGraph.Context.AddNote.Name",
-      tooltip = "i18n::HopGuiDimensionalModelGraph.Context.AddNote.Tooltip",
-      image = "ui/images/note.svg",
-      category = "Dimensional",
-      categoryOrder = "3")
   public void addNote(HopGuiDimensionalContext context) {
     Point click = context.getClick();
     HopGuiDimensionalModelGraph graph = context.getDimensionalGraph();
@@ -1312,15 +1201,6 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     graph.setChanged();
   }
 
-  @GuiContextAction(
-      id = "dm-graph-paste-clipboard",
-      parentId = HopGuiDimensionalContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiDimensionalModelGraph.PasteFromClipboard.Name",
-      tooltip = "i18n::HopGuiDimensionalModelGraph.PasteFromClipboard.Tooltip",
-      image = "ui/images/paste.svg",
-      category = "Dimensional",
-      categoryOrder = "6")
   public void pasteFromClipboard(HopGuiDimensionalContext context) {
     HopGuiDimensionalModelGraph graph = context.getDimensionalGraph();
     if (graph != null) {
@@ -1328,15 +1208,6 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "dm-graph-paste-clipboard-table",
-      parentId = HopGuiDimensionalTableContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiDimensionalModelGraph.PasteFromClipboard.Name",
-      tooltip = "i18n::HopGuiDimensionalModelGraph.PasteFromClipboard.Tooltip",
-      image = "ui/images/paste.svg",
-      category = "Dimensional",
-      categoryOrder = "6")
   public void pasteFromClipboardOnTable(HopGuiDimensionalTableContext context) {
     HopGuiDimensionalModelGraph graph = context.getDimensionalGraph();
     if (graph != null) {
@@ -1344,15 +1215,6 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "dm-graph-paste-clipboard-note",
-      parentId = HopGuiDimensionalNoteContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiDimensionalModelGraph.PasteFromClipboard.Name",
-      tooltip = "i18n::HopGuiDimensionalModelGraph.PasteFromClipboard.Tooltip",
-      image = "ui/images/paste.svg",
-      category = "Dimensional",
-      categoryOrder = "3")
   public void pasteFromClipboardOnNote(HopGuiDimensionalNoteContext context) {
     HopGuiDimensionalModelGraph graph = context.getDimensionalGraph();
     if (graph != null) {
@@ -1360,15 +1222,6 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "dm-graph-copy-update-action",
-      parentId = HopGuiDimensionalContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiDimensionalModelGraph.Context.CopyUpdateAction.Name",
-      tooltip = "i18n::HopGuiDimensionalModelGraph.Context.CopyUpdateAction.Tooltip",
-      image = "ui/images/copy.svg",
-      category = "Workflow",
-      categoryOrder = "1")
   public void copyUpdateActionToClipboard(HopGuiDimensionalContext context) {
     HopGuiDimensionalModelGraph graph = context.getDimensionalGraph();
     if (graph != null) {
@@ -1376,15 +1229,6 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "dm-graph-edit-note",
-      parentId = HopGuiDimensionalNoteContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiDimensionalModelGraph.EditNote.Name",
-      tooltip = "i18n::HopGuiDimensionalModelGraph.EditNote.Tooltip",
-      image = "ui/images/edit.svg",
-      category = "Dimensional",
-      categoryOrder = "1")
   public void editNoteAction(HopGuiDimensionalNoteContext context) {
     DvNote note = context.getNote();
     HopGuiDimensionalModelGraph graph = context.getDimensionalGraph();
@@ -1393,15 +1237,6 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "dm-graph-delete-note",
-      parentId = HopGuiDimensionalNoteContext.CONTEXT_ID,
-      type = GuiActionType.Delete,
-      name = "i18n::HopGuiDimensionalModelGraph.DeleteNote.Name",
-      tooltip = "i18n::HopGuiDimensionalModelGraph.DeleteNote.Tooltip",
-      image = "ui/images/delete.svg",
-      category = "Dimensional",
-      categoryOrder = "2")
   public void deleteNoteAction(HopGuiDimensionalNoteContext context) {
     DvNote note = context.getNote();
     HopGuiDimensionalModelGraph graph = context.getDimensionalGraph();
@@ -1415,21 +1250,11 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     }
   }
 
-  private static final String ACTION_ID_GO_TO_ALIASED_DIMENSION =
-      "dm-graph-go-to-aliased-dimension";
-  private static final String ACTION_ID_OPEN_SOURCE_PIPELINE = "dm-graph-open-source-pipeline";
-  private static final String ACTION_ID_CREATE_PRESENTATION =
+  static final String ACTION_ID_GO_TO_ALIASED_DIMENSION = "dm-graph-go-to-aliased-dimension";
+  static final String ACTION_ID_OPEN_SOURCE_PIPELINE = "dm-graph-open-source-pipeline";
+  static final String ACTION_ID_CREATE_PRESENTATION =
       FactCrosstabGuiSupport.ACTION_ID_CREATE_PRESENTATION;
 
-  @GuiContextAction(
-      id = "dm-graph-edit-table",
-      parentId = HopGuiDimensionalTableContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiDimensionalModelGraph.Context.EditTable.Name",
-      tooltip = "i18n::HopGuiDimensionalModelGraph.Context.EditTable.Tooltip",
-      image = "ui/images/edit.svg",
-      category = "Dimensional",
-      categoryOrder = "1")
   public void editTableAction(HopGuiDimensionalTableContext context) {
     HopGuiDimensionalModelGraph graph = context.getDimensionalGraph();
     if (graph != null) {
@@ -1437,28 +1262,10 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = ACTION_ID_CREATE_PRESENTATION,
-      parentId = HopGuiDimensionalTableContext.CONTEXT_ID,
-      type = GuiActionType.Info,
-      name = "i18n::HopGuiDimensionalModelGraph.Context.CreatePresentation.Name",
-      tooltip = "i18n::HopGuiDimensionalModelGraph.Context.CreatePresentation.Tooltip",
-      image = "fact.svg",
-      category = "Dimensional",
-      categoryOrder = "2")
   public void createFactPresentationAction(HopGuiDimensionalTableContext context) {
     FactCrosstabGuiSupport.open(hopGui, context.getModel(), context.getTable());
   }
 
-  @GuiContextAction(
-      id = ACTION_ID_OPEN_SOURCE_PIPELINE,
-      parentId = HopGuiDimensionalTableContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiDimensionalModelGraph.Context.OpenSourcePipeline.Name",
-      tooltip = "i18n::HopGuiDimensionalModelGraph.Context.OpenSourcePipeline.Tooltip",
-      image = "ui/images/pipeline.svg",
-      category = "Dimensional",
-      categoryOrder = "2")
   public void openSourcePipelineAction(HopGuiDimensionalTableContext context) {
     IDmTable table = context.getTable();
     if (table != null) {
@@ -1466,15 +1273,6 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = ACTION_ID_GO_TO_ALIASED_DIMENSION,
-      parentId = HopGuiDimensionalTableContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiDimensionalModelGraph.Context.GoToAliasedDimension.Name",
-      tooltip = "i18n::HopGuiDimensionalModelGraph.Context.GoToAliasedDimension.Tooltip",
-      image = "ui/images/location.svg",
-      category = "Dimensional",
-      categoryOrder = "3")
   public void goToAliasedDimensionAction(HopGuiDimensionalTableContext context) {
     IDmTable table = context.getTable();
     HopGuiDimensionalModelGraph graph = context.getDimensionalGraph();
@@ -1495,7 +1293,6 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextActionFilter(parentId = HopGuiDimensionalTableContext.CONTEXT_ID)
   public boolean filterTableContextActions(
       String contextActionId, HopGuiDimensionalTableContext context) {
     if (ACTION_ID_GO_TO_ALIASED_DIMENSION.equals(contextActionId)) {
@@ -1516,20 +1313,12 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
       return !(context.getTable() instanceof DmDimensionAlias);
     }
     if ("dm-graph-preview-masked-rows".equals(contextActionId)) {
-      return !(context.getTable() instanceof org.hopper.edw.datavault.metadata.dimensional.DmRangeDimension);
+      return !(context.getTable()
+          instanceof org.hopper.edw.datavault.metadata.dimensional.DmRangeDimension);
     }
     return true;
   }
 
-  @GuiContextAction(
-      id = "dm-graph-delete-table",
-      parentId = HopGuiDimensionalTableContext.CONTEXT_ID,
-      type = GuiActionType.Delete,
-      name = "i18n::HopGuiDimensionalModelGraph.Context.DeleteTable.Name",
-      tooltip = "i18n::HopGuiDimensionalModelGraph.Context.DeleteTable.Tooltip",
-      image = "ui/images/delete.svg",
-      category = "Dimensional",
-      categoryOrder = "4")
   public void deleteTable(HopGuiDimensionalTableContext context) {
     IDmTable table = context.getTable();
     HopGuiDimensionalModelGraph graph = context.getDimensionalGraph();
@@ -1545,15 +1334,6 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     graph.redraw();
   }
 
-  @GuiContextAction(
-      id = "dm-graph-show-update-pipeline",
-      parentId = HopGuiDimensionalTableContext.CONTEXT_ID,
-      type = GuiActionType.Info,
-      name = "i18n::HopGuiDimensionalModelGraph.Context.ShowUpdatePipeline.Name",
-      tooltip = "i18n::HopGuiDimensionalModelGraph.Context.ShowUpdatePipeline.Tooltip",
-      image = "ui/images/debug.svg",
-      category = "Dimensional",
-      categoryOrder = "5")
   public void showUpdatePipelineAction(HopGuiDimensionalTableContext context) {
     IDmTable table = context.getTable();
     HopGuiDimensionalModelGraph graph = context.getDimensionalGraph();
@@ -1562,15 +1342,6 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "dm-graph-preview-masked-rows",
-      parentId = HopGuiDimensionalTableContext.CONTEXT_ID,
-      type = GuiActionType.Info,
-      name = "i18n::HopGuiDimensionalModelGraph.Context.PreviewMaskedRows.Name",
-      tooltip = "i18n::HopGuiDimensionalModelGraph.Context.PreviewMaskedRows.Tooltip",
-      image = "ui/images/preview.svg",
-      category = "Dimensional",
-      categoryOrder = "7")
   public void previewMaskedRowsAction(HopGuiDimensionalTableContext context) {
     IDmTable table = context.getTable();
     DimensionalModel dmModel = context.getModel();
@@ -1620,15 +1391,6 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "dm-graph-preview-target-table",
-      parentId = HopGuiDimensionalTableContext.CONTEXT_ID,
-      type = GuiActionType.Info,
-      name = "i18n::HopGuiDimensionalModelGraph.Context.PreviewTargetTable.Name",
-      tooltip = "i18n::HopGuiDimensionalModelGraph.Context.PreviewTargetTable.Tooltip",
-      image = "ui/images/preview.svg",
-      category = "Dimensional",
-      categoryOrder = "7")
   public void previewTargetTableAction(HopGuiDimensionalTableContext context) {
     IDmTable table = context.getTable();
     DimensionalModel dmModel = context.getModel();
@@ -1639,15 +1401,6 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
         hopGui.getShell(), getVariables(), hopGui.getMetadataProvider(), dmModel, table);
   }
 
-  @GuiContextAction(
-      id = "dm-graph-preview-target-layout",
-      parentId = HopGuiDimensionalTableContext.CONTEXT_ID,
-      type = GuiActionType.Info,
-      name = "i18n::HopGuiDimensionalModelGraph.Context.PreviewTargetLayout.Name",
-      tooltip = "i18n::HopGuiDimensionalModelGraph.Context.PreviewTargetLayout.Tooltip",
-      image = "ui/images/preview.svg",
-      category = "Dimensional",
-      categoryOrder = "8")
   public void previewTargetLayoutAction(HopGuiDimensionalTableContext context) {
     IDmTable table = context.getTable();
     DimensionalModel dmModel = context.getModel();

@@ -26,7 +26,6 @@ import lombok.Setter;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.ICheckResult;
 import org.apache.hop.core.Props;
-import org.apache.hop.core.action.GuiContextAction;
 import org.apache.hop.core.database.DatabaseMeta;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.AreaOwner;
@@ -35,7 +34,6 @@ import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.gui.SnapAllignDistribute;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.IGuiRefresher;
-import org.apache.hop.core.gui.plugin.action.GuiActionType;
 import org.apache.hop.core.gui.plugin.key.GuiKeyboardShortcut;
 import org.apache.hop.core.gui.plugin.key.GuiOsxKeyboardShortcut;
 import org.apache.hop.core.gui.plugin.toolbar.GuiToolbarElement;
@@ -1500,15 +1498,6 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
     redraw();
   }
 
-  @GuiContextAction(
-      id = "bv-graph-add-hub-reference",
-      parentId = HopGuiBusinessVaultContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiBusinessVaultGraph.Context.AddHubReference.Name",
-      tooltip = "i18n::HopGuiBusinessVaultGraph.Context.AddHubReference.Tooltip",
-      image = "datavault-hub.svg",
-      category = "Data Vault",
-      categoryOrder = "1")
   public void addHubReference(HopGuiBusinessVaultContext context) {
     HopGuiBusinessVaultGraph graph = context.getBusinessVaultGraph();
     if (graph == null || context.getModel() == null) {
@@ -1518,15 +1507,6 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
     graph.addDvReferenceAtClick(DvTableType.HUB, context.getClick());
   }
 
-  @GuiContextAction(
-      id = "bv-graph-add-satellite-reference",
-      parentId = HopGuiBusinessVaultContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiBusinessVaultGraph.Context.AddSatelliteReference.Name",
-      tooltip = "i18n::HopGuiBusinessVaultGraph.Context.AddSatelliteReference.Tooltip",
-      image = "datavault-satellite.svg",
-      category = "Data Vault",
-      categoryOrder = "2")
   public void addSatelliteReference(HopGuiBusinessVaultContext context) {
     HopGuiBusinessVaultGraph graph = context.getBusinessVaultGraph();
     if (graph == null || context.getModel() == null) {
@@ -1536,15 +1516,6 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
     graph.addDvReferenceAtClick(DvTableType.SATELLITE, context.getClick());
   }
 
-  @GuiContextAction(
-      id = "bv-graph-add-link-reference",
-      parentId = HopGuiBusinessVaultContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiBusinessVaultGraph.Context.AddLinkReference.Name",
-      tooltip = "i18n::HopGuiBusinessVaultGraph.Context.AddLinkReference.Tooltip",
-      image = "datavault-link.svg",
-      category = "Data Vault",
-      categoryOrder = "3")
   public void addLinkReference(HopGuiBusinessVaultContext context) {
     HopGuiBusinessVaultGraph graph = context.getBusinessVaultGraph();
     if (graph == null || context.getModel() == null) {
@@ -1554,15 +1525,6 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
     graph.addDvReferenceAtClick(DvTableType.LINK, context.getClick());
   }
 
-  @GuiContextAction(
-      id = "bv-graph-delete-dv-reference",
-      parentId = HopGuiBusinessVaultDvReferenceContext.CONTEXT_ID,
-      type = GuiActionType.Delete,
-      name = "i18n::HopGuiBusinessVaultGraph.Context.DeleteDvReference.Name",
-      tooltip = "i18n::HopGuiBusinessVaultGraph.Context.DeleteDvReference.Tooltip",
-      image = "ui/images/delete.svg",
-      category = "Data Vault",
-      categoryOrder = "1")
   public void deleteDvReference(HopGuiBusinessVaultDvReferenceContext context) {
     BvDvTableReference reference = context.getReference();
     HopGuiBusinessVaultGraph graph = context.getBusinessVaultGraph();
@@ -1582,15 +1544,6 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
     graph.redraw();
   }
 
-  @GuiContextAction(
-      id = "bv-graph-add-bv-reference",
-      parentId = HopGuiBusinessVaultContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiBusinessVaultGraph.Context.AddBvReference.Name",
-      tooltip = "i18n::HopGuiBusinessVaultGraph.Context.AddBvReference.Tooltip",
-      image = "business-vault-model.svg",
-      category = "Business Vault",
-      categoryOrder = "0")
   public void addBvTableReference(HopGuiBusinessVaultContext context) {
     HopGuiBusinessVaultGraph graph = context.getBusinessVaultGraph();
     if (graph == null || context.getModel() == null) {
@@ -1600,15 +1553,6 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
     graph.addBvReferenceAtClick(context.getClick());
   }
 
-  @GuiContextAction(
-      id = "bv-graph-delete-bv-reference",
-      parentId = HopGuiBusinessVaultBvReferenceContext.CONTEXT_ID,
-      type = GuiActionType.Delete,
-      name = "i18n::HopGuiBusinessVaultGraph.Context.DeleteBvReference.Name",
-      tooltip = "i18n::HopGuiBusinessVaultGraph.Context.DeleteBvReference.Tooltip",
-      image = "ui/images/delete.svg",
-      category = "Business Vault",
-      categoryOrder = "1")
   public void deleteBvReference(HopGuiBusinessVaultBvReferenceContext context) {
     BvBvTableReference reference = context.getReference();
     HopGuiBusinessVaultGraph graph = context.getBusinessVaultGraph();
@@ -1630,15 +1574,6 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
     graph.redraw();
   }
 
-  @GuiContextAction(
-      id = "bv-graph-add-scd2",
-      parentId = HopGuiBusinessVaultContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiBusinessVaultGraph.Context.AddScd2.Name",
-      tooltip = "i18n::HopGuiBusinessVaultGraph.Context.AddScd2.Tooltip",
-      image = "business-vault-model.svg",
-      category = "Business Vault",
-      categoryOrder = "1")
   public void addScd2Table(HopGuiBusinessVaultContext context) {
     HopGuiBusinessVaultGraph graph = context.getBusinessVaultGraph();
     if (graph == null || context.getModel() == null) {
@@ -1650,15 +1585,6 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
     graph.redraw();
   }
 
-  @GuiContextAction(
-      id = "bv-graph-add-pit",
-      parentId = HopGuiBusinessVaultContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiBusinessVaultGraph.Context.AddPit.Name",
-      tooltip = "i18n::HopGuiBusinessVaultGraph.Context.AddPit.Tooltip",
-      image = "business-vault-model.svg",
-      category = "Business Vault",
-      categoryOrder = "2")
   public void addPitTable(HopGuiBusinessVaultContext context) {
     HopGuiBusinessVaultGraph graph = context.getBusinessVaultGraph();
     if (graph == null || context.getModel() == null) {
@@ -1670,15 +1596,6 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
     graph.redraw();
   }
 
-  @GuiContextAction(
-      id = "bv-graph-add-business-table",
-      parentId = HopGuiBusinessVaultContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiBusinessVaultGraph.Context.AddBusinessTable.Name",
-      tooltip = "i18n::HopGuiBusinessVaultGraph.Context.AddBusinessTable.Tooltip",
-      image = "business-vault-model.svg",
-      category = "Business Vault",
-      categoryOrder = "3")
   public void addBusinessTable(HopGuiBusinessVaultContext context) {
     HopGuiBusinessVaultGraph graph = context.getBusinessVaultGraph();
     if (graph == null || context.getModel() == null) {
@@ -1690,15 +1607,6 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
     graph.redraw();
   }
 
-  @GuiContextAction(
-      id = "bv-graph-add-source-query",
-      parentId = HopGuiBusinessVaultContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiBusinessVaultGraph.Context.AddSourceQuery.Name",
-      tooltip = "i18n::HopGuiBusinessVaultGraph.Context.AddSourceQuery.Tooltip",
-      image = "business-vault-model.svg",
-      category = "Business Vault",
-      categoryOrder = "3")
   public void addSourceQuery(HopGuiBusinessVaultContext context) {
     HopGuiBusinessVaultGraph graph = context.getBusinessVaultGraph();
     if (graph == null || context.getModel() == null) {
@@ -1710,15 +1618,6 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
     graph.redraw();
   }
 
-  @GuiContextAction(
-      id = "bv-graph-add-identity-map",
-      parentId = HopGuiBusinessVaultContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiBusinessVaultGraph.Context.AddIdentityMap.Name",
-      tooltip = "i18n::HopGuiBusinessVaultGraph.Context.AddIdentityMap.Tooltip",
-      image = "business-vault-model.svg",
-      category = "Business Vault",
-      categoryOrder = "3")
   public void addIdentityMap(HopGuiBusinessVaultContext context) {
     HopGuiBusinessVaultGraph graph = context.getBusinessVaultGraph();
     if (graph == null || context.getModel() == null) {
@@ -1730,15 +1629,6 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
     graph.redraw();
   }
 
-  @GuiContextAction(
-      id = "bv-graph-add-source-calendar",
-      parentId = HopGuiBusinessVaultContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiBusinessVaultGraph.Context.AddSourceCalendar.Name",
-      tooltip = "i18n::HopGuiBusinessVaultGraph.Context.AddSourceCalendar.Tooltip",
-      image = "business-vault-model.svg",
-      category = "Business Vault",
-      categoryOrder = "3")
   public void addSourceCalendar(HopGuiBusinessVaultContext context) {
     HopGuiBusinessVaultGraph graph = context.getBusinessVaultGraph();
     if (graph == null || context.getModel() == null) {
@@ -1750,15 +1640,6 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
     graph.redraw();
   }
 
-  @GuiContextAction(
-      id = "bv-graph-add-bridge",
-      parentId = HopGuiBusinessVaultContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiBusinessVaultGraph.Context.AddBridge.Name",
-      tooltip = "i18n::HopGuiBusinessVaultGraph.Context.AddBridge.Tooltip",
-      image = "business-vault-model.svg",
-      category = "Business Vault",
-      categoryOrder = "3")
   public void addBridgeTable(HopGuiBusinessVaultContext context) {
     HopGuiBusinessVaultGraph graph = context.getBusinessVaultGraph();
     if (graph == null || context.getModel() == null) {
@@ -1770,15 +1651,6 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
     graph.redraw();
   }
 
-  @GuiContextAction(
-      id = "bv-graph-import-dbt",
-      parentId = HopGuiBusinessVaultContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiBusinessVaultGraph.Context.ImportDbt.Name",
-      tooltip = "i18n::HopGuiBusinessVaultGraph.Context.ImportDbt.Tooltip",
-      image = "jinja-macro-library.svg",
-      category = "Business Vault",
-      categoryOrder = "5")
   public void importDbtModelsContext(HopGuiBusinessVaultContext context) {
     HopGuiBusinessVaultGraph graph = context.getBusinessVaultGraph();
     if (graph == null) {
@@ -1787,15 +1659,6 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
     HopGuiDbtImportSupport.importDbtProject(hopGui, graph);
   }
 
-  @GuiContextAction(
-      id = "bv-graph-add-note",
-      parentId = HopGuiBusinessVaultContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiBusinessVaultGraph.Context.AddNote.Name",
-      tooltip = "i18n::HopGuiBusinessVaultGraph.Context.AddNote.Tooltip",
-      image = "ui/images/note.svg",
-      category = "Business Vault",
-      categoryOrder = "4")
   public void addNote(HopGuiBusinessVaultContext context) {
     Point click = context.getClick();
     HopGuiBusinessVaultGraph graph = context.getBusinessVaultGraph();
@@ -1814,15 +1677,6 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
     graph.setChanged();
   }
 
-  @GuiContextAction(
-      id = "bv-graph-edit-note",
-      parentId = HopGuiBusinessVaultNoteContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiBusinessVaultGraph.EditNote.Name",
-      tooltip = "i18n::HopGuiBusinessVaultGraph.EditNote.Tooltip",
-      image = "ui/images/edit.svg",
-      category = "Business Vault",
-      categoryOrder = "1")
   public void editNoteAction(HopGuiBusinessVaultNoteContext context) {
     DvNote note = context.getNote();
     HopGuiBusinessVaultGraph graph = context.getBusinessVaultGraph();
@@ -1831,15 +1685,6 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "bv-graph-delete-note",
-      parentId = HopGuiBusinessVaultNoteContext.CONTEXT_ID,
-      type = GuiActionType.Delete,
-      name = "i18n::HopGuiBusinessVaultGraph.DeleteNote.Name",
-      tooltip = "i18n::HopGuiBusinessVaultGraph.DeleteNote.Tooltip",
-      image = "ui/images/delete.svg",
-      category = "Business Vault",
-      categoryOrder = "2")
   public void deleteNoteAction(HopGuiBusinessVaultNoteContext context) {
     DvNote note = context.getNote();
     HopGuiBusinessVaultGraph graph = context.getBusinessVaultGraph();
@@ -1853,15 +1698,6 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "bv-graph-ai-help",
-      parentId = HopGuiBusinessVaultContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiBusinessVaultGraph.AiHelp.Name",
-      tooltip = "i18n::HopGuiBusinessVaultGraph.AiHelp.Tooltip",
-      image = "ai-provider.svg",
-      category = "Help",
-      categoryOrder = "10")
   public void openAiAdvisorContext(HopGuiBusinessVaultContext context) {
     HopGuiBusinessVaultGraph graph = context.getBusinessVaultGraph();
     if (graph != null) {
@@ -1869,15 +1705,6 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "bv-graph-table-ai-help",
-      parentId = HopGuiBusinessVaultTableContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiBusinessVaultGraph.AiHelp.Name",
-      tooltip = "i18n::HopGuiBusinessVaultGraph.AiHelp.Tooltip",
-      image = "ai-provider.svg",
-      category = "Help",
-      categoryOrder = "10")
   public void openAiAdvisorTableContext(HopGuiBusinessVaultTableContext context) {
     HopGuiBusinessVaultGraph graph = context.getBusinessVaultGraph();
     if (graph != null) {
@@ -1886,15 +1713,6 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "bv-graph-paste-clipboard",
-      parentId = HopGuiBusinessVaultContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiBusinessVaultGraph.PasteFromClipboard.Name",
-      tooltip = "i18n::HopGuiBusinessVaultGraph.PasteFromClipboard.Tooltip",
-      image = "ui/images/paste.svg",
-      category = "Business Vault",
-      categoryOrder = "5")
   public void pasteFromClipboard(HopGuiBusinessVaultContext context) {
     HopGuiBusinessVaultGraph graph = context.getBusinessVaultGraph();
     if (graph != null) {
@@ -1902,15 +1720,6 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "bv-graph-paste-clipboard-table",
-      parentId = HopGuiBusinessVaultTableContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiBusinessVaultGraph.PasteFromClipboard.Name",
-      tooltip = "i18n::HopGuiBusinessVaultGraph.PasteFromClipboard.Tooltip",
-      image = "ui/images/paste.svg",
-      category = "Business Vault",
-      categoryOrder = "5")
   public void pasteFromClipboardOnTable(HopGuiBusinessVaultTableContext context) {
     HopGuiBusinessVaultGraph graph = context.getBusinessVaultGraph();
     if (graph != null) {
@@ -1918,15 +1727,6 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "bv-graph-paste-clipboard-note",
-      parentId = HopGuiBusinessVaultNoteContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiBusinessVaultGraph.PasteFromClipboard.Name",
-      tooltip = "i18n::HopGuiBusinessVaultGraph.PasteFromClipboard.Tooltip",
-      image = "ui/images/paste.svg",
-      category = "Business Vault",
-      categoryOrder = "3")
   public void pasteFromClipboardOnNote(HopGuiBusinessVaultNoteContext context) {
     HopGuiBusinessVaultGraph graph = context.getBusinessVaultGraph();
     if (graph != null) {
@@ -1934,15 +1734,6 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "bv-graph-copy-update-action",
-      parentId = HopGuiBusinessVaultContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiBusinessVaultGraph.Context.CopyUpdateAction.Name",
-      tooltip = "i18n::HopGuiBusinessVaultGraph.Context.CopyUpdateAction.Tooltip",
-      image = "ui/images/copy.svg",
-      category = "Workflow",
-      categoryOrder = "9")
   public void copyUpdateActionToClipboard(HopGuiBusinessVaultContext context) {
     HopGuiBusinessVaultGraph graph = context.getBusinessVaultGraph();
     if (graph != null) {
@@ -1950,15 +1741,6 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "bv-graph-edit-table",
-      parentId = HopGuiBusinessVaultTableContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiBusinessVaultGraph.Context.EditTable.Name",
-      tooltip = "i18n::HopGuiBusinessVaultGraph.Context.EditTable.Tooltip",
-      image = "ui/images/edit.svg",
-      category = "Business Vault",
-      categoryOrder = "1")
   public void editBvTableAction(HopGuiBusinessVaultTableContext context) {
     HopGuiBusinessVaultGraph graph = context.getBusinessVaultGraph();
     if (graph != null) {
@@ -1966,15 +1748,6 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "bv-graph-delete-table",
-      parentId = HopGuiBusinessVaultTableContext.CONTEXT_ID,
-      type = GuiActionType.Delete,
-      name = "i18n::HopGuiBusinessVaultGraph.Context.DeleteTable.Name",
-      tooltip = "i18n::HopGuiBusinessVaultGraph.Context.DeleteTable.Tooltip",
-      image = "ui/images/delete.svg",
-      category = "Business Vault",
-      categoryOrder = "2")
   public void deleteBvTable(HopGuiBusinessVaultTableContext context) {
     IBvTable table = context.getTable();
     HopGuiBusinessVaultGraph graph = context.getBusinessVaultGraph();
@@ -1988,15 +1761,6 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
     graph.redraw();
   }
 
-  @GuiContextAction(
-      id = "bv-graph-show-build-pipeline",
-      parentId = HopGuiBusinessVaultTableContext.CONTEXT_ID,
-      type = GuiActionType.Info,
-      name = "i18n::HopGuiBusinessVaultGraph.Context.ShowBuildPipeline.Name",
-      tooltip = "i18n::HopGuiBusinessVaultGraph.Context.ShowBuildPipeline.Tooltip",
-      image = "ui/images/debug.svg",
-      category = "Business Vault",
-      categoryOrder = "3")
   public void showBuildPipelineAction(HopGuiBusinessVaultTableContext context) {
     IBvTable table = context.getTable();
     HopGuiBusinessVaultGraph graph = context.getBusinessVaultGraph();
@@ -2006,15 +1770,6 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = "bv-graph-generate-scd2-calc-unit-test",
-      parentId = HopGuiBusinessVaultTableContext.CONTEXT_ID,
-      type = GuiActionType.Create,
-      name = "i18n::HopGuiBusinessVaultGraph.Context.GenerateCalcUnitTest.Name",
-      tooltip = "i18n::HopGuiBusinessVaultGraph.Context.GenerateCalcUnitTest.Tooltip",
-      image = "ui/images/debug.svg",
-      category = "Business Vault",
-      categoryOrder = "4")
   public void generateScd2CalculationUnitTestAction(HopGuiBusinessVaultTableContext context) {
     IBvTable table = context.getTable();
     HopGuiBusinessVaultGraph graph = context.getBusinessVaultGraph();
@@ -2035,15 +1790,6 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
         hopGui, hopGui.getShell(), getVariables(), model, dataVaultModel, table);
   }
 
-  @GuiContextAction(
-      id = "bv-graph-preview-target-table",
-      parentId = HopGuiBusinessVaultTableContext.CONTEXT_ID,
-      type = GuiActionType.Info,
-      name = "i18n::HopGuiBusinessVaultGraph.Context.PreviewTargetTable.Name",
-      tooltip = "i18n::HopGuiBusinessVaultGraph.Context.PreviewTargetTable.Tooltip",
-      image = "ui/images/preview.svg",
-      category = "Business Vault",
-      categoryOrder = "5")
   public void previewTargetTableAction(HopGuiBusinessVaultTableContext context) {
     IBvTable table = context.getTable();
     BusinessVaultModel bvModel = context.getModel();
@@ -2054,15 +1800,6 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
         hopGui.getShell(), getVariables(), hopGui.getMetadataProvider(), bvModel, table);
   }
 
-  @GuiContextAction(
-      id = "bv-graph-preview-target-layout",
-      parentId = HopGuiBusinessVaultTableContext.CONTEXT_ID,
-      type = GuiActionType.Info,
-      name = "i18n::HopGuiBusinessVaultGraph.Context.PreviewTargetLayout.Name",
-      tooltip = "i18n::HopGuiBusinessVaultGraph.Context.PreviewTargetLayout.Tooltip",
-      image = "ui/images/preview.svg",
-      category = "Business Vault",
-      categoryOrder = "6")
   public void previewTargetLayoutAction(HopGuiBusinessVaultTableContext context) {
     IBvTable table = context.getTable();
     BusinessVaultModel bvModel = context.getModel();

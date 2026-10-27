@@ -24,8 +24,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.hop.core.Const;
 import org.apache.hop.core.Props;
-import org.apache.hop.core.action.GuiContextAction;
-import org.apache.hop.core.action.GuiContextActionFilter;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.core.gui.AreaOwner;
 import org.apache.hop.core.gui.DPoint;
@@ -34,7 +32,6 @@ import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.gui.SnapAllignDistribute;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.IGuiRefresher;
-import org.apache.hop.core.gui.plugin.action.GuiActionType;
 import org.apache.hop.core.gui.plugin.toolbar.GuiToolbarElement;
 import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.core.svg.HopSvgGraphics2D;
@@ -114,11 +111,11 @@ public class HopGuiExecutionMapGraph extends HopGuiModelGraphBase
   public static final String TOOLBAR_ITEM_EXPORT_FULL_SVG =
       "HopGuiExecutionMapGraph-ToolBar-10080-Export-Full-Svg";
   private static final String STATE_FOCUS_NODE_ID = "focusNodeId";
-  private static final String ACTION_ID_OPEN_ARTIFACT = "execution-map-graph-open-artifact";
-  private static final String ACTION_ID_VIEW_SNAPSHOT = "execution-map-graph-view-snapshot";
-  private static final String ACTION_ID_OPEN_IN_CATALOG = "execution-map-graph-open-in-catalog";
-  private static final String ACTION_ID_PREVIEW_DATASET = "execution-map-graph-preview-dataset";
-  private static final String ACTION_ID_VIEW_DATASET = "execution-map-graph-view-dataset";
+  static final String ACTION_ID_OPEN_ARTIFACT = "execution-map-graph-open-artifact";
+  static final String ACTION_ID_VIEW_SNAPSHOT = "execution-map-graph-view-snapshot";
+  static final String ACTION_ID_OPEN_IN_CATALOG = "execution-map-graph-open-in-catalog";
+  static final String ACTION_ID_PREVIEW_DATASET = "execution-map-graph-preview-dataset";
+  static final String ACTION_ID_VIEW_DATASET = "execution-map-graph-view-dataset";
 
   private final HopExecutionMapFileType fileType;
   private final ModelGraphSnapshotUndo<ExecutionMapDocument> snapshotUndo =
@@ -539,7 +536,6 @@ public class HopGuiExecutionMapGraph extends HopGuiModelGraphBase
     canvas.setToolTipText(tooltip);
   }
 
-  @GuiContextActionFilter(parentId = HopGuiExecutionMapNodeContext.CONTEXT_ID)
   public boolean filterNodeContextActions(
       String contextActionId, HopGuiExecutionMapNodeContext context) {
     ExecutionMapNode node = context.getNode();
@@ -563,15 +559,6 @@ public class HopGuiExecutionMapGraph extends HopGuiModelGraphBase
     return true;
   }
 
-  @GuiContextAction(
-      id = ACTION_ID_OPEN_ARTIFACT,
-      parentId = HopGuiExecutionMapNodeContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiExecutionMapGraph.Context.OpenArtifact.Name",
-      tooltip = "i18n::HopGuiExecutionMapGraph.Context.OpenArtifact.Tooltip",
-      image = "ui/images/open.svg",
-      category = "Execution map",
-      categoryOrder = "1")
   public void openArtifactFromContext(HopGuiExecutionMapNodeContext context) {
     if (context.getNode() != null) {
       ExecutionMapNavigationSupport.openNode(
@@ -579,29 +566,11 @@ public class HopGuiExecutionMapGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = ACTION_ID_VIEW_SNAPSHOT,
-      parentId = HopGuiExecutionMapNodeContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiExecutionMapGraph.Context.ViewSnapshot.Name",
-      tooltip = "i18n::HopGuiExecutionMapGraph.Context.ViewSnapshot.Tooltip",
-      image = "ui/images/view.svg",
-      category = "Execution map",
-      categoryOrder = "2")
   public void viewSnapshotFromContext(HopGuiExecutionMapNodeContext context) {
     ExecutionMapSnapshotViewer.showSnapshot(
         hopGui.getShell(), context.getDocument(), context.getNode());
   }
 
-  @GuiContextAction(
-      id = ACTION_ID_OPEN_IN_CATALOG,
-      parentId = HopGuiExecutionMapNodeContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiExecutionMapGraph.Context.OpenInCatalog.Name",
-      tooltip = "i18n::HopGuiExecutionMapGraph.Context.OpenInCatalog.Tooltip",
-      image = "data-catalog.svg",
-      category = "Execution map",
-      categoryOrder = "3")
   public void openInCatalogFromContext(HopGuiExecutionMapNodeContext context) {
     if (context.getNode() != null) {
       try {
@@ -624,15 +593,6 @@ public class HopGuiExecutionMapGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = ACTION_ID_PREVIEW_DATASET,
-      parentId = HopGuiExecutionMapNodeContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiExecutionMapGraph.Context.PreviewDataset.Name",
-      tooltip = "i18n::HopGuiExecutionMapGraph.Context.PreviewDataset.Tooltip",
-      image = "ui/images/preview.svg",
-      category = "Execution map",
-      categoryOrder = "4")
   public void previewDatasetFromContext(HopGuiExecutionMapNodeContext context) {
     if (context.getNode() != null) {
       try {
@@ -655,28 +615,10 @@ public class HopGuiExecutionMapGraph extends HopGuiModelGraphBase
     }
   }
 
-  @GuiContextAction(
-      id = ACTION_ID_VIEW_DATASET,
-      parentId = HopGuiExecutionMapNodeContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiExecutionMapGraph.Context.ViewDataset.Name",
-      tooltip = "i18n::HopGuiExecutionMapGraph.Context.ViewDataset.Tooltip",
-      image = "ui/images/view.svg",
-      category = "Execution map",
-      categoryOrder = "5")
   public void viewDatasetFromContext(HopGuiExecutionMapNodeContext context) {
     ExecutionMapDatasetDetailsViewer.showDetails(hopGui.getShell(), context.getNode());
   }
 
-  @GuiContextAction(
-      id = "execution-map-ai-help",
-      parentId = HopGuiExecutionMapNodeContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
-      name = "i18n::HopGuiExecutionMapGraph.AiHelp.Name",
-      tooltip = "i18n::HopGuiExecutionMapGraph.AiHelp.Tooltip",
-      image = "ai-provider.svg",
-      category = "Help",
-      categoryOrder = "1")
   public void openAiAdvisorNodeContext(HopGuiExecutionMapNodeContext context) {
     HopGuiExecutionMapGraph graph = context != null ? context.getExecutionMapGraph() : this;
     if (graph != null) {

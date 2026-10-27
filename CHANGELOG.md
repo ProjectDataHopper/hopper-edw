@@ -4,6 +4,10 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## [Unreleased]
 
+### Hop Web modeler context menus (issue #239)
+
+- Left-click context menus on source, Data Vault, Business Vault, dimensional, and execution-map canvases open again in Hop Web. Those actions are registered on a plain plugin with a no-arg constructor, the same pattern as lineage view, instead of on the graph widget.
+
 ### Hop Web documentation
 
 - Component explorer screenshots load through the documentation handler. Paths the page builds in script (`../images/…`) are rewritten to the same handler URLs as ordinary image links, so Hop Web no longer requests them from `/images/`.
