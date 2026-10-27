@@ -22,6 +22,7 @@ import org.apache.hop.core.extension.IExtensionPoint;
 import org.apache.hop.core.logging.ILogChannel;
 import org.apache.hop.core.plugins.PluginRegistry;
 import org.apache.hop.core.variables.IVariables;
+import org.hopper.edw.datavault.diagram.exporter.EdwDiagramExporters;
 
 @ExtensionPoint(
     id = "RegisterEdwDiagramSubjectLoadersExtensionPoint",
@@ -40,5 +41,7 @@ public class RegisterEdwDiagramSubjectLoadersExtensionPoint
     service.registerSubjectLoader(new DimensionalDiagramSubjectLoader());
     service.registerSubjectLoader(new ExecutionMapDiagramSubjectLoader());
     service.registerSubjectLoader(new LineageViewDiagramSubjectLoader());
+    // Subjects loaded here are this loader's classes. Registry exporters may not be.
+    EdwDiagramExporters.registerForThisClassLoader();
   }
 }

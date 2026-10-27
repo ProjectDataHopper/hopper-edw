@@ -65,6 +65,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
+import org.hopper.edw.datavault.diagram.exporter.EdwDiagramExporters;
 import org.hopper.edw.datavault.hopgui.ModelCoachPanelAuditSupport;
 import org.hopper.edw.datavault.hopgui.ModelLoadDurationPaneAuditSupport;
 import org.hopper.edw.datavault.hopgui.coaching.CoachingCanvasDropSupport;
@@ -140,6 +141,8 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph
   protected HopGuiModelGraphBase(HopGui hopGui, Composite parent, ExplorerPerspective perspective) {
     super(hopGui, parent, SWT.NO_BACKGROUND);
     this.perspective = perspective;
+    // Same loader as this graph and its model. Plugin-registry exporters can be on another loader.
+    EdwDiagramExporters.registerForThisClassLoader();
   }
 
   /**
