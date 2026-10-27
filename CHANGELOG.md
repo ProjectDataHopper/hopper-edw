@@ -11,6 +11,7 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 ### Hop Web documentation
 
 - Component explorer screenshots load through the documentation handler. Paths the page builds in script (`../images/…`) are rewritten to the same handler URLs as ordinary image links, so Hop Web no longer requests them from `/images/`.
+- PlantUML sources linked from generated documentation (`.puml`) are served as plain text. The documentation handler allow-list includes them. The explorer document view serves them through Apache Hop's explorer-file servlet, which allows the same extension.
 
 ### Configure EDW setup prompt (issue #238)
 

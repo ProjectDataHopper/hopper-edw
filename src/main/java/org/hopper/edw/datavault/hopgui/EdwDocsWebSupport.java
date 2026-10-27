@@ -68,8 +68,8 @@ public final class EdwDocsWebSupport {
       Pattern.compile("(['\"])((?:\\./|\\.\\./)[A-Za-z0-9._~%+/-]*)\\1");
   private static final Set<String> ALLOWED_EXTENSIONS =
       Set.of(
-          "html", "htm", "css", "js", "png", "jpg", "jpeg", "gif", "svg", "ico", "webp", "woff",
-          "woff2", "ttf", "eot", "map", "txt", "md", "json", "xml");
+          "html", "htm", "css", "js", "png", "jpg", "jpeg", "gif", "svg", "puml", "ico", "webp",
+          "woff", "woff2", "ttf", "eot", "map", "txt", "md", "json", "xml");
 
   private static final Object LOCK = new Object();
   private static volatile boolean handlerRegistered;
@@ -707,7 +707,7 @@ public final class EdwDocsWebSupport {
     if (name.endsWith(".xml")) {
       return "application/xml; charset=UTF-8";
     }
-    if (name.endsWith(".md") || name.endsWith(".txt")) {
+    if (name.endsWith(".md") || name.endsWith(".txt") || name.endsWith(".puml")) {
       return "text/plain; charset=UTF-8";
     }
     return "application/octet-stream";

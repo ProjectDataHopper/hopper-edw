@@ -41,6 +41,9 @@ class EdwDocsWebSupportTest {
     assertEquals(
         docs.resolve("images").resolve("edw-logo.svg").toAbsolutePath().normalize(),
         EdwDocsWebSupport.resolveSafe(docs, "images/edw-logo.svg"));
+    assertEquals(
+        docs.resolve("diagrams").resolve("d1-logical-layers.puml").toAbsolutePath().normalize(),
+        EdwDocsWebSupport.resolveSafe(docs, "diagrams/d1-logical-layers.puml"));
     assertNull(EdwDocsWebSupport.resolveSafe(docs, "../secret.html"));
     assertNull(EdwDocsWebSupport.resolveSafe(docs, "help/../../secret.html"));
     assertNull(EdwDocsWebSupport.resolveSafe(docs, "/etc/passwd"));
@@ -98,6 +101,9 @@ class EdwDocsWebSupportTest {
   void contentTypeForHtmlAndSvg() {
     assertEquals("text/html; charset=UTF-8", EdwDocsWebSupport.contentType("index.html"));
     assertEquals("image/svg+xml", EdwDocsWebSupport.contentType("edw-logo.svg"));
+    assertEquals(
+        "text/plain; charset=UTF-8",
+        EdwDocsWebSupport.contentType("d1-logical-layers.puml"));
   }
 
   @Test
