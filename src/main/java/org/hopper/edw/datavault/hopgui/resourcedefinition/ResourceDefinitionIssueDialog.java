@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.Text;
 import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
 import org.hopper.edw.catalog.model.RecordDefinition;
 import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
+import org.hopper.edw.datavault.hopgui.security.EdwWebAuthorizationUi;
 import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 import org.hopper.edw.datavault.resourcedefinition.RemediationProposalApplySupport;
 import org.hopper.edw.datavault.resourcedefinition.RemediationProposalApplySupport.ApplyResult;
@@ -302,6 +303,9 @@ public final class ResourceDefinitionIssueDialog {
   }
 
   private void applySelectedProposal() {
+    if (!EdwWebAuthorizationUi.allowModelEdit()) {
+      return;
+    }
     int selectionIndex = wProposals.getTable().getSelectionIndex();
     if (selectionIndex < 0 || selectionIndex >= proposals.size()) {
       return;

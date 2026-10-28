@@ -894,6 +894,9 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
       toolTip = "i18n::HopGuiLineageViewGraph.Toolbar.Settings",
       image = "ui/images/settings.svg")
   public void toolbarSettings() {
+    if (!allowModelEdit()) {
+      return;
+    }
     byte[] beforeChange = captureUndoSnapshot();
     LineageViewSettingsDialog dialog =
         new LineageViewSettingsDialog(hopGui.getShell(), hopGui, document, false);
@@ -1347,6 +1350,9 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
 
   @Override
   public void save() throws HopException {
+    if (!allowSaveFiles()) {
+      return;
+    }
     if (fileType != null) {
       fileType.saveFile(hopGui, this);
     }
@@ -1354,6 +1360,9 @@ public class HopGuiLineageViewGraph extends HopGuiModelGraphBase
 
   @Override
   public void saveAs(String filename) throws HopException {
+    if (!allowSaveFiles()) {
+      return;
+    }
     if (fileType != null) {
       fileType.saveFileAs(hopGui, this, filename);
     }

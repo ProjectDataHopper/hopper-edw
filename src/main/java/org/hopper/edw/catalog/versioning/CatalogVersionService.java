@@ -44,6 +44,7 @@ import org.hopper.edw.datavault.resourcedefinition.ResourceDefinitionGroupResolv
 import org.hopper.edw.datavault.resourcedefinition.SourceUsage;
 import org.hopper.edw.datavault.resourcedefinition.SourceUsageIndexBuilder;
 import org.hopper.edw.datavault.resourcedefinition.ValidationModels;
+import org.hopper.edw.security.EdwWebAuthorization;
 
 /**
  * Creates and loads semantic catalog version tags for file-based data catalogs. Snapshots freeze
@@ -78,6 +79,7 @@ public final class CatalogVersionService {
       IVariables variables,
       IHopMetadataProvider metadataProvider)
       throws HopException {
+    EdwWebAuthorization.requireCatalogEdit();
     if (group == null) {
       throw new HopException(
           BaseMessages.getString(PKG, "CatalogVersionService.Error.MissingGroup"));

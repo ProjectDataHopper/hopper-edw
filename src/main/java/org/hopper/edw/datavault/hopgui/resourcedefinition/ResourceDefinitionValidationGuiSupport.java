@@ -25,6 +25,8 @@ import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.eclipse.swt.widgets.Shell;
 import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
+import org.hopper.edw.datavault.hopgui.security.EdwWebAuthorizationUi;
+import org.hopper.edw.security.EdwWebAuthorization;
 import org.hopper.edw.datavault.resourcedefinition.SchemaCompareMode;
 import org.hopper.edw.datavault.resourcedefinition.SchemaImpactSimulationRequest;
 import org.hopper.edw.datavault.resourcedefinition.SchemaImpactSimulationResult;
@@ -42,6 +44,9 @@ public final class ResourceDefinitionValidationGuiSupport {
 
   public static ValidationReport validateAndShowResults(
       HopGui hopGui, ResourceDefinitionGroupMeta group) {
+    if (!EdwWebAuthorizationUi.allowCatalogEdit()) {
+      return null;
+    }
     if (hopGui == null || group == null) {
       return null;
     }
@@ -69,6 +74,9 @@ public final class ResourceDefinitionValidationGuiSupport {
   public static ValidationReport validateAndShowResults(
       HopGui hopGui, ResourceDefinitionGroupMeta group, ValidationOptions options)
       throws HopException {
+    if (!EdwWebAuthorizationUi.allowCatalogEdit()) {
+      return null;
+    }
     if (hopGui == null || group == null || options == null) {
       return null;
     }
@@ -143,6 +151,9 @@ public final class ResourceDefinitionValidationGuiSupport {
       ValidationOptions options, SchemaImpactSimulationResult simulation, IVariables variables)
       throws HopException {
     if (options == null || !options.writeReport() || Utils.isEmpty(options.reportOutputPath())) {
+      return;
+    }
+    if (!EdwWebAuthorization.canSaveFiles()) {
       return;
     }
     List<String> written =

@@ -34,6 +34,7 @@ import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.i18n.BaseMessages;
 import org.hopper.edw.datavault.catalog.DvSourceCatalogService;
+import org.hopper.edw.security.EdwWebAuthorization;
 import org.hopper.edw.datavault.hopgui.ai.EdwAiAdvisorGraphSupport;
 import org.hopper.edw.datavault.hopgui.ai.EdwAiBoundModel;
 import org.hopper.edw.datavault.hopgui.ai.EdwAiBoundModel.CatalogCoachSource;
@@ -214,6 +215,9 @@ public class DataVaultAiAdvisor implements IAiAdvisor {
   @Override
   public void applyProposals(AiAdvisorRequest request, List<AiProposal> selected)
       throws HopException {
+    if (!EdwWebAuthorization.canEditModels()) {
+      throw new HopException(EdwWebAuthorization.MODEL_EDIT_DENIED);
+    }
     DataVaultModel model = modelFor(request);
     if (model == null) {
       throw new HopException(EdwAiBoundModel.unbound("Data Vault model", request));

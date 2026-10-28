@@ -19,6 +19,8 @@ import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.menu.GuiMenuElement;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
+import org.apache.hop.core.security.Permission;
+import org.apache.hop.ui.core.security.HopSecurityUi;
 import org.apache.hop.ui.hopgui.HopGui;
 
 /** Tools menu entry to (re)open the EDW project-setup dialog. */
@@ -51,6 +53,9 @@ public class EdwSetupGuiPlugin {
       image = "datavault-configuration.svg",
       separator = true)
   public void menuToolsEdwSetup() {
+    if (!HopSecurityUi.check(Permission.METADATA_WRITE)) {
+      return;
+    }
     HopGui hopGui = HopGui.getInstance();
     try {
       StandardProjectElementsOfferSupport.openFromMenu(hopGui);

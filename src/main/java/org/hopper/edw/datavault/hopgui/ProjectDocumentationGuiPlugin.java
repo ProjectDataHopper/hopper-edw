@@ -34,6 +34,7 @@ import org.hopper.edw.datavault.documentation.ProjectDocumentationOptions;
 import org.hopper.edw.datavault.documentation.ProjectDocumentationResult;
 import org.hopper.edw.datavault.documentation.ProjectDocumentationService;
 import org.hopper.edw.datavault.hopgui.file.projectdoc.ProjectDocumentationExplorerSupport;
+import org.hopper.edw.datavault.hopgui.security.EdwWebAuthorizationUi;
 import org.hopper.edw.datavault.workflow.actions.generatedocumentation.ActionGenerateProjectDocumentation;
 import org.hopper.edw.datavault.workflow.actions.generatedocumentation.ActionGenerateProjectDocumentationDialog;
 
@@ -108,6 +109,9 @@ public class ProjectDocumentationGuiPlugin {
       parentId = HopGui.ID_MAIN_MENU_TOOLS_PARENT_ID,
       image = "edw-logo.svg")
   public void menuToolsGenerateProjectDocumentation() {
+    if (!EdwWebAuthorizationUi.allowCreateFiles()) {
+      return;
+    }
     HopGui hopGui = HopGui.getInstance();
     try {
       ActionGenerateProjectDocumentation action = new ActionGenerateProjectDocumentation();

@@ -599,7 +599,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       type = GuiToolbarElementType.BUTTON,
       image = "source-model.svg")
   public void editModelProperties() {
-    if (model == null) {
+    if (model == null || !allowModelEdit()) {
       return;
     }
     byte[] beforeChange = captureUndoSnapshot();
@@ -620,7 +620,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       type = GuiToolbarElementType.BUTTON,
       image = "ui/images/schema.svg")
   public void importSchema() {
-    if (model == null) {
+    if (model == null || !allowModelEdit()) {
       return;
     }
     byte[] beforeChange = captureUndoSnapshot();
@@ -641,6 +641,9 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       type = GuiToolbarElementType.BUTTON,
       image = "source-model.svg")
   public void addMaskingSource() {
+    if (!allowModelEdit()) {
+      return;
+    }
     addMaskingAt(new Point(50, 50));
   }
 
@@ -651,6 +654,9 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       type = GuiToolbarElementType.BUTTON,
       image = "ui/images/publish.svg")
   public void pushToCatalogFromToolbar() {
+    if (!allowCatalogEdit()) {
+      return;
+    }
     pushSelectedSourcesToCatalog();
   }
 
@@ -661,6 +667,9 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
       type = GuiToolbarElementType.BUTTON,
       image = "datavault-model.svg")
   public void generateDataVaultFromToolbar() {
+    if (!allowModelEdit()) {
+      return;
+    }
     org.hopper.edw.datavault.hopgui.tovault.SourceToVaultGenerationSupport.generateFromSourceModel(
         hopGui, this);
   }
@@ -1124,6 +1133,9 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
 
   @Override
   public void save() throws HopException {
+    if (!allowSaveFiles()) {
+      return;
+    }
     if (fileType != null) {
       fileType.saveFile(hopGui, this);
     }
@@ -1131,6 +1143,9 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
 
   @Override
   public void saveAs(String filename) throws HopException {
+    if (!allowSaveFiles()) {
+      return;
+    }
     if (fileType != null) {
       fileType.saveFileAs(hopGui, this, filename);
     }
@@ -1720,6 +1735,9 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
 
   @Override
   protected boolean nudgeSelectedElements(int dx, int dy) {
+    if (!canEditGraph()) {
+      return false;
+    }
     if (getSelectedTables().isEmpty()
         && getSelectedQueries().isEmpty()
         && getSelectedJsonSources().isEmpty()
@@ -1880,7 +1898,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
   }
 
   private void addTableAt(Point location) {
-    if (model == null) {
+    if (model == null || !allowModelEdit()) {
       return;
     }
     byte[] beforeChange = captureUndoSnapshot();
@@ -1905,7 +1923,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
   }
 
   private void editTable(SourceTable table) {
-    if (table == null) {
+    if (table == null || !allowModelEdit()) {
       return;
     }
     byte[] beforeChange = captureUndoSnapshot();
@@ -1921,7 +1939,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
   }
 
   private void editRelationship(SourceRelationship relationship) {
-    if (relationship == null) {
+    if (relationship == null || !allowModelEdit()) {
       return;
     }
     byte[] beforeChange = captureUndoSnapshot();
@@ -1937,7 +1955,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
   }
 
   private void editQuery(SourceQuery query) {
-    if (query == null) {
+    if (query == null || !allowModelEdit()) {
       return;
     }
     byte[] beforeChange = captureUndoSnapshot();
@@ -1953,7 +1971,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
   }
 
   private void editJsonSource(SourceJson jsonSource) {
-    if (jsonSource == null) {
+    if (jsonSource == null || !allowModelEdit()) {
       return;
     }
     byte[] beforeChange = captureUndoSnapshot();
@@ -1969,7 +1987,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
   }
 
   private void editPipelineSource(SourcePipeline pipelineSource) {
-    if (pipelineSource == null) {
+    if (pipelineSource == null || !allowModelEdit()) {
       return;
     }
     byte[] beforeChange = captureUndoSnapshot();
@@ -1985,7 +2003,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
   }
 
   private void addPipelineAt(Point location) {
-    if (model == null) {
+    if (model == null || !allowModelEdit()) {
       return;
     }
     byte[] beforeChange = captureUndoSnapshot();
@@ -2020,7 +2038,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
   }
 
   private void addJsonAt(Point location) {
-    if (model == null) {
+    if (model == null || !allowModelEdit()) {
       return;
     }
     byte[] beforeChange = captureUndoSnapshot();
@@ -2048,7 +2066,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
   }
 
   private void editMaskingSource(SourceMasking maskingSource) {
-    if (maskingSource == null) {
+    if (maskingSource == null || !allowModelEdit()) {
       return;
     }
     byte[] beforeChange = captureUndoSnapshot();
@@ -2064,7 +2082,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
   }
 
   private void addMaskingAt(Point location) {
-    if (model == null) {
+    if (model == null || !allowModelEdit()) {
       return;
     }
     byte[] beforeChange = captureUndoSnapshot();
@@ -2164,7 +2182,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
   }
 
   private void addQueryAt(Point location) {
-    if (model == null) {
+    if (model == null || !allowModelEdit()) {
       return;
     }
     byte[] beforeChange = captureUndoSnapshot();
@@ -2207,6 +2225,9 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
   }
 
   public void runUndoableModelChange(SourceModelChange change) throws HopException {
+    if (!allowModelEdit()) {
+      return;
+    }
     byte[] beforeChange = captureUndoSnapshot();
     try {
       change.run();

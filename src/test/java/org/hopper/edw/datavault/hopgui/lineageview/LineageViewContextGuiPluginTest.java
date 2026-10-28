@@ -53,7 +53,7 @@ class LineageViewContextGuiPluginTest {
     GuiAction pluginAction =
         new GuiAction(
             LineageViewContextGuiPlugin.ACTION_ID_AI_HELP,
-            GuiActionType.Modify,
+            GuiActionType.Info,
             "AI Help",
             "Ask the AI assistant",
             "ai-provider.svg",

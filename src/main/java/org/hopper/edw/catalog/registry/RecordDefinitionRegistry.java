@@ -37,6 +37,7 @@ import org.hopper.edw.catalog.model.RecordDefinitionRef;
 import org.hopper.edw.catalog.model.RecordDefinitionType;
 import org.hopper.edw.catalog.spi.DataCatalogPluginFactory;
 import org.hopper.edw.catalog.spi.IDataCatalog;
+import org.hopper.edw.security.EdwWebAuthorization;
 
 /**
  * Central facade that aggregates CRUD operations across all enabled {@link DataCatalogMeta}
@@ -204,6 +205,7 @@ public final class RecordDefinitionRegistry {
       IVariables variables,
       IHopMetadataProvider metadataProvider)
       throws HopException {
+    EdwWebAuthorization.requireCatalogEdit();
     IDataCatalog catalog = getConnectedCatalog(catalogConnectionName, variables, metadataProvider);
     catalog.create(definition);
     clearListCache();
@@ -215,6 +217,7 @@ public final class RecordDefinitionRegistry {
       IVariables variables,
       IHopMetadataProvider metadataProvider)
       throws HopException {
+    EdwWebAuthorization.requireCatalogEdit();
     IDataCatalog catalog = getConnectedCatalog(catalogConnectionName, variables, metadataProvider);
     catalog.update(definition);
     clearListCache();
@@ -226,6 +229,7 @@ public final class RecordDefinitionRegistry {
       IVariables variables,
       IHopMetadataProvider metadataProvider)
       throws HopException {
+    EdwWebAuthorization.requireCatalogEdit();
     IDataCatalog catalog = getConnectedCatalog(catalogConnectionName, variables, metadataProvider);
     catalog.delete(key);
     clearListCache();
@@ -237,6 +241,7 @@ public final class RecordDefinitionRegistry {
       IVariables variables,
       IHopMetadataProvider metadataProvider)
       throws HopException {
+    EdwWebAuthorization.requireCatalogEdit();
     definition.validate();
     IDataCatalog catalog = getConnectedCatalog(catalogConnectionName, variables, metadataProvider);
     RecordDefinition existing = catalog.read(definition.getKey());

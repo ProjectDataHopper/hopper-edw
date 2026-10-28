@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hop.core.extension.ExtensionPointPluginType;
+import org.apache.hop.core.security.Permission;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.menu.GuiMenuElement;
 import org.apache.hop.core.gui.plugin.toolbar.GuiToolbarElement;
@@ -28,6 +29,7 @@ import org.apache.hop.core.plugins.IPlugin;
 import org.apache.hop.core.plugins.PluginRegistry;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
+import org.apache.hop.ui.core.security.HopSecurityUi;
 import org.apache.hop.ui.core.dialog.MessageBox;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.hopgui.perspective.explorer.ExplorerFile;
@@ -59,8 +61,6 @@ public class PresentationGuiPlugin {
       "40170-menu-tools-project-presentation";
   public static final String ID_EXPLORER_TOOLBAR_PRESENTATION =
       "ExplorerPerspective-Toolbar-10080-presentation";
-  public static final String ID_EXPLORER_MENU_PRESENTATION =
-      "ExplorerPerspective-ContextMenu-presentation";
 
   private static PresentationGuiPlugin instance;
   private static volatile boolean environmentInitialized;
@@ -89,6 +89,9 @@ public class PresentationGuiPlugin {
       image = "execution-metrics-profile.svg",
       toolTip = "i18n::PresentationGuiPlugin.Toolbar.Tooltip")
   public void openProjectPresentation() {
+    if (!HopSecurityUi.check(Permission.FILE_VIEW)) {
+      return;
+    }
     HopGui hopGui = HopGui.getInstance();
     try {
       ensureEnvironment();
@@ -105,18 +108,15 @@ public class PresentationGuiPlugin {
     }
   }
 
-  @GuiMenuElement(
-      root = ExplorerPerspective.GUI_PLUGIN_CONTEXT_MENU_PARENT_ID,
-      parentId = ExplorerPerspective.GUI_PLUGIN_CONTEXT_MENU_PARENT_ID,
-      id = ID_EXPLORER_MENU_PRESENTATION,
-      label = "i18n::PresentationGuiPlugin.Explorer.Menu",
-      image = "execution-metrics-profile.svg")
   @GuiToolbarElement(
       root = ExplorerPerspective.GUI_PLUGIN_TOOLBAR_PARENT_ID,
       id = ID_EXPLORER_TOOLBAR_PRESENTATION,
       image = "execution-metrics-profile.svg",
       toolTip = "i18n::PresentationGuiPlugin.Explorer.Tooltip")
   public void openSelectedFilePresentation() {
+    if (!HopSecurityUi.check(Permission.FILE_VIEW)) {
+      return;
+    }
     HopGui hopGui = HopGui.getInstance();
     try {
       ensureEnvironment();

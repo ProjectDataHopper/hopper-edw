@@ -67,6 +67,8 @@ import org.hopper.edw.catalog.model.RecordDefinition;
 import org.hopper.edw.catalog.model.RecordDefinitionType;
 import org.hopper.edw.catalog.model.RecordOrigin;
 import org.hopper.edw.catalog.registry.RecordDefinitionRegistry;
+import org.hopper.edw.datavault.hopgui.security.EdwWebAuthorizationUi;
+import org.hopper.edw.security.EdwWebAuthorization;
 import org.hopper.edw.datavault.catalog.DvSourceFieldSupport;
 import org.hopper.edw.datavault.catalog.RecordSourceIndicatorSupport;
 import org.hopper.edw.datavault.metadata.CsvFieldOptions;
@@ -1119,11 +1121,12 @@ public class RecordDefinitionDetailsPanel {
       wPreviewRecords.setEnabled(
           !readOnlyVersion && RecordDefinitionPreviewSupport.supportsPreview(definition));
     }
+    boolean canEditCatalog = !readOnlyVersion && EdwWebAuthorization.canEditCatalog();
     if (wUpdateQualityRules != null) {
-      wUpdateQualityRules.setEnabled(!readOnlyVersion);
+      wUpdateQualityRules.setEnabled(canEditCatalog);
     }
     if (wTestQualityMeasure != null) {
-      wTestQualityMeasure.setEnabled(!readOnlyVersion);
+      wTestQualityMeasure.setEnabled(canEditCatalog);
     }
     if (wQualityHistory != null) {
       wQualityHistory.setEnabled(true);
@@ -1133,7 +1136,7 @@ public class RecordDefinitionDetailsPanel {
     }
     if (wRefreshFromSource != null) {
       wRefreshFromSource.setEnabled(
-          !readOnlyVersion
+          canEditCatalog
               && RecordDefinitionPhysicalRefSupport.supportsRefreshFromSource(definition));
     }
 
@@ -1342,6 +1345,9 @@ public class RecordDefinitionDetailsPanel {
   }
 
   private void persistDefinition() throws Exception {
+    if (!EdwWebAuthorizationUi.allowCatalogEdit()) {
+      return;
+    }
     RecordDefinitionRegistry.getInstance()
         .update(
             catalogConnectionName,

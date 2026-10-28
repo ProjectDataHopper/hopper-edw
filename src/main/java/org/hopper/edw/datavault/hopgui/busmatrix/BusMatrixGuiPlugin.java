@@ -16,7 +16,9 @@
 package org.hopper.edw.datavault.hopgui.busmatrix;
 
 import org.apache.hop.core.gui.plugin.GuiPlugin;
+import org.apache.hop.core.security.Permission;
 import org.apache.hop.core.gui.plugin.menu.GuiMenuElement;
+import org.apache.hop.ui.core.security.HopSecurityUi;
 import org.apache.hop.ui.hopgui.HopGui;
 
 /** Tools menu: view the Kimball bus matrix for a resource definition group. */
@@ -44,6 +46,9 @@ public class BusMatrixGuiPlugin {
       parentId = HopGui.ID_MAIN_MENU_TOOLS_PARENT_ID,
       image = "business-process-catalog.svg")
   public void menuToolsViewBusMatrix() {
+    if (!HopSecurityUi.check(Permission.FILE_VIEW)) {
+      return;
+    }
     BusMatrixLaunchSupport.openPicker(HopGui.getInstance());
   }
 }

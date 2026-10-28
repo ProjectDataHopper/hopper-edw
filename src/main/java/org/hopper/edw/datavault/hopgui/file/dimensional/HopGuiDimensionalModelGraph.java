@@ -414,6 +414,9 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
   }
 
   public void runUndoableModelChange(DmModelChange change) throws HopException {
+    if (!allowModelEdit()) {
+      return;
+    }
     byte[] beforeChange = captureUndoSnapshot();
     change.run();
     commitDialogUndo(beforeChange);
@@ -427,7 +430,7 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
   }
 
   private void editDmTable(IDmTable table) {
-    if (table == null) {
+    if (table == null || !allowModelEdit()) {
       return;
     }
     byte[] beforeChange = captureUndoSnapshot();
@@ -508,6 +511,9 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
 
   @Override
   protected boolean nudgeSelectedElements(int dx, int dy) {
+    if (!canEditGraph()) {
+      return false;
+    }
     if (getSelectedTables().isEmpty() && getSelectedNotes().isEmpty()) {
       return false;
     }
@@ -1061,6 +1067,9 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
   }
 
   public void importDatabaseTables(HopGuiDimensionalContext context) {
+    if (!allowModelEdit()) {
+      return;
+    }
     DimensionalModel dmModel = context.getModel();
     HopGuiDimensionalModelGraph graph = context.getDimensionalGraph();
     if (dmModel == null || graph == null) {
@@ -1417,7 +1426,7 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
       toolTip = "i18n::HopGuiDimensionalModelGraph.Toolbar.EditModel.Tooltip",
       image = "dimensional-model.svg")
   public void editModelProperties() {
-    if (model == null) {
+    if (model == null || !allowModelEdit()) {
       return;
     }
     byte[] beforeChange = captureUndoSnapshot();
@@ -1508,6 +1517,9 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
       toolTip = "i18n::HopGuiDimensionalModelGraph.Toolbar.GenerateDdl.Tooltip",
       image = "ui/images/database.svg")
   public void generateModelDdl() {
+    if (!allowExecute()) {
+      return;
+    }
     if (model == null) {
       return;
     }
@@ -1568,6 +1580,9 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
       toolTip = "i18n::HopGuiDimensionalModelGraph.Toolbar.Debug.Tooltip",
       image = "ui/images/debug.svg")
   public void debugPipelines() {
+    if (!allowExecute()) {
+      return;
+    }
     if (model == null) {
       return;
     }
@@ -2159,6 +2174,9 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
 
   @Override
   public void save() throws HopException {
+    if (!allowSaveFiles()) {
+      return;
+    }
     if (fileType != null) {
       fileType.saveFile(hopGui, this);
     }
@@ -2166,6 +2184,9 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
 
   @Override
   public void saveAs(String filename) throws HopException {
+    if (!allowSaveFiles()) {
+      return;
+    }
     if (fileType != null) {
       fileType.saveFileAs(hopGui, this, filename);
     }

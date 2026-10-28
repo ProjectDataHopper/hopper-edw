@@ -17,12 +17,14 @@ package org.hopper.edw.datavault.hopgui;
 
 import java.nio.file.Path;
 import org.apache.hop.core.Const;
+import org.apache.hop.core.security.Permission;
 import org.apache.hop.core.gui.plugin.GuiPlugin;
 import org.apache.hop.core.gui.plugin.menu.GuiMenuElement;
 import org.apache.hop.core.gui.plugin.toolbar.GuiToolbarElement;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
+import org.apache.hop.ui.core.security.HopSecurityUi;
 import org.apache.hop.ui.core.dialog.MessageBox;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.util.EnvironmentUtils;
@@ -65,6 +67,9 @@ public class EdwDocsGuiPlugin {
       toolTip = "i18n::EdwDocsGuiPlugin.Toolbar.Tooltip",
       separator = true)
   public void openDocumentation() {
+    if (!HopSecurityUi.check(Permission.FILE_VIEW)) {
+      return;
+    }
     openHtml(HopGui.getInstance(), "index.html");
   }
 

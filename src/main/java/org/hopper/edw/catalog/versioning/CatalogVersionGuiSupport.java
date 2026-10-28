@@ -34,6 +34,7 @@ import org.apache.hop.ui.hopgui.HopGui;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 import org.hopper.edw.catalog.metadata.ResourceDefinitionGroupMeta;
+import org.hopper.edw.datavault.hopgui.security.EdwWebAuthorizationUi;
 
 /** GUI entry points for tagging and listing catalog versions. */
 public final class CatalogVersionGuiSupport {
@@ -48,6 +49,9 @@ public final class CatalogVersionGuiSupport {
    */
   public static CatalogVersionEntry tagVersionFromGroup(
       HopGui hopGui, ResourceDefinitionGroupMeta group) {
+    if (!EdwWebAuthorizationUi.allowCatalogEdit()) {
+      return null;
+    }
     return tagVersionWithPrompts(hopGui, group, null);
   }
 
@@ -58,6 +62,9 @@ public final class CatalogVersionGuiSupport {
    */
   public static CatalogVersionEntry tagVersionFromPerspective(
       HopGui hopGui, String preferredCatalogConnection) {
+    if (!EdwWebAuthorizationUi.allowCatalogEdit()) {
+      return null;
+    }
     if (hopGui == null) {
       return null;
     }

@@ -60,6 +60,8 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.hopper.edw.catalog.hopgui.perspective.importmenu.DataCatalogImportMenu;
+import org.hopper.edw.datavault.hopgui.security.EdwWebAuthorizationUi;
+import org.hopper.edw.security.EdwWebAuthorization;
 import org.hopper.edw.catalog.hopgui.preview.RecordDefinitionPreviewRunner;
 import org.hopper.edw.catalog.hopgui.preview.RecordDefinitionPreviewSupport;
 import org.hopper.edw.catalog.metadata.DataCatalogMeta;
@@ -344,6 +346,9 @@ public class DataCatalogPerspective implements IHopPerspective {
       toolTip = "i18n::DataCatalogPerspective.Toolbar.Import.Tooltip",
       image = "ui/images/add.svg")
   public void openImportMenu() {
+    if (!EdwWebAuthorizationUi.allowCatalogEdit()) {
+      return;
+    }
     DataCatalogImportMenu.open(hopGui, null, resolveSelectedCatalogConnectionName(), this::refresh);
   }
 
@@ -353,6 +358,9 @@ public class DataCatalogPerspective implements IHopPerspective {
       toolTip = "i18n::DataCatalogPerspective.Toolbar.TagVersion.Tooltip",
       image = "resource-definition-group.svg")
   public void tagCatalogVersion() {
+    if (!EdwWebAuthorizationUi.allowCatalogEdit()) {
+      return;
+    }
     String catalogConnection = resolveSelectedCatalogConnectionName();
     if (Utils.isEmpty(catalogConnection)) {
       return;
@@ -814,6 +822,9 @@ public class DataCatalogPerspective implements IHopPerspective {
   @GuiKeyboardShortcut(key = SWT.DEL)
   @GuiOsxKeyboardShortcut(key = SWT.DEL)
   public void onDeleteRecord() {
+    if (!EdwWebAuthorizationUi.allowCatalogEdit()) {
+      return;
+    }
     if (tree == null || tree.isDisposed()) {
       return;
     }
@@ -948,8 +959,12 @@ public class DataCatalogPerspective implements IHopPerspective {
         selectedRecords.stream()
             .anyMatch(n -> n != null && n.getType() == DataCatalogTreeNode.Type.VERSION_RECORD);
     boolean catalogElementSelected = !Utils.isEmpty(resolveSelectedCatalogConnectionName());
-    toolBarWidgets.enableToolbarItem(TOOLBAR_ITEM_DELETE, recordSelected && !anyVersion);
-    toolBarWidgets.enableToolbarItem(TOOLBAR_ITEM_TAG_VERSION, catalogElementSelected);
+    boolean canEditCatalog = EdwWebAuthorization.canEditCatalog();
+    toolBarWidgets.enableToolbarItem(TOOLBAR_ITEM_IMPORT, canEditCatalog);
+    toolBarWidgets.enableToolbarItem(
+        TOOLBAR_ITEM_DELETE, canEditCatalog && recordSelected && !anyVersion);
+    toolBarWidgets.enableToolbarItem(
+        TOOLBAR_ITEM_TAG_VERSION, canEditCatalog && catalogElementSelected);
     toolBarWidgets.enableToolbarItem(
         TOOLBAR_ITEM_PREVIEW,
         selectedRecordDefinition != null

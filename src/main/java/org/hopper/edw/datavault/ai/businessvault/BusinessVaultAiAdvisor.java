@@ -29,6 +29,7 @@ import org.apache.hop.ai.advisor.IAiAdvisor;
 import org.apache.hop.core.exception.HopException;
 import org.apache.hop.i18n.BaseMessages;
 import org.hopper.edw.datavault.ai.EdwAiAdvisorLocations;
+import org.hopper.edw.security.EdwWebAuthorization;
 import org.hopper.edw.datavault.ai.EdwAiInclusions;
 import org.hopper.edw.datavault.ai.EdwAiProposalSupport;
 import org.hopper.edw.datavault.hopgui.ai.EdwAiAdvisorGraphSupport;
@@ -129,6 +130,9 @@ public class BusinessVaultAiAdvisor implements IAiAdvisor {
   @Override
   public void applyProposals(AiAdvisorRequest request, List<AiProposal> selected)
       throws HopException {
+    if (!EdwWebAuthorization.canEditModels()) {
+      throw new HopException(EdwWebAuthorization.MODEL_EDIT_DENIED);
+    }
     BusinessVaultModel model = modelFrom(request);
     EdwAiAdvisorGraphSupport.markUndoPoint(request);
     BvAiProposalApplier.apply(

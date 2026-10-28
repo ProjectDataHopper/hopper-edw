@@ -20,6 +20,7 @@ import org.apache.hop.core.gui.plugin.menu.GuiMenuElement;
 import org.apache.hop.i18n.BaseMessages;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.hopgui.HopGui;
+import org.hopper.edw.datavault.hopgui.security.EdwWebAuthorizationUi;
 
 /** Tools menu entry for operational analytics. */
 @GuiPlugin
@@ -39,6 +40,9 @@ public class OpsAnalyticsGuiPlugin {
       image = "datavault-configuration.svg",
       separator = true)
   public void menuToolsCreateOperationalAnalytics() {
+    if (!EdwWebAuthorizationUi.allowCreateFiles()) {
+      return;
+    }
     HopGui hopGui = HopGui.getInstance();
     try {
       OpsAnalyticsDialog.open(hopGui);

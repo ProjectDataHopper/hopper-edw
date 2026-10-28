@@ -73,6 +73,7 @@ import org.hopper.core.AggregationMethod;
 import org.hopper.core.HHorizontalAlignment;
 import org.hopper.core.HVerticalAlignment;
 import org.hopper.edw.datavault.hopgui.PresentationGuiPlugin;
+import org.hopper.edw.datavault.hopgui.security.EdwWebAuthorizationUi;
 import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
 import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 import org.hopper.edw.datavault.metadata.dimensional.DimensionalModel;
@@ -830,6 +831,9 @@ public class FactCrosstabEditorDialog {
   }
 
   private boolean writeSelection(String name) {
+    if (!EdwWebAuthorizationUi.allowSaveFiles()) {
+      return false;
+    }
     collectSpec();
     if (!requireColumnsSelected()) {
       return false;

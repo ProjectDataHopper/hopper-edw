@@ -59,6 +59,7 @@ import org.hopper.edw.datavault.hopgui.EdwDocsGuiPlugin;
 import org.hopper.edw.datavault.hopgui.GuiBusySupport;
 import org.hopper.edw.datavault.hopgui.ai.EdwAiAdvisorOpenSupport;
 import org.hopper.edw.datavault.hopgui.opsanalytics.OpsAnalyticsDialog;
+import org.hopper.edw.datavault.hopgui.security.EdwWebAuthorizationUi;
 import org.hopper.edw.datavault.hopgui.perspective.journey.EdwJourneyTreeNode.Kind;
 import org.hopper.edw.datavault.hopgui.perspective.journey.link.EdwJourneyGuiNavigator;
 import org.hopper.edw.datavault.hopgui.perspective.journey.link.EdwJourneyPresentationHost;
@@ -438,6 +439,9 @@ public class EdwJourneyPerspective implements IHopPerspective {
       toolTip = "i18n::EdwJourneyPerspective.Toolbar.OpsAnalytics.Tooltip",
       image = "datavault-configuration.svg")
   public void createOperationalAnalytics() {
+    if (!EdwWebAuthorizationUi.allowCreateFiles()) {
+      return;
+    }
     OpsAnalyticsDialog.open(hopGui);
   }
 

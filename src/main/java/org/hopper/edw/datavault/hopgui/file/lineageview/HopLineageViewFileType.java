@@ -46,6 +46,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.hopper.edw.datavault.hopgui.file.ExplorerPerspectiveTabSupport;
+import org.hopper.edw.datavault.hopgui.security.EdwWebAuthorizationUi;
 import org.hopper.edw.datavault.lineage.LineageSnapshot;
 import org.hopper.edw.datavault.lineageview.HopLineageViewDocument;
 import org.hopper.edw.datavault.lineageview.LineageViewPersistence;
@@ -111,6 +112,9 @@ public class HopLineageViewFileType extends HopFileTypeBase {
 
   @Override
   public IHopFileTypeHandler newFile(HopGui hopGui, IVariables variables) throws HopException {
+    if (!EdwWebAuthorizationUi.allowCreateFiles()) {
+      return null;
+    }
     try {
       HopLineageViewDocument draft = new HopLineageViewDocument();
       LineageViewSettingsDialog dialog =

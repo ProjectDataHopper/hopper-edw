@@ -35,6 +35,7 @@ import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.core.dialog.MessageBox;
 import org.apache.hop.ui.core.gui.GuiResource;
 import org.apache.hop.ui.hopgui.HopGui;
+import org.hopper.edw.datavault.hopgui.security.EdwWebAuthorizationUi;
 import org.apache.hop.ui.hopgui.context.IGuiContextHandler;
 import org.apache.hop.ui.hopgui.file.IHopFileType;
 import org.apache.hop.ui.hopgui.file.IHopFileTypeHandler;
@@ -454,6 +455,9 @@ public class HopGuiSemanticLayerEditor extends Composite implements IHopFileType
   }
 
   private void deleteSelectedSelection() {
+    if (!EdwWebAuthorizationUi.allowModelEdit()) {
+      return;
+    }
     String name = selectedSelectionName();
     SemanticSelection selection = model.findSelection(name);
     if (selection == null || model.getSelections() == null) {
@@ -472,6 +476,9 @@ public class HopGuiSemanticLayerEditor extends Composite implements IHopFileType
   }
 
   private void renameSelectedSelection() {
+    if (!EdwWebAuthorizationUi.allowModelEdit()) {
+      return;
+    }
     String name = selectedSelectionName();
     SemanticSelection selection = model.findSelection(name);
     if (selection == null) {
@@ -674,6 +681,9 @@ public class HopGuiSemanticLayerEditor extends Composite implements IHopFileType
   }
 
   private void selectDimensionalModel() {
+    if (!EdwWebAuthorizationUi.allowModelEdit()) {
+      return;
+    }
     try {
       String filename =
           BaseDialog.presentFileDialog(
@@ -741,12 +751,18 @@ public class HopGuiSemanticLayerEditor extends Composite implements IHopFileType
 
   @Override
   public void save() throws HopException {
+    if (!EdwWebAuthorizationUi.allowSaveFiles()) {
+      return;
+    }
     applyProperties();
     fileType.saveFile(hopGui, this);
   }
 
   @Override
   public void saveAs(String filename) throws HopException {
+    if (!EdwWebAuthorizationUi.allowSaveFiles()) {
+      return;
+    }
     applyProperties();
     fileType.saveFileAs(hopGui, this, filename);
   }

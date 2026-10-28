@@ -549,6 +549,9 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
   }
 
   public void runUndoableModelChange(BvModelChange change) throws HopException {
+    if (!allowModelEdit()) {
+      return;
+    }
     byte[] beforeChange = captureUndoSnapshot();
     change.run();
     commitDialogUndo(beforeChange);
@@ -719,7 +722,7 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
   }
 
   private void editBvTable(IBvTable table) {
-    if (table == null) {
+    if (table == null || !allowModelEdit()) {
       return;
     }
     byte[] beforeChange = captureUndoSnapshot();
@@ -1005,6 +1008,9 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
 
   @Override
   protected boolean nudgeSelectedElements(int dx, int dy) {
+    if (!canEditGraph()) {
+      return false;
+    }
     List<IBvTable> tables = getSelectedBvTables();
     List<BvDvTableReference> dvRefs = getSelectedDvReferences();
     List<BvBvTableReference> bvRefs = getSelectedBvReferences();
@@ -1780,7 +1786,7 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
   }
 
   public void generateScd2CalculationUnitTest(BvScd2Table table) {
-    if (table == null) {
+    if (table == null || !allowCreateFiles()) {
       return;
     }
     if (!ensureDataVaultModelLoaded()) {
@@ -1816,7 +1822,7 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
       toolTip = "i18n::HopGuiBusinessVaultGraph.Toolbar.EditModel.Tooltip",
       image = "business-vault-model.svg")
   public void editModelProperties() {
-    if (model == null) {
+    if (model == null || !allowModelEdit()) {
       return;
     }
     byte[] beforeChange = captureUndoSnapshot();
@@ -1876,6 +1882,9 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
       toolTip = "i18n::HopGuiBusinessVaultGraph.Toolbar.ImportDbt.Tooltip",
       image = "jinja-macro-library.svg")
   public void importDbtModels() {
+    if (!allowModelEdit()) {
+      return;
+    }
     HopGuiDbtImportSupport.importDbtProject(hopGui, this);
   }
 
@@ -1949,6 +1958,9 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
       toolTip = "i18n::HopGuiBusinessVaultGraph.Toolbar.GenerateDdl.Tooltip",
       image = "ui/images/database.svg")
   public void generateModelDdl() {
+    if (!allowExecute()) {
+      return;
+    }
     if (model == null) {
       return;
     }
@@ -2012,6 +2024,9 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
       toolTip = "i18n::HopGuiBusinessVaultGraph.Toolbar.Debug.Tooltip",
       image = "ui/images/debug.svg")
   public void debugPipelines() {
+    if (!allowExecute()) {
+      return;
+    }
     if (model == null) {
       return;
     }
@@ -2610,6 +2625,9 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
 
   @Override
   public void save() throws HopException {
+    if (!allowSaveFiles()) {
+      return;
+    }
     if (fileType != null) {
       fileType.saveFile(hopGui, this);
     }
@@ -2617,6 +2635,9 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
 
   @Override
   public void saveAs(String filename) throws HopException {
+    if (!allowSaveFiles()) {
+      return;
+    }
     if (fileType != null) {
       fileType.saveFileAs(hopGui, this, filename);
     }
@@ -2704,6 +2725,9 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
   }
 
   public void copyBusinessVaultUpdateActionToClipboard() {
+    if (!allowCreateFiles()) {
+      return;
+    }
     if (model == null) {
       return;
     }

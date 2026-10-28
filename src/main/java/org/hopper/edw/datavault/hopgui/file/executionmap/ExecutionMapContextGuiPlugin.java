@@ -44,7 +44,7 @@ public class ExecutionMapContextGuiPlugin {
   @GuiContextAction(
       id = HopGuiExecutionMapGraph.ACTION_ID_OPEN_ARTIFACT,
       parentId = HopGuiExecutionMapNodeContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
+      type = GuiActionType.Info,
       name = "i18n::HopGuiExecutionMapGraph.Context.OpenArtifact.Name",
       tooltip = "i18n::HopGuiExecutionMapGraph.Context.OpenArtifact.Tooltip",
       image = "ui/images/open.svg",
@@ -60,7 +60,7 @@ public class ExecutionMapContextGuiPlugin {
   @GuiContextAction(
       id = HopGuiExecutionMapGraph.ACTION_ID_VIEW_SNAPSHOT,
       parentId = HopGuiExecutionMapNodeContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
+      type = GuiActionType.Info,
       name = "i18n::HopGuiExecutionMapGraph.Context.ViewSnapshot.Name",
       tooltip = "i18n::HopGuiExecutionMapGraph.Context.ViewSnapshot.Tooltip",
       image = "ui/images/view.svg",
@@ -76,7 +76,7 @@ public class ExecutionMapContextGuiPlugin {
   @GuiContextAction(
       id = HopGuiExecutionMapGraph.ACTION_ID_OPEN_IN_CATALOG,
       parentId = HopGuiExecutionMapNodeContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
+      type = GuiActionType.Info,
       name = "i18n::HopGuiExecutionMapGraph.Context.OpenInCatalog.Name",
       tooltip = "i18n::HopGuiExecutionMapGraph.Context.OpenInCatalog.Tooltip",
       image = "data-catalog.svg",
@@ -92,7 +92,7 @@ public class ExecutionMapContextGuiPlugin {
   @GuiContextAction(
       id = HopGuiExecutionMapGraph.ACTION_ID_PREVIEW_DATASET,
       parentId = HopGuiExecutionMapNodeContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
+      type = GuiActionType.Info,
       name = "i18n::HopGuiExecutionMapGraph.Context.PreviewDataset.Name",
       tooltip = "i18n::HopGuiExecutionMapGraph.Context.PreviewDataset.Tooltip",
       image = "ui/images/preview.svg",
@@ -108,7 +108,7 @@ public class ExecutionMapContextGuiPlugin {
   @GuiContextAction(
       id = HopGuiExecutionMapGraph.ACTION_ID_VIEW_DATASET,
       parentId = HopGuiExecutionMapNodeContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
+      type = GuiActionType.Info,
       name = "i18n::HopGuiExecutionMapGraph.Context.ViewDataset.Name",
       tooltip = "i18n::HopGuiExecutionMapGraph.Context.ViewDataset.Tooltip",
       image = "ui/images/view.svg",
@@ -124,7 +124,7 @@ public class ExecutionMapContextGuiPlugin {
   @GuiContextAction(
       id = "execution-map-ai-help",
       parentId = HopGuiExecutionMapNodeContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
+      type = GuiActionType.Info,
       name = "i18n::HopGuiExecutionMapGraph.AiHelp.Name",
       tooltip = "i18n::HopGuiExecutionMapGraph.AiHelp.Tooltip",
       image = "ai-provider.svg",

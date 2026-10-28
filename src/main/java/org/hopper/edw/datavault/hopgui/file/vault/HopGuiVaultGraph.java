@@ -351,6 +351,9 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
 
   @Override
   protected boolean nudgeSelectedElements(int dx, int dy) {
+    if (!canEditGraph()) {
+      return false;
+    }
     if (getSelectedTables().isEmpty() && getSelectedNotes().isEmpty()) {
       return false;
     }
@@ -796,6 +799,9 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
       toolTip = "i18n::HopGuiVaultGraph.Toolbar.EditModel.Tooltip",
       image = "datavault-model.svg")
   public void editModelProperties() {
+    if (!allowModelEdit()) {
+      return;
+    }
     editModelProperties(model);
   }
 
@@ -805,6 +811,9 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
       toolTip = "i18n::HopGuiVaultGraph.ImportSources.Tooltip",
       image = "data-catalog.svg")
   public void importCatalogRecordDefinitions() {
+    if (!allowModelEdit()) {
+      return;
+    }
     DataCatalogPerspective dcp = DataCatalogPerspective.getInstance();
     if (dcp != null) {
       DataCatalogImportMenu.open(hopGui, model, null, () -> dcp.refresh());
@@ -866,6 +875,9 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
       image = "source-model.svg")
   @Override
   public void generateFromSourceModel() {
+    if (!allowModelEdit()) {
+      return;
+    }
     org.hopper.edw.datavault.hopgui.tovault.SourceToVaultGenerationSupport.generateFromVaultModel(
         hopGui, this);
   }
@@ -898,6 +910,9 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
       toolTip = "i18n::HopGuiVaultGraph.Toolbar.RunDataVaultUpdate.Tooltip",
       image = "ui/images/run.svg")
   public void runDataVaultUpdate() {
+    if (!allowExecute()) {
+      return;
+    }
     if (model == null) {
       return;
     }
@@ -1013,6 +1028,9 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
   }
 
   public void copyDataVaultUpdateActionToClipboard() {
+    if (!allowCreateFiles()) {
+      return;
+    }
     if (model == null) {
       return;
     }
@@ -1168,6 +1186,9 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
       toolTip = "i18n::HopGuiVaultGraph.Toolbar.GenerateDdl.Tooltip",
       image = "ui/images/database.svg")
   public void generateModelDdl() {
+    if (!allowExecute()) {
+      return;
+    }
     if (model == null) {
       return;
     }
@@ -1228,6 +1249,9 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
       toolTip = "i18n::HopGuiVaultGraph.Toolbar.Debug.Tooltip",
       image = "ui/images/debug.svg")
   public void debugPipelines() {
+    if (!allowExecute()) {
+      return;
+    }
     if (model == null) {
       return;
     }
@@ -2142,7 +2166,7 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
   }
 
   private void editTable(IDvTable table) {
-    if (table == null) {
+    if (table == null || !allowModelEdit()) {
       return;
     }
     byte[] beforeChange = captureUndoSnapshot();
@@ -2173,7 +2197,7 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
   }
 
   private void editModelProperties(DataVaultModel modelToEdit) {
-    if (modelToEdit == null) {
+    if (modelToEdit == null || !allowModelEdit()) {
       return;
     }
     byte[] beforeChange = captureUndoSnapshot();
@@ -2555,6 +2579,9 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
 
   @Override
   public void save() throws HopException {
+    if (!allowSaveFiles()) {
+      return;
+    }
     if (fileType != null) {
       fileType.saveFile(hopGui, this);
     }
@@ -2562,6 +2589,9 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
 
   @Override
   public void saveAs(String filename) throws HopException {
+    if (!allowSaveFiles()) {
+      return;
+    }
     if (fileType != null) {
       fileType.saveFileAs(hopGui, this, filename);
     }
@@ -2947,6 +2977,9 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
    * change.
    */
   public void runUndoableModelChange(HopGuiVaultModelChange change) throws HopException {
+    if (!allowModelEdit()) {
+      return;
+    }
     byte[] beforeChange = captureUndoSnapshot();
     change.run();
     commitDialogUndo(beforeChange);

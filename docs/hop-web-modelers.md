@@ -107,6 +107,22 @@ Painters already target `IGc`. Interactive web path uses the `*ModelCanvasSvgRen
 4. Start Hop Web (for example `docker/run-hop-web-local.sh --quick` from a Hop checkout that mounts the plugin).
 5. Create or open a model under the explorer.
 
+## Hop Web roles
+
+Hop Web sessions use the signed-in user's Hop role. Desktop Hop, and Hop Web with authentication off, stay unrestricted.
+
+| Action | admin / user | operator | readonly |
+|---|---|---|---|
+| Open and view models, zoom, pan, check a model, coach, load durations, journey, docs, bus matrix, presentations | yes | yes | yes |
+| Move, create, delete, or edit model objects; undo; generate vaults, pipelines, or project files; save `.hsm` `.hdv` `.hbv` `.hdm` `.hsl` `.hlv` | yes | no | no |
+| Export a diagram | yes | yes | no |
+| Run or stop a pipeline or workflow that is already in the project, including a warehouse update | yes | yes | no |
+| Edit catalog record definitions, import into the catalog, delete catalog rows, tag a version, run schema validation | yes | yes | no |
+| Write a validation report file, apply remediation, or generate new project files | yes | no | no |
+| Edit Hop metadata (connections, EDW setup, quality rules) | yes | no | no |
+
+`operator` does not have Hop's `metadata.write` permission. Catalog record edits are the exception: that role may change record definitions and validate them. Generating a new update workflow is a file create, so `operator` runs a workflow that is already there. The source-model JDBC servlet stays on `run.execute`, so `readonly` cannot query it.
+
 ## Known limitations
 
 - Continuous “live” card motion while the button is held is client-outline only; the authoritative model updates on mouse-up (RAP).

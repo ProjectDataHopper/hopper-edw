@@ -16,7 +16,9 @@
 package org.hopper.edw.datavault.hopgui.coaching;
 
 import org.apache.hop.core.gui.Point;
+import org.apache.hop.core.security.Permission;
 import org.apache.hop.core.variables.IVariables;
+import org.apache.hop.ui.core.security.HopSecurityUi;
 import org.apache.hop.ui.hopgui.HopGui;
 import org.apache.hop.ui.hopgui.file.shared.HopGuiAbstractGraph;
 import org.eclipse.swt.dnd.DND;
@@ -29,6 +31,7 @@ import org.eclipse.swt.widgets.Canvas;
 import org.hopper.edw.datavault.metadata.coaching.CoachingSourceRef;
 import org.hopper.edw.datavault.metadata.coaching.CoachingSourceResolver;
 import org.hopper.edw.datavault.metadata.coaching.ICoachingModelAdapter;
+import org.hopper.edw.security.EdwWebAuthorization;
 
 public final class CoachingCanvasDropSupport {
 
@@ -46,6 +49,10 @@ public final class CoachingCanvasDropSupport {
         new DropTargetAdapter() {
           @Override
           public void drop(DropTargetEvent event) {
+            if (!EdwWebAuthorization.canEditModels()) {
+              HopSecurityUi.deny(Permission.FILE_EDIT);
+              return;
+            }
             if (!(event.data instanceof String identityKey)) {
               return;
             }

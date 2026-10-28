@@ -32,10 +32,13 @@ import org.apache.hop.core.gui.markdown.NoteLinkHit;
 import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.i18n.BaseMessages;
+import org.apache.hop.core.security.Permission;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.core.dialog.MessageBox;
 import org.apache.hop.ui.core.gui.GuiResource;
+import org.apache.hop.ui.core.security.HopSecurityUi;
+import org.hopper.edw.datavault.hopgui.security.EdwWebAuthorizationUi;
 import org.apache.hop.ui.core.gui.GuiToolbarWidgets;
 import org.apache.hop.ui.hopgui.CanvasFacade;
 import org.apache.hop.ui.hopgui.CanvasListener;
@@ -532,7 +535,7 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph
       // would swallow the table context dialog). Keep lastButton so mouseMoveEvent still treats
       // the gesture as button-held (stateMask on mouse-up no longer has BUTTON1).
       if (!isUnmovedClick(released)) {
-        if (iconDragCommitted || dragSelection) {
+        if (canEditGraph() && (iconDragCommitted || dragSelection)) {
           markPositionUndoPoint();
         }
         mouseMoveEvent(e);
@@ -602,6 +605,9 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph
    * {@code HopGuiPipelineGraph} web behaviour.
    */
   protected void armWebObjectDragModes(Event e, boolean shift, boolean control) {
+    if (!canEditGraph()) {
+      return;
+    }
     if (!EnvironmentUtils.getInstance().isWeb() || canvas == null || canvas.isDisposed()) {
       return;
     }
@@ -627,6 +633,9 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph
 
   /** Hop Web: arm note drag or resize mode for client feedback. */
   protected void armWebNoteDragModes(Event e) {
+    if (!canEditGraph()) {
+      return;
+    }
     if (!EnvironmentUtils.getInstance().isWeb() || canvas == null || canvas.isDisposed()) {
       return;
     }
@@ -658,25 +667,28 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph
 
     boolean doRedraw = false;
 
-    if (resize != null && selectedNote != null) {
+    if (canEditGraph() && resize != null && selectedNote != null) {
       resizeDvNote(selectedNote, real);
       return;
     }
 
     if (mouseInteractions().isRelationshipDragActive()) {
-      mouseInteractions().handleRelationshipMouseMove(e);
-      redraw();
+      if (canEditGraph()) {
+        mouseInteractions().handleRelationshipMouseMove(e);
+        redraw();
+      }
       return;
     }
 
     // RAP: stateMask often lacks BUTTON1 during move/up; lastButton tracks the gesture.
     boolean leftButtonDown = (e.stateMask & SWT.BUTTON1) != 0 || lastButton == 1;
 
-    if (mouseInteractions().handleObjectMouseMove(real, leftButtonDown)) {
+    if (canEditGraph() && mouseInteractions().handleObjectMouseMove(real, leftButtonDown)) {
       doRedraw = true;
     }
 
-    if (selectedNote != null
+    if (canEditGraph()
+        && selectedNote != null
         && leftButtonDown
         && resize == null
         && !mouseInteractions().isRelationshipDragActive()) {
@@ -729,6 +741,11 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph
       }
 
       if (mouseInteractions().isRelationshipDragActive()) {
+        if (!canEditGraph()) {
+          mouseInteractions().cancelActiveDragsOnBackgroundClick();
+          clearNoteDragState();
+          return;
+        }
         if (mouseInteractions().handleRelationshipMouseUp(e, real)) {
           return;
         }
@@ -742,7 +759,9 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph
       }
 
       // Hop Web arms iconDragCommitted on mouse-down. A still click is not a completed drag.
-      if (!isUnmovedClick(real) && mouseInteractions().handleCommittedDragMouseUp(e)) {
+      if (canEditGraph()
+          && !isUnmovedClick(real)
+          && mouseInteractions().handleCommittedDragMouseUp(e)) {
         return;
       }
 
@@ -850,7 +869,7 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph
    * true when drag was just committed.
    */
   protected boolean tryCommitIconDrag(Point real) {
-    if (iconDragCommitted || iconDragStart == null) {
+    if (!canEditGraph() || iconDragCommitted || iconDragStart == null) {
       return false;
     }
     int dxs = real.x - iconDragStart.x;
@@ -891,6 +910,12 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph
     selectedNote = noteHit;
     noteWasMoved = false;
     prepareExclusiveDragSelection(control, noteHit.isSelected(), () -> noteHit.setSelected(true));
+    if (!canEditGraph()) {
+      mouseInteractions().clearObjectDragState();
+      clearSelectionRegion();
+      redraw();
+      return true;
+    }
 
     Point loc = noteHit.getLocation() != null ? noteHit.getLocation() : new Point(0, 0);
     noteOffset = new Point(real.x - loc.x, real.y - loc.y);
@@ -1060,7 +1085,8 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph
 
   /** Ends in-progress note resize on mouse-up. Returns true when resize was finalized. */
   protected boolean handleNoteResizeMouseUp() {
-    if (resize == null || selectedNote == null) {
+    if (!canEditGraph() || resize == null || selectedNote == null) {
+      resize = null;
       return false;
     }
     setChanged();
@@ -1402,11 +1428,17 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph
 
   /** Snapshot undo before an AI proposal apply. Must run before mutations. */
   public void markAiAdvisorUndoPoint() {
+    if (!canEditGraph()) {
+      return;
+    }
     markUndoPoint();
   }
 
   /** Mark changed, redraw, and refresh undo toolbar after AI proposals are applied. */
   public void afterAiAdvisorApply() {
+    if (!canEditGraph()) {
+      return;
+    }
     setChanged();
     redraw();
     enableUndoToolbarItems();
@@ -1422,6 +1454,10 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph
   }
 
   protected void applySnapshotChange(Object restored) {
+    if (!canEditGraph()) {
+      HopSecurityUi.deny(Permission.FILE_EDIT);
+      return;
+    }
     if (restored == null) {
       return;
     }
@@ -1438,8 +1474,30 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph
     if (widgets == null || snapshotUndo == null) {
       return;
     }
-    widgets.enableToolbarItem(undoToolbarItemId(), snapshotUndo.canUndo());
-    widgets.enableToolbarItem(redoToolbarItemId(), snapshotUndo.canRedo());
+    boolean canEdit = canEditGraph();
+    widgets.enableToolbarItem(undoToolbarItemId(), canEdit && snapshotUndo.canUndo());
+    widgets.enableToolbarItem(redoToolbarItemId(), canEdit && snapshotUndo.canRedo());
+  }
+
+  /** Deliberate model edit. Shows the Hop access-denied dialog when the session cannot edit. */
+  protected boolean allowModelEdit() {
+    return EdwWebAuthorizationUi.allowModelEdit();
+  }
+
+  protected boolean allowSaveFiles() {
+    return EdwWebAuthorizationUi.allowSaveFiles();
+  }
+
+  protected boolean allowCreateFiles() {
+    return EdwWebAuthorizationUi.allowCreateFiles();
+  }
+
+  protected boolean allowExecute() {
+    return EdwWebAuthorizationUi.allowExecute();
+  }
+
+  protected boolean allowCatalogEdit() {
+    return EdwWebAuthorizationUi.allowCatalogEdit();
   }
 
   protected void showUndoError(String title, String message, Exception e) {
@@ -1705,7 +1763,7 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph
   }
 
   public void editNote(DvNote note, boolean recordUndo) {
-    if (note == null) {
+    if (note == null || !allowModelEdit()) {
       return;
     }
     byte[] beforeChange = recordUndo ? captureUndoSnapshot() : null;
