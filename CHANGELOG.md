@@ -4,6 +4,10 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## [Unreleased]
 
+### Presentation engine 1.0.0
+
+- Dashboards, the Performance chart, and the Gantt chart use `hopper-presentation-core` and `hopper-presentation-swt` **1.0.0**.
+
 ### Hop Web modeler context menus (issue #239)
 
 - Left-click context menus on source, Data Vault, Business Vault, dimensional, and execution-map canvases open again in Hop Web. Those actions are registered on a plain plugin with a no-arg constructor, the same pattern as lineage view, instead of on the graph widget.
