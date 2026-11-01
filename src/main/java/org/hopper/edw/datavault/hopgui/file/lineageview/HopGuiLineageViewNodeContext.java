@@ -20,10 +20,10 @@ import java.util.List;
 import lombok.Getter;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.gui.plugin.action.GuiAction;
-import org.apache.hop.core.gui.plugin.action.GuiActionLambdaBuilder;
 import org.apache.hop.core.logging.LogChannel;
 import org.apache.hop.ui.hopgui.context.BaseGuiContextHandler;
 import org.apache.hop.ui.hopgui.context.IGuiContextHandler;
+import org.hopper.edw.datavault.hopgui.file.ContextActionBinder;
 import org.hopper.edw.datavault.lineageview.HopLineageViewDocument;
 import org.hopper.edw.datavault.lineageview.backend.LineageNode;
 
@@ -58,13 +58,11 @@ public class HopGuiLineageViewNodeContext extends BaseGuiContextHandler
   @Override
   public List<GuiAction> getSupportedActions() {
     List<GuiAction> actions = new ArrayList<>();
-    GuiActionLambdaBuilder<HopGuiLineageViewNodeContext> lambdaBuilder =
-        new GuiActionLambdaBuilder<>();
     List<GuiAction> pluginActions = getPluginActions(true);
     if (pluginActions != null) {
       for (GuiAction pluginAction : pluginActions) {
         try {
-          actions.add(lambdaBuilder.createLambda(pluginAction, this, lineageViewGraph));
+          actions.add(ContextActionBinder.bind(pluginAction, this, lineageViewGraph));
         } catch (Exception e) {
           LogChannel.UI.logError(
               "Unable to create lineage view context action " + pluginAction.getId(), e);

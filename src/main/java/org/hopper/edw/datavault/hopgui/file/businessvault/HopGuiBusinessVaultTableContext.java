@@ -19,9 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.gui.plugin.action.GuiAction;
-import org.apache.hop.core.gui.plugin.action.GuiActionLambdaBuilder;
 import org.apache.hop.ui.hopgui.context.BaseGuiContextHandler;
 import org.apache.hop.ui.hopgui.context.IGuiContextHandler;
+import org.hopper.edw.datavault.hopgui.file.ContextActionBinder;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.BvBridge;
 import org.hopper.edw.datavault.metadata.businessvault.BvPitTable;
@@ -58,8 +58,6 @@ public class HopGuiBusinessVaultTableContext extends BaseGuiContextHandler
   @Override
   public List<GuiAction> getSupportedActions() {
     List<GuiAction> actions = new ArrayList<>();
-    GuiActionLambdaBuilder<HopGuiBusinessVaultTableContext> lambdaBuilder =
-        new GuiActionLambdaBuilder<>();
     List<GuiAction> pluginActions = getPluginActions(true);
     if (pluginActions != null) {
       for (GuiAction pluginAction : pluginActions) {
@@ -73,7 +71,7 @@ public class HopGuiBusinessVaultTableContext extends BaseGuiContextHandler
             && !(table instanceof BvScd2Table)) {
           continue;
         }
-        actions.add(lambdaBuilder.createLambda(pluginAction, this, businessVaultGraph));
+        actions.add(ContextActionBinder.bind(pluginAction, this, businessVaultGraph));
       }
     }
     return actions;

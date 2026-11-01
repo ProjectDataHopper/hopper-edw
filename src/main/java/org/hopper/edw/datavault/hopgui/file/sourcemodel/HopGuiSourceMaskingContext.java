@@ -19,14 +19,15 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.gui.plugin.action.GuiAction;
-import org.apache.hop.core.gui.plugin.action.GuiActionLambdaBuilder;
 import org.apache.hop.ui.hopgui.context.BaseGuiContextHandler;
 import org.apache.hop.ui.hopgui.context.IGuiContextHandler;
+import org.hopper.edw.datavault.hopgui.file.ContextActionBinder;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceMasking;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceModel;
 
 /** Context handler for clicks on a source masking card. */
-public class HopGuiSourceMaskingContext extends BaseGuiContextHandler implements IGuiContextHandler {
+public class HopGuiSourceMaskingContext extends BaseGuiContextHandler
+    implements IGuiContextHandler {
 
   public static final String CONTEXT_ID = "HopGuiSourceMaskingContext";
 
@@ -54,11 +55,10 @@ public class HopGuiSourceMaskingContext extends BaseGuiContextHandler implements
   @Override
   public List<GuiAction> getSupportedActions() {
     List<GuiAction> actions = new ArrayList<>();
-    GuiActionLambdaBuilder<HopGuiSourceMaskingContext> lambdaBuilder = new GuiActionLambdaBuilder<>();
     List<GuiAction> pluginActions = getPluginActions(true);
     if (pluginActions != null) {
       for (GuiAction pluginAction : pluginActions) {
-        actions.add(lambdaBuilder.createLambda(pluginAction, this, sourceModelGraph));
+        actions.add(ContextActionBinder.bind(pluginAction, this, sourceModelGraph));
       }
     }
     return actions;

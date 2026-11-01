@@ -19,9 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.gui.plugin.action.GuiAction;
-import org.apache.hop.core.gui.plugin.action.GuiActionLambdaBuilder;
 import org.apache.hop.ui.hopgui.context.BaseGuiContextHandler;
 import org.apache.hop.ui.hopgui.context.IGuiContextHandler;
+import org.hopper.edw.datavault.hopgui.file.ContextActionBinder;
 import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapDocument;
 import org.hopper.edw.datavault.metadata.executionmap.ExecutionMapNode;
 
@@ -55,12 +55,10 @@ public class HopGuiExecutionMapNodeContext extends BaseGuiContextHandler
   @Override
   public List<GuiAction> getSupportedActions() {
     List<GuiAction> actions = new ArrayList<>();
-    GuiActionLambdaBuilder<HopGuiExecutionMapNodeContext> lambdaBuilder =
-        new GuiActionLambdaBuilder<>();
     List<GuiAction> pluginActions = getPluginActions(true);
     if (pluginActions != null) {
       for (GuiAction pluginAction : pluginActions) {
-        actions.add(lambdaBuilder.createLambda(pluginAction, this, executionMapGraph));
+        actions.add(ContextActionBinder.bind(pluginAction, this, executionMapGraph));
       }
     }
     return actions;

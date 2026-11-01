@@ -19,9 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.gui.plugin.action.GuiAction;
-import org.apache.hop.core.gui.plugin.action.GuiActionLambdaBuilder;
 import org.apache.hop.ui.hopgui.context.BaseGuiContextHandler;
 import org.apache.hop.ui.hopgui.context.IGuiContextHandler;
+import org.hopper.edw.datavault.hopgui.file.ContextActionBinder;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.IDvTable;
 
@@ -56,7 +56,6 @@ public class HopGuiVaultTableContext extends BaseGuiContextHandler implements IG
   @Override
   public List<GuiAction> getSupportedActions() {
     List<GuiAction> actions = new ArrayList<>();
-    GuiActionLambdaBuilder<HopGuiVaultTableContext> lambdaBuilder = new GuiActionLambdaBuilder<>();
 
     // Get the actions from @GuiContextAction annotations (in HopGuiVaultGraph)
     // that specify parentId = HopGuiVaultTableContext.CONTEXT_ID .
@@ -64,7 +63,7 @@ public class HopGuiVaultTableContext extends BaseGuiContextHandler implements IG
     List<GuiAction> pluginActions = getPluginActions(true);
     if (pluginActions != null) {
       for (GuiAction pluginAction : pluginActions) {
-        actions.add(lambdaBuilder.createLambda(pluginAction, this, vaultGraph));
+        actions.add(ContextActionBinder.bind(pluginAction, this, vaultGraph));
       }
     }
 

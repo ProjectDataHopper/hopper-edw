@@ -19,9 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.gui.plugin.action.GuiAction;
-import org.apache.hop.core.gui.plugin.action.GuiActionLambdaBuilder;
 import org.apache.hop.ui.hopgui.context.BaseGuiContextHandler;
 import org.apache.hop.ui.hopgui.context.IGuiContextHandler;
+import org.hopper.edw.datavault.hopgui.file.ContextActionBinder;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 
 /**
@@ -51,18 +51,16 @@ public class HopGuiVaultContext extends BaseGuiContextHandler implements IGuiCon
   @Override
   public List<GuiAction> getSupportedActions() {
     List<GuiAction> actions = new ArrayList<>();
-    GuiActionLambdaBuilder<HopGuiVaultContext> lambdaBuilder = new GuiActionLambdaBuilder<>();
 
     // Get the actions from @GuiContextAction annotations (in HopGuiVaultGraph etc)
     // that specify parentId = HopGuiVaultContext.CONTEXT_ID .
-    // We manually wrap with lambdas that invoke on the *real* vaultGraph instance we hold
-    // (avoids needing no-arg ctor on HopGuiVaultGraph or implementing IGuiRefresher for
-    // lambdaBuilder).
+    // ContextActionBinder invokes them on the loader that defined this context, and passes the
+    // live vaultGraph as the refresher.
     //
     List<GuiAction> pluginActions = getPluginActions(true);
     if (pluginActions != null) {
       for (GuiAction pluginAction : pluginActions) {
-        actions.add(lambdaBuilder.createLambda(pluginAction, this, vaultGraph));
+        actions.add(ContextActionBinder.bind(pluginAction, this, vaultGraph));
       }
     }
 
