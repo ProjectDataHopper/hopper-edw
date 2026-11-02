@@ -851,7 +851,13 @@
               <executable>bash</executable>
               <arguments>
                 <argument>-c</argument>
-                <argument>if [ ! -f "${project.basedir}/hop-hsm-jdbc/pom.xml" ]; then echo "Skipping hop-hsm-jdbc (no module POM)"; exit 0; fi; mvn -q -f "${project.basedir}/hop-hsm-jdbc/pom.xml" package -DskipTests</argument>
+                <argument>set -euo pipefail
+jdbc="${project.basedir}/hop-hsm-jdbc"
+if [ ! -f "$jdbc/pom.xml" ]; then echo "Skipping hop-hsm-jdbc (no module POM)"; exit 0; fi
+# Release builds run versions:set on this POM only. hop-hsm-jdbc is a separate project, so give it the same version or the assembly looks for a jar that was not built.
+mvn -B -q -f "$jdbc/pom.xml" org.codehaus.mojo:versions-maven-plugin:2.18.0:set -DnewVersion=${project.version} -DgenerateBackupPoms=false
+mvn -B -q -f "$jdbc/pom.xml" package -DskipTests
+test -f "$jdbc/target/hop-hsm-jdbc-${project.version}.jar"</argument>
               </arguments>
             </configuration>
           </execution>
