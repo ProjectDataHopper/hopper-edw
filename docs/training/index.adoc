@@ -109,7 +109,7 @@ by hand.
 #   File -> Open project -> retail-example
 ----
 
-Prerequisites: **Apache Hop 2.20** (development `2.20.0-SNAPSHOT`) and **Java 21**, plus Docker with
+Prerequisites: **Apache Hop 2.20.0** and **Java 21**, plus Docker with
 Compose v2 for the commands above. Marquez is only needed for module 7; `./scripts/run-marquez.sh
 status` reports whether its API answers, `down` stops the stack and `reset` wipes its database too.
 See link:../getting-started-retail.adoc[getting-started-retail]

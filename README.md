@@ -18,9 +18,9 @@ limitations under the License.
 
 ![EDW](docs/images/edw-logo.svg)
 
-Apache Hop plugins to design, generate, and operate an **Enterprise Data Warehouse**: Data Catalog, source models, **Data Vault 2.0**, **Business Vault**, **dimensional** models, quality, lineage, and the **EDW Journey** map. Version **0.17.0-SNAPSHOT** (latest release **0.16.0**) requires **Apache Hop 2.20** (development **2.20.0-SNAPSHOT**) and **Java 21**.
+Apache Hop plugins to design, generate, and operate an **Enterprise Data Warehouse**: Data Catalog, source models, **Data Vault 2.0**, **Business Vault**, **dimensional** models, quality, lineage, and the **EDW Journey** map. Version **1.0.0** requires **Apache Hop 2.20.0** and **Java 21**.
 
-**Hop 2.20.0-SNAPSHOT is required.** Hop **2.19.x** and earlier are **not** supported for this development line.
+**Hop 2.20.0 is required.** Hop **2.19.x** and earlier are **not** supported.
 
 **Model once. Generate loads and consumption layers.** Sources live in the Hop **Data Catalog**; visual **`.hsm`**, **`.hdv`**, **`.hbv`**, and **`.hdm`** models drive workflow actions, optional **execution maps** (`.hem`), and **Hop Lineage Views** (`.hlv`).
 
@@ -136,26 +136,26 @@ mvn clean package
 
 Artifacts:
 
-- `target/hopper-edw-0.17.0-SNAPSHOT.jar`
-- `target/hopper-edw-0.17.0-SNAPSHOT.zip` (ready-to-unzip plugin layout)
+- `target/hopper-edw-1.0.0.jar`
+- `target/hopper-edw-1.0.0.zip` (ready-to-unzip plugin layout)
 
 Maven coordinates from **0.10.0** onward: `org.hopper:hopper-edw`. Release **0.9.0** was published as `org.apache.hop:hop-datavault` and unpacked under `plugins/misc/datavault/`.
 
-Published release artifacts for **0.16.0**:
+Published release artifacts for **1.0.0**:
 
-- **GitHub:** [v0.16.0 release](https://github.com/ProjectDataHopper/hopper-edw/releases/tag/v0.16.0) — [hopper-edw-0.16.0.zip](https://github.com/ProjectDataHopper/hopper-edw/releases/download/v0.16.0/hopper-edw-0.16.0.zip)
-- **Nexus (Marketplace):** [hopper-edw-0.16.0.zip](https://repository.data-hopper.com/repository/hop-community-plugins/org/hopper/hopper-edw/0.16.0/hopper-edw-0.16.0.zip) (`org.hopper:hopper-edw:0.16.0`)
+- **GitHub:** [v1.0.0 release](https://github.com/ProjectDataHopper/hopper-edw/releases/tag/v1.0.0) — [hopper-edw-1.0.0.zip](https://github.com/ProjectDataHopper/hopper-edw/releases/download/v1.0.0/hopper-edw-1.0.0.zip)
+- **Nexus (Marketplace):** [hopper-edw-1.0.0.zip](https://repository.data-hopper.com/repository/hop-community-plugins/org/hopper/hopper-edw/1.0.0/hopper-edw-1.0.0.zip) (`org.hopper:hopper-edw:1.0.0`)
 
 ## Installation (external plugin)
 
-1. Install **Apache Hop 2.20.0-SNAPSHOT**.
+1. Install **Apache Hop 2.20.0**.
 2. Unzip the assembly zip into your Hop installation root (`$HOP_HOME`) so both `plugins/misc/hopper-edw/` and `lib/core/` (Jinjava) are updated. Copying only the plugin jar is not enough for Jinja SQL.
 3. Restart Hop GUI.
 4. New metadata types appear under **Metadata → EDW**. **Data Vault Update**, **Business Vault Update**, **Validate resource definitions**, **Export data lineage**, and **Update resource definition group** actions are available in workflows. `.hsm`, `.hdv`, `.hbv`, `.hdm`, and `.hlv` files open in Explorer tabs.
 
 ### Hop Marketplace
 
-Continuous Jenkins builds publish the latest SNAPSHOT zip to the Data Hopper community Maven repository. On **Apache Hop 2.20.0-SNAPSHOT**, import the shareable repository definition ([`hop-marketplace-repo.yaml`](hop-marketplace-repo.yaml)), then query and install.
+Continuous Jenkins builds publish the latest SNAPSHOT zip to the Data Hopper community Maven repository. On **Apache Hop 2.20.0**, import the shareable repository definition ([`hop-marketplace-repo.yaml`](hop-marketplace-repo.yaml)), then query and install.
 
 **1. Import the repository** (from GitHub `main`, or a local clone of this file):
 
@@ -177,7 +177,7 @@ If you previously installed **0.9.0** as `hop-datavault`, remove `$HOP_HOME/plug
 ```
 
 ```text
-| hopper-edw                | 0.16.0          | Community     | data-hopper-community |           | 2026-10-23 | Apache Hop plugins to build an Enterprise Data Wareho... |
+| hopper-edw                | 1.0.0           | Community     | data-hopper-community |           | 2026-11-02 | Apache Hop plugins to build an Enterprise Data Wareho... |
 ```
 
 **3. Install** the plugin (latest release or continuous SNAPSHOT when published):
@@ -187,15 +187,15 @@ If you previously installed **0.9.0** as `hop-datavault`, remove `$HOP_HOME/plug
 ```
 
 ```text
-Resolved hopper-edw → org.hopper:hopper-edw:0.16.0 (prefer repo 'data-hopper-community')
-… Marketplace - Downloading org.hopper:hopper-edw:0.16.0 from https://repository.data-hopper.com/repository/hop-community-plugins/…
-… Marketplace - Installed org.hopper:hopper-edw:0.16.0. Restart Hop to load the plugin.
-Plugin org.hopper:hopper-edw:0.16.0 installed under $HOP_HOME from repo 'data-hopper-community'. Restart Hop to load it.
+Resolved hopper-edw → org.hopper:hopper-edw:1.0.0 (prefer repo 'data-hopper-community')
+… Marketplace - Downloading org.hopper:hopper-edw:1.0.0 from https://repository.data-hopper.com/repository/hop-community-plugins/…
+… Marketplace - Installed org.hopper:hopper-edw:1.0.0. Restart Hop to load the plugin.
+Plugin org.hopper:hopper-edw:1.0.0 installed under $HOP_HOME from repo 'data-hopper-community'. Restart Hop to load it.
 ```
 
 You can also use **Tools → Marketplace…** in Hop GUI: import the repository on the **Repositories** tab, then install from the **Plugins** tab.
 
-**Restart Hop** after install so the plugin registry reloads. This plugin requires **Hop 2.20.0-SNAPSHOT**.
+**Restart Hop** after install so the plugin registry reloads. This plugin requires **Hop 2.20.0**.
 
 ## Usage
 
@@ -232,6 +232,8 @@ SELECT * FROM sat_customer WHERE x_load_end_ts IS NULL
 - Record source groups for partial model updates
 
 ## Roadmap / releases
+
+**Shipped in 1.0.0:** first stable release, aligned with Apache Hop **2.20.0**. Semantic layer and Hopper presentations are available. See [CHANGELOG.md](CHANGELOG.md).
 
 **Shipped in 0.16.0:** a dimensional model service exposes a `.hdm` as a masked `jdbc:hop-hsm:` schema with query audit; lineage cards; crosstab selections and page format; the architecture poster adds Hop JDBC clients. See [CHANGELOG.md](CHANGELOG.md).
 

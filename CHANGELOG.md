@@ -4,6 +4,14 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## [Unreleased]
 
+## [1.0.0] — 2026-11-02
+
+Requires **Apache Hop 2.20.0** and **Java 21**.
+
+First stable release. It matches Apache Hop 2.20.0.
+
+**Downloads:** [GitHub release zip](https://github.com/ProjectDataHopper/hopper-edw/releases/download/v1.0.0/hopper-edw-1.0.0.zip) · [Data Hopper Nexus](https://repository.data-hopper.com/repository/hop-community-plugins/org/hopper/hopper-edw/1.0.0/hopper-edw-1.0.0.zip) (`org.hopper:hopper-edw:1.0.0`)
+
 ### Presentation engine 1.0.0
 
 - Dashboards, the Performance chart, and the Gantt chart use `hopper-presentation-core` and `hopper-presentation-swt` **1.0.0**.

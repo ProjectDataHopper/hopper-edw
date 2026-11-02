@@ -15,7 +15,7 @@ The tour of the sample (catalog, models, schema gate, lineage) stays in link:get
 |Where |What
 
 |Windows 11
-|Java 21, Apache Hop *2.20.0-SNAPSHOT*, the Data Hopper EDW plugin, and Hop GUI
+|Java 21, Apache Hop *2.20.0*, the Data Hopper EDW plugin, and Hop GUI
 
 |Ubuntu on WSL2
 |This git repository, Docker Compose, PostgreSQL on port *54320*, and Marquez (API *5001*, UI *3001*)
@@ -36,10 +36,10 @@ Replace `<user>` with your Ubuntu username. Both prefixes point at the same file
 == Install Hop and the plugin on Windows
 
 . Install *Java 21*.
-. Install *Apache Hop 2.20.0-SNAPSHOT*. This plugin requires that line. Hop 2.19 does not load it. Install steps and the version pin are in link:../README.md[the repository README].
+. Install *Apache Hop 2.20.0*. This plugin requires that release. Hop 2.19 does not load it. Install steps and the version pin are in link:../README.md[the repository README].
 . Install the plugin. Unzip a release assembly into the Hop installation root so both `plugins/misc/hopper-edw/` and `lib/core/` are updated. Copying only the plugin jar leaves Jinja SQL unresolved.
 +
-Release *0.16.0*: https://github.com/ProjectDataHopper/hopper-edw/releases/tag/v0.16.0[v0.16.0] includes `hopper-edw-0.16.0.zip`. The same README section describes the Hop Marketplace install on Hop 2.20.0-SNAPSHOT.
+Release *1.0.0*: https://github.com/ProjectDataHopper/hopper-edw/releases/tag/v1.0.0[v1.0.0] includes `hopper-edw-1.0.0.zip`. The same README section describes the Hop Marketplace install on Hop 2.20.0.
 . Restart Hop. *Metadata → EDW* lists the EDW metadata types when the plugin has loaded.
 
 == Install Ubuntu, Git, and Docker Compose

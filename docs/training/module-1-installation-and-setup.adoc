@@ -14,8 +14,7 @@ saves the next hour. Two install details decide whether a first session works:
 
 * the plugin is not just a jar — the assembly zip also updates `lib/core/` so Jinja-based SQL
   resolves, and
-* the version pins are hard: the plugin requires **Apache Hop 2.20** (development builds run
-  `2.20.0-SNAPSHOT`) and **Java 21**. Nothing else is supported.
+* the version pins are hard: the plugin requires **Apache Hop 2.20.0** and **Java 21**. Nothing else is supported.
 
 This module installs the plugin by either supported route — **Hop Marketplace** or the **assembly
 zip** into `$HOP_HOME` — runs the first-time **Configure EDW setup** helper, and proves the local
@@ -83,7 +82,7 @@ image::../images/hopgui-configuration-perspecive-data-vault-options.png[Hopper E
 
 === Install the plugin
 
-Route 1 — **Hop Marketplace** (needs Hop 2.20.0-SNAPSHOT). Import the shareable repository
+Route 1 — **Hop Marketplace** (needs Hop 2.20.0). Import the shareable repository
 definition, install the plugin, then restart Hop:
 
 [source,sh]
@@ -211,11 +210,11 @@ you a text summary to keep.
     <p class="edw-quiz-prompt">1. Which Apache Hop version does this plugin require?</p>
     <div class="edw-quiz-options">
       <button type="button" class="edw-quiz-option">a) Any Hop 2.x release; the plugin just targets the 2.x line</button>
-      <button type="button" class="edw-quiz-option" data-correct="true">b) Apache Hop 2.20 (<code>2.20.0-SNAPSHOT</code> until GA)</button>
+      <button type="button" class="edw-quiz-option" data-correct="true">b) Apache Hop 2.20.0</button>
       <button type="button" class="edw-quiz-option">c) Apache Hop 2.19 with a compatibility flag</button>
       <button type="button" class="edw-quiz-option">d) The newest Hop available, whichever version that is</button>
     </div>
-    <p class="edw-quiz-explain" hidden><strong>b)</strong> The plugin is built against the Hop <strong>2.20</strong> line and requires <code>2.20.0-SNAPSHOT</code> until 2.20.0 is released. The pin is deliberate and does not move without a human decision.</p>
+    <p class="edw-quiz-explain" hidden><strong>b)</strong> The plugin is built against Apache Hop <strong>2.20.0</strong> and requires that release. The pin does not move without a human decision.</p>
   </div>
 
   <div class="edw-quiz-q" data-id="m1-q2">

@@ -19,7 +19,7 @@
 
   <groupId>org.hopper</groupId>
   <artifactId>hopper-edw</artifactId>
-  <version>0.17.0-SNAPSHOT</version>
+  <version>1.0.0</version>
   <packaging>jar</packaging>
 
   <name>Data Hopper EDW</name>
@@ -63,8 +63,8 @@
     <commonmark.version>0.29.0</commonmark.version>
     <elk.version>0.10.0</elk.version>
     <hadoop.version>3.3.6</hadoop.version>
-    <!-- Required runtime: Apache Hop 2.20.0-SNAPSHOT (until 2.20.0 GA). -->
-    <hop.version>2.20.0-SNAPSHOT</hop.version>
+    <!-- Required runtime: Apache Hop 2.20.0 from Maven Central. -->
+    <hop.version>2.20.0</hop.version>
     <!-- Hopper Presentation Engine (issue #170). Resolved from repository.data-hopper.com/hopper. -->
     <hopper.presentation.version>1.0.0</hopper.presentation.version>
     <iceberg.version>1.6.1</iceberg.version>
@@ -531,9 +531,8 @@
   </dependencies>
 
   <!--
-    Optional ASF snapshots repository. Hop 2.20.0-SNAPSHOT is resolved from here (or a
-    local mvn install of the Hop tree). Releases stay disabled so GA artifacts come from
-    Maven Central.
+    Hop 2.20.0 comes from Maven Central. Snapshot repositories stay for any dependency
+    that is still published only as a snapshot. Releases stay disabled on those repos.
   -->
   <repositories>
     <repository>
@@ -549,8 +548,7 @@
       <url>https://repository.apache.org/snapshots/</url>
     </repository>
     <!--
-      Mask fields (apache/hop#8748) is on Hop main but not in ASF snapshots yet.
-      The 2.20.0-SNAPSHOT jar is published here until the next ASF snapshot deploy.
+      Extra Hop plugin snapshots, used when a fix is ahead of the Maven Central release.
     -->
     <repository>
       <releases>

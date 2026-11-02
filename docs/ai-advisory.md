@@ -17,7 +17,7 @@ Start sessions with `conventions.md` + the file-type docs that match the edit. P
 ## Prerequisites & Installation
 
 To use the AI Helper:
-1. Install Apache Hop **2.20** (development **2.20.0-SNAPSHOT**) with the **AI Assistant** plugin (`plugins/tech/ai`). Removing that plugin makes AI Help a no-op; hopper-edw still loads.
+1. Install Apache Hop **2.20.0** with the **AI Assistant** plugin (`plugins/tech/ai`). Removing that plugin makes AI Help a no-op; hopper-edw still loads.
 2. Create a named **AI Provider** under **Metadata** and enable AI under **Configuration → Plugins → AI Assistant**.
 3. Open a `.hdv` / `.hbv` / `.hdm` / `.hsm` / `.hlv` / `.hem` graph (or the **EDW Journey** perspective) and click **AI Help** (floating workbench). Pipeline and workflow AI Help is Hop's, not this plugin.
 
