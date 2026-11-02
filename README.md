@@ -155,7 +155,7 @@ Published release artifacts for **1.0.0**:
 
 ### Hop Marketplace
 
-Continuous Jenkins builds publish the latest SNAPSHOT zip to the Data Hopper community Maven repository. On **Apache Hop 2.20.0**, import the shareable repository definition ([`hop-marketplace-repo.yaml`](hop-marketplace-repo.yaml)), then query and install.
+On **Apache Hop 2.20.0**, import the repository definition ([`hop-marketplace-repo.yaml`](hop-marketplace-repo.yaml)). That registers hop-community-plugins and lists release **1.0.0** from [`hop-marketplace-catalog.yaml`](hop-marketplace-catalog.yaml). Applying the same URL installs the plugin and does not add it to the Marketplace Plugins tab.
 
 **1. Import the repository** (from GitHub `main`, or a local clone of this file):
 
