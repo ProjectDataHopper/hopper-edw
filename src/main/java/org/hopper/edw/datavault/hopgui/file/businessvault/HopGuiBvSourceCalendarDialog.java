@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Text;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
 import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
 import org.hopper.edw.datavault.hopgui.help.HelpTopics;
+import org.hopper.edw.datavault.hopgui.security.EdwModelDialogSubjects;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.BvSourceCalendar;
@@ -51,7 +52,9 @@ import org.hopper.edw.datavault.metadata.businessvault.IBvTable;
 import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
 import org.hopper.edw.datavault.naming.EdwNamingWidgetSupport;
 
-/** Dialog for a Business Vault source calendar. The window grid is the body; buttons stay below it. */
+/**
+ * Dialog for a Business Vault source calendar. The window grid is the body; buttons stay below it.
+ */
 public class HopGuiBvSourceCalendarDialog {
 
   private static final Class<?> PKG = HopGuiBvSourceCalendarDialog.class;
@@ -108,6 +111,7 @@ public class HopGuiBvSourceCalendarDialog {
         BaseMessages.getString(
             ModelDialogValidationSupport.class, "ModelTableDialog.Validate.Label"));
     wValidate.addListener(SWT.Selection, e -> validate());
+    EdwModelDialogSubjects.keepInspect(wValidate);
     Button wCancel = new Button(shell, SWT.PUSH);
     wCancel.setText(BaseMessages.getString(PKG, "System.Button.Cancel"));
     wCancel.addListener(SWT.Selection, e -> cancel());
@@ -196,12 +200,19 @@ public class HopGuiBvSourceCalendarDialog {
         };
     wEntries =
         new TableView(
-            variables, shell, SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI, columns, 1, null, PropsUi.getInstance());
+            variables,
+            shell,
+            SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI,
+            columns,
+            1,
+            null,
+            PropsUi.getInstance());
     wEntries.setLayoutData(
         new FormDataBuilder().left().top(wAdd, margin).right().bottom(wOk, -margin).result());
 
     getData();
     BaseTransformDialog.setSize(shell, 760, 560);
+    EdwModelDialogSubjects.bindFileEdit(shell);
     BaseDialog.defaultShellHandling(shell, e -> ok(), e -> cancel());
     return ok;
   }

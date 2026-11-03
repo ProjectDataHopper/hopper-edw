@@ -30,16 +30,15 @@ import org.apache.hop.core.gui.Point;
 import org.apache.hop.core.gui.Rectangle;
 import org.apache.hop.core.gui.markdown.NoteLinkHit;
 import org.apache.hop.core.logging.LogChannel;
+import org.apache.hop.core.security.Permission;
 import org.apache.hop.core.util.Utils;
 import org.apache.hop.i18n.BaseMessages;
-import org.apache.hop.core.security.Permission;
 import org.apache.hop.ui.core.PropsUi;
 import org.apache.hop.ui.core.dialog.ErrorDialog;
 import org.apache.hop.ui.core.dialog.MessageBox;
 import org.apache.hop.ui.core.gui.GuiResource;
-import org.apache.hop.ui.core.security.HopSecurityUi;
-import org.hopper.edw.datavault.hopgui.security.EdwWebAuthorizationUi;
 import org.apache.hop.ui.core.gui.GuiToolbarWidgets;
+import org.apache.hop.ui.core.security.HopSecurityUi;
 import org.apache.hop.ui.hopgui.CanvasFacade;
 import org.apache.hop.ui.hopgui.CanvasListener;
 import org.apache.hop.ui.hopgui.CanvasSvgFacade;
@@ -77,7 +76,9 @@ import org.hopper.edw.datavault.hopgui.coaching.ModelCoachPanel;
 import org.hopper.edw.datavault.hopgui.file.metrics.ModelLoadDurationPane;
 import org.hopper.edw.datavault.hopgui.file.vault.BasePainter;
 import org.hopper.edw.datavault.hopgui.file.vault.DvNotePadSupport;
+import org.hopper.edw.datavault.hopgui.security.EdwWebAuthorizationUi;
 import org.hopper.edw.datavault.metadata.DvNote;
+import org.hopper.edw.security.EdwWebAuthorization;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -1482,6 +1483,14 @@ public abstract class HopGuiModelGraphBase extends HopGuiAbstractGraph
   /** Deliberate model edit. Shows the Hop access-denied dialog when the session cannot edit. */
   protected boolean allowModelEdit() {
     return EdwWebAuthorizationUi.allowModelEdit();
+  }
+
+  /**
+   * Whether a property dialog that returned OK may be committed. Silent: view-only sessions open
+   * the dialog and must not see an access-denied warning when OK is disabled.
+   */
+  protected boolean canCommitModelEdit() {
+    return EdwWebAuthorization.canEditModels();
   }
 
   protected boolean allowSaveFiles() {

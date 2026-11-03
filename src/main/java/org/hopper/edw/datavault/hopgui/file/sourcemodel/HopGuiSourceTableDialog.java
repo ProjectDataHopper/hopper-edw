@@ -54,6 +54,7 @@ import org.eclipse.swt.widgets.Text;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
 import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
 import org.hopper.edw.datavault.hopgui.help.HelpTopics;
+import org.hopper.edw.datavault.hopgui.security.EdwModelDialogSubjects;
 import org.hopper.edw.datavault.metadata.datatypemapping.PhysicalSourceField;
 import org.hopper.edw.datavault.metadata.datatypemapping.SourceDataTypeMappingSupport;
 import org.hopper.edw.datavault.metadata.sourcemodel.SourceColumn;
@@ -124,12 +125,14 @@ public class HopGuiSourceTableDialog {
     Button wValidate = new Button(shell, SWT.PUSH);
     wValidate.setText(BaseMessages.getString(PKG, "HopGuiSourceTableDialog.Validate.Button"));
     wValidate.addListener(SWT.Selection, e -> validateDefinition());
+    EdwModelDialogSubjects.keepInspect(wValidate);
     Button wCancel = new Button(shell, SWT.PUSH);
     wCancel.setText(BaseMessages.getString(PKG, "System.Button.Cancel"));
     wCancel.addListener(SWT.Selection, e -> cancel());
     Button wPreview = new Button(shell, SWT.PUSH);
     wPreview.setText(BaseMessages.getString(PKG, "HopGuiSourceTableDialog.Preview.Button"));
     wPreview.addListener(SWT.Selection, e -> previewData());
+    EdwModelDialogSubjects.keepPreview(wPreview);
     DialogHelpSupport.createHelpButton(shell, HelpTopics.SOURCE_TABLE);
     BaseTransformDialog.positionBottomButtons(
         shell, new Button[] {wOk, wValidate, wCancel, wPreview}, margin, null);
@@ -166,6 +169,7 @@ public class HopGuiSourceTableDialog {
     getData();
 
     BaseTransformDialog.setSize(shell, 780, 560);
+    EdwModelDialogSubjects.bindFileEdit(shell);
     BaseDialog.defaultShellHandling(shell, e -> ok(), e -> cancel());
     return ok;
   }
@@ -286,6 +290,7 @@ public class HopGuiSourceTableDialog {
     wShowDiff.setLayoutData(
         new FormDataBuilder().left(wGetColumns, margin).top(0, margin).result());
     wShowDiff.addListener(SWT.Selection, e -> showColumnDifferences());
+    EdwModelDialogSubjects.keepPreview(wShowDiff);
 
     String[] hopTypes = ValueMetaFactory.getValueMetaNames();
     ColumnInfo[] columns =

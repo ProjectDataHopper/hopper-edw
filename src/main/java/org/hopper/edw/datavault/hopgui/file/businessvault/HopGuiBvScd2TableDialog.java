@@ -61,6 +61,7 @@ import org.hopper.edw.datavault.hopgui.file.vault.TableViewPopulateSupport;
 import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
 import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 import org.hopper.edw.datavault.hopgui.lineage.LineageTabSupport;
+import org.hopper.edw.datavault.hopgui.security.EdwModelDialogSubjects;
 import org.hopper.edw.datavault.lineage.BvModelLineageCollector;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.DvSatellite;
@@ -72,6 +73,8 @@ import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultDvModelResol
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultSourceQuerySupport;
 import org.hopper.edw.datavault.metadata.businessvault.BvDerivativeRef;
+import org.hopper.edw.datavault.metadata.businessvault.BvIdentityMap;
+import org.hopper.edw.datavault.metadata.businessvault.BvIdentityUnmappedPolicy;
 import org.hopper.edw.datavault.metadata.businessvault.BvLegOperation;
 import org.hopper.edw.datavault.metadata.businessvault.BvNullPolicy;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2BuildMode;
@@ -83,8 +86,6 @@ import org.hopper.edw.datavault.metadata.businessvault.BvScd2HashPartitionCount;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2PipelineSupport;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2SatelliteConfig;
 import org.hopper.edw.datavault.metadata.businessvault.BvScd2Table;
-import org.hopper.edw.datavault.metadata.businessvault.BvIdentityMap;
-import org.hopper.edw.datavault.metadata.businessvault.BvIdentityUnmappedPolicy;
 import org.hopper.edw.datavault.metadata.businessvault.BvSourceCalendar;
 import org.hopper.edw.datavault.metadata.businessvault.BvSourceCalendarEntry;
 import org.hopper.edw.datavault.metadata.businessvault.BvSourceQueryRef;
@@ -184,6 +185,7 @@ public class HopGuiBvScd2TableDialog {
         BaseMessages.getString(
             ModelDialogValidationSupport.class, "ModelTableDialog.Validate.Label"));
     wValidate.addListener(SWT.Selection, e -> validate());
+    EdwModelDialogSubjects.keepInspect(wValidate);
     Button wCancel = new Button(shell, SWT.PUSH);
     wCancel.setText(BaseMessages.getString(PKG, "System.Button.Cancel"));
     wCancel.addListener(SWT.Selection, e -> cancel());
@@ -241,6 +243,7 @@ public class HopGuiBvScd2TableDialog {
     updateMappingsHint();
 
     BaseTransformDialog.setSize(shell, 720, 620);
+    EdwModelDialogSubjects.bindFileEdit(shell);
     BaseDialog.defaultShellHandling(shell, e -> ok(), e -> cancel());
     return ok;
   }
@@ -1461,8 +1464,7 @@ public class HopGuiBvScd2TableDialog {
       item.setText(2, Const.NVL(mapping.getSourceFieldName(), ""));
       item.setText(3, Const.NVL(mapping.getTargetFieldName(), ""));
       item.setText(4, Const.NVL(mapping.getRank(), ""));
-      item.setText(
-          5, mapping.getNullPolicy() == null ? "" : mapping.getNullPolicy().getCode());
+      item.setText(5, mapping.getNullPolicy() == null ? "" : mapping.getNullPolicy().getCode());
       item.setText(6, Const.NVL(mapping.getPresentFlagField(), ""));
     }
     wMappings.optimizeTableView();
@@ -1619,7 +1621,8 @@ public class HopGuiBvScd2TableDialog {
     item.setText(firstColumn + 4, Const.NVL(opField, ""));
   }
 
-  private static void applyLegCutover(BvScd2SatelliteConfig config, TableItem item, int firstColumn) {
+  private static void applyLegCutover(
+      BvScd2SatelliteConfig config, TableItem item, int firstColumn) {
     config.setSourceId(Const.trim(item.getText(firstColumn)));
     config.setOp(BvLegOperation.lookupCode(item.getText(firstColumn + 1)));
     config.setNullPolicyDefault(BvNullPolicy.lookupCode(item.getText(firstColumn + 2)));
@@ -1769,7 +1772,8 @@ public class HopGuiBvScd2TableDialog {
     target.setValidToField(wValidToField.getText());
     target.setSourceCalendarName(Const.trim(wSourceCalendar.getText()));
     target.setIdentityMapName(Const.trim(wIdentityMap.getText()));
-    target.setIdentityUnmappedPolicy(BvIdentityUnmappedPolicy.lookupCode(wIdentityUnmapped.getText()));
+    target.setIdentityUnmappedPolicy(
+        BvIdentityUnmappedPolicy.lookupCode(wIdentityUnmapped.getText()));
 
     applyDerivativesToTable(target);
     BusinessVaultDerivativeSupport.setParentHub(target, wParentHubName.getText());

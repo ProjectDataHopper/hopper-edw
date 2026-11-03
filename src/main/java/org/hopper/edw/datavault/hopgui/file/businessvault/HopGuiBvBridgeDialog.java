@@ -51,6 +51,7 @@ import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelDialogValidationSupp
 import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
 import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 import org.hopper.edw.datavault.hopgui.lineage.LineageTabSupport;
+import org.hopper.edw.datavault.hopgui.security.EdwModelDialogSubjects;
 import org.hopper.edw.datavault.lineage.BvModelLineageCollector;
 import org.hopper.edw.datavault.lineage.LineageSnapshot;
 import org.hopper.edw.datavault.lineage.TableLineage;
@@ -285,11 +286,13 @@ public class HopGuiBvBridgeDialog {
         BaseMessages.getString(
             ModelDialogValidationSupport.class, "ModelTableDialog.Validate.Label"));
     wValidate.addListener(SWT.Selection, e -> validate());
+    EdwModelDialogSubjects.keepInspect(wValidate);
     Button wLineage = new Button(shell, SWT.PUSH);
     wLineage.setText(BaseMessages.getString(LineageTabSupport.class, "LineageTab.ShowButton"));
     wLineage.setToolTipText(
         BaseMessages.getString(LineageTabSupport.class, "LineageTab.ShowButton.ToolTip"));
     wLineage.addListener(SWT.Selection, e -> showLineage());
+    EdwModelDialogSubjects.keepInspect(wLineage);
     Button wCancel = new Button(shell, SWT.PUSH);
     wCancel.setText(BaseMessages.getString(PKG, "System.Button.Cancel"));
     wCancel.addListener(SWT.Selection, e -> cancel());
@@ -300,6 +303,7 @@ public class HopGuiBvBridgeDialog {
 
     getData();
     BaseTransformDialog.setSize(shell, 640, 720);
+    EdwModelDialogSubjects.bindFileEdit(shell);
     BaseDialog.defaultShellHandling(shell, e -> ok(), e -> cancel());
     return ok;
   }

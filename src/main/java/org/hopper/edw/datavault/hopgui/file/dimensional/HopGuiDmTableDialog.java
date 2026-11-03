@@ -48,7 +48,6 @@ import org.apache.hop.ui.pipeline.transform.BaseTransformDialog;
 import org.apache.hop.ui.util.EnvironmentUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
-
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Button;
@@ -64,6 +63,7 @@ import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelDialogValidationSupp
 import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
 import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 import org.hopper.edw.datavault.hopgui.lineage.LineageTabSupport;
+import org.hopper.edw.datavault.hopgui.security.EdwModelDialogSubjects;
 import org.hopper.edw.datavault.lineage.DmModelLineageCollector;
 import org.hopper.edw.datavault.metadata.busmatrix.BusinessProcessCatalogMeta;
 import org.hopper.edw.datavault.metadata.busmatrix.BusinessProcessCatalogSupport;
@@ -80,7 +80,6 @@ import org.hopper.edw.datavault.metadata.dimensional.DmDimensionAlias;
 import org.hopper.edw.datavault.metadata.dimensional.DmDimensionAttribute;
 import org.hopper.edw.datavault.metadata.dimensional.DmDimensionLoadStrategySupport;
 import org.hopper.edw.datavault.metadata.dimensional.DmDimensionLoadStrategySupport.DmDimensionLoadStrategy;
-import org.hopper.edw.datavault.metadata.dimensional.DmType1UpdateMode;
 import org.hopper.edw.datavault.metadata.dimensional.DmDimensionOutriggerRef;
 import org.hopper.edw.datavault.metadata.dimensional.DmDimensionResolutionSupport;
 import org.hopper.edw.datavault.metadata.dimensional.DmFact;
@@ -112,6 +111,7 @@ import org.hopper.edw.datavault.metadata.dimensional.DmSurrogateKeySupport;
 import org.hopper.edw.datavault.metadata.dimensional.DmTableBase;
 import org.hopper.edw.datavault.metadata.dimensional.DmTableType;
 import org.hopper.edw.datavault.metadata.dimensional.DmTargetDatabaseSupport;
+import org.hopper.edw.datavault.metadata.dimensional.DmType1UpdateMode;
 import org.hopper.edw.datavault.metadata.dimensional.IDmFactLikeTable;
 import org.hopper.edw.datavault.metadata.dimensional.IDmTable;
 import org.hopper.edw.datavault.naming.EdwNamingSchemeTypes;
@@ -283,6 +283,7 @@ public class HopGuiDmTableDialog {
         BaseMessages.getString(
             ModelDialogValidationSupport.class, "ModelTableDialog.Validate.Label"));
     wValidate.addListener(SWT.Selection, e -> validate());
+    EdwModelDialogSubjects.keepInspect(wValidate);
     Button wCancel = new Button(shell, SWT.PUSH);
     wCancel.setText(BaseMessages.getString(PKG, "System.Button.Cancel"));
     wCancel.addListener(SWT.Selection, e -> cancel());
@@ -334,6 +335,7 @@ public class HopGuiDmTableDialog {
         dimensionAlias
             ? 360
             : range ? 520 : dimension ? 620 : junk ? 480 : bridge ? 520 : factless ? 560 : 620);
+    EdwModelDialogSubjects.bindFileEdit(shell);
     BaseDialog.defaultShellHandling(shell, e -> ok(), e -> cancel());
 
     return ok;
@@ -442,7 +444,9 @@ public class HopGuiDmTableDialog {
       wDerivedLoadStrategy.addListener(
           SWT.Selection,
           e -> {
-            if (populatingAttributes || refreshingLoadStrategy || !wDerivedLoadStrategy.isEnabled()) {
+            if (populatingAttributes
+                || refreshingLoadStrategy
+                || !wDerivedLoadStrategy.isEnabled()) {
               return;
             }
             selectedType1UpdateMode =
@@ -1035,7 +1039,11 @@ public class HopGuiDmTableDialog {
         BaseMessages.getString(PKG, "HopGuiDmTableDialog.SourceFactTable.ToolTip"));
     PropsUi.setLook(wlSourceFactTable);
     wlSourceFactTable.setLayoutData(
-        new FormDataBuilder().left().top(wLoadStrategySummary, margin).right(middle, -margin).result());
+        new FormDataBuilder()
+            .left()
+            .top(wLoadStrategySummary, margin)
+            .right(middle, -margin)
+            .result());
 
     wSourceFactTable = new Combo(comp, SWT.READ_ONLY | SWT.BORDER);
     PropsUi.setLook(wSourceFactTable);
@@ -1085,6 +1093,7 @@ public class HopGuiDmTableDialog {
     PropsUi.setLook(wSourcePreview);
     wSourcePreview.setLayoutData(new FormDataBuilder().left(middle, 0).bottom().result());
     wSourcePreview.addListener(SWT.Selection, e -> previewSourceSql());
+    EdwModelDialogSubjects.keepPreview(wSourcePreview);
 
     wSourceSql.setLayoutData(
         new FormDataBuilder()
@@ -1101,7 +1110,11 @@ public class HopGuiDmTableDialog {
         BaseMessages.getString(PKG, "HopGuiDmTableDialog.SourcePipelineFile.ToolTip"));
     PropsUi.setLook(wlSourcePipelineFile);
     wlSourcePipelineFile.setLayoutData(
-        new FormDataBuilder().left().top(wLoadStrategySummary, margin).right(middle, -margin).result());
+        new FormDataBuilder()
+            .left()
+            .top(wLoadStrategySummary, margin)
+            .right(middle, -margin)
+            .result());
 
     wOpenSourcePipeline = new Button(comp, SWT.PUSH);
     wOpenSourcePipeline.setText(
@@ -1186,6 +1199,7 @@ public class HopGuiDmTableDialog {
     wSourcePipelinePreviewData.setLayoutData(
         new FormDataBuilder().left(middle, 0).bottom().result());
     wSourcePipelinePreviewData.addListener(SWT.Selection, e -> previewSourcePipelineData());
+    EdwModelDialogSubjects.keepPreview(wSourcePipelinePreviewData);
 
     wSourcePipelinePreview = new Button(comp, SWT.PUSH);
     wSourcePipelinePreview.setText(
@@ -1196,6 +1210,7 @@ public class HopGuiDmTableDialog {
     wSourcePipelinePreview.setLayoutData(
         new FormDataBuilder().left(wSourcePipelinePreviewData, margin).bottom().result());
     wSourcePipelinePreview.addListener(SWT.Selection, e -> previewSourcePipelineFields());
+    EdwModelDialogSubjects.keepPreview(wSourcePipelinePreview);
 
     wSourceCatalogConnection =
         new MetaSelectionLine<>(
@@ -1276,6 +1291,7 @@ public class HopGuiDmTableDialog {
     PropsUi.setLook(wSourceRecordPreviewData);
     wSourceRecordPreviewData.setLayoutData(new FormDataBuilder().left(middle, 0).bottom().result());
     wSourceRecordPreviewData.addListener(SWT.Selection, e -> previewSourceRecordData());
+    EdwModelDialogSubjects.keepPreview(wSourceRecordPreviewData);
 
     wSourceRecordPreviewFields = new Button(comp, SWT.PUSH);
     wSourceRecordPreviewFields.setText(
@@ -1286,6 +1302,7 @@ public class HopGuiDmTableDialog {
     wSourceRecordPreviewFields.setLayoutData(
         new FormDataBuilder().left(wSourceRecordPreviewData, margin).bottom().result());
     wSourceRecordPreviewFields.addListener(SWT.Selection, e -> previewSourceRecordFields());
+    EdwModelDialogSubjects.keepPreview(wSourceRecordPreviewFields);
 
     String loadDateField =
         model != null ? model.getConfigurationOrDefault().resolveLoadDateField(variables) : null;
@@ -2306,7 +2323,8 @@ public class HopGuiDmTableDialog {
     if (!dimensionAlias && !range) {
       EnumDialogSupport.selectCombo(wSourceType, input.getSourceOrDefault().resolveSourceType());
       editedLoadStrategy =
-          input instanceof DmTableBase loadStrategyTable && loadStrategyTable.getLoadStrategy() != null
+          input instanceof DmTableBase loadStrategyTable
+                  && loadStrategyTable.getLoadStrategy() != null
               ? loadStrategyTable.getLoadStrategy().copy()
               : null;
       refreshLoadStrategySummary();
@@ -2937,8 +2955,7 @@ public class HopGuiDmTableDialog {
         DmLoadStrategySupport.Snapshot snapshot =
             DmLoadStrategySupport.previewSnapshot(
                 table, targetDatabase, variables, new java.util.Date());
-        sql =
-            DmLoadStrategySupport.preparePreviewSql(sql, editedLoadStrategy, snapshot, variables);
+        sql = DmLoadStrategySupport.preparePreviewSql(sql, editedLoadStrategy, snapshot, variables);
       } finally {
         table.setLoadStrategy(previous);
       }
@@ -3573,7 +3590,9 @@ public class HopGuiDmTableDialog {
   }
 
   private void refreshLoadStrategyCombo(DmDimension dimension) {
-    if (wDerivedLoadStrategy == null || wDerivedLoadStrategy.isDisposed() || refreshingLoadStrategy) {
+    if (wDerivedLoadStrategy == null
+        || wDerivedLoadStrategy.isDisposed()
+        || refreshingLoadStrategy) {
       return;
     }
     refreshingLoadStrategy = true;
@@ -3591,9 +3610,7 @@ public class HopGuiDmTableDialog {
         EnumDialogSupport.selectCombo(wDerivedLoadStrategy, selectedType1UpdateMode);
       } else {
         String label =
-            dimension == null
-                ? ""
-                : DmDimensionLoadStrategySupport.resolveDisplayLabel(dimension);
+            dimension == null ? "" : DmDimensionLoadStrategySupport.resolveDisplayLabel(dimension);
         wDerivedLoadStrategy.setItems(new String[] {label});
         wDerivedLoadStrategy.select(0);
         wDerivedLoadStrategy.setEnabled(false);

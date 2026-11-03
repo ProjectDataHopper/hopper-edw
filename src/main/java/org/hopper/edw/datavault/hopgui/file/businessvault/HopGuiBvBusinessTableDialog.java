@@ -56,6 +56,7 @@ import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelDialogValidationSupp
 import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
 import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 import org.hopper.edw.datavault.hopgui.lineage.LineageTabSupport;
+import org.hopper.edw.datavault.hopgui.security.EdwModelDialogSubjects;
 import org.hopper.edw.datavault.lineage.BvModelLineageCollector;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
@@ -291,6 +292,7 @@ public class HopGuiBvBusinessTableDialog {
     fdPreviewSql.top = new FormAttachment(0, margin);
     wPreviewSql.setLayoutData(fdPreviewSql);
     wPreviewSql.addListener(SWT.Selection, e -> previewSql());
+    EdwModelDialogSubjects.keepPreview(wPreviewSql);
 
     int sqlStyle = SWT.MULTI | SWT.LEFT | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL;
     if (EnvironmentUtils.getInstance().isWeb()) {
@@ -503,6 +505,7 @@ public class HopGuiBvBusinessTableDialog {
         BaseMessages.getString(
             ModelDialogValidationSupport.class, "ModelTableDialog.Validate.Label"));
     wValidate.addListener(SWT.Selection, e -> validate());
+    EdwModelDialogSubjects.keepInspect(wValidate);
     Button wCancel = new Button(shell, SWT.PUSH);
     wCancel.setText(BaseMessages.getString(PKG, "System.Button.Cancel"));
     wCancel.addListener(SWT.Selection, e -> cancel());
@@ -513,6 +516,7 @@ public class HopGuiBvBusinessTableDialog {
 
     getData();
     BaseTransformDialog.setSize(shell, 720, 640);
+    EdwModelDialogSubjects.bindFileEdit(shell);
     BaseDialog.defaultShellHandling(shell, e -> ok(), e -> cancel());
     return ok;
   }

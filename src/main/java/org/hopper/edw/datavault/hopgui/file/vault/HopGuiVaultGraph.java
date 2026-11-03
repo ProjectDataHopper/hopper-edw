@@ -2166,7 +2166,7 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
   }
 
   private void editTable(IDvTable table) {
-    if (table == null || !allowModelEdit()) {
+    if (table == null) {
       return;
     }
     byte[] beforeChange = captureUndoSnapshot();
@@ -2188,7 +2188,7 @@ public class HopGuiVaultGraph extends HopGuiModelGraphBase
           new DvReferenceTableDialog(parentShell, hopGui, model, referenceTable);
       modelChanged = dialog.open();
     }
-    if (modelChanged) {
+    if (modelChanged && canCommitModelEdit()) {
       commitDialogUndo(beforeChange);
       table.setChanged();
       setChanged();

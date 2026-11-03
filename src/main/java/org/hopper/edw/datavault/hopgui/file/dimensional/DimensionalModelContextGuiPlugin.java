@@ -322,7 +322,7 @@ public class DimensionalModelContextGuiPlugin {
   @GuiContextAction(
       id = "dm-graph-edit-table",
       parentId = HopGuiDimensionalTableContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
+      type = GuiActionType.Info,
       name = "i18n::HopGuiDimensionalModelGraph.Context.EditTable.Name",
       tooltip = "i18n::HopGuiDimensionalModelGraph.Context.EditTable.Tooltip",
       image = "ui/images/edit.svg",

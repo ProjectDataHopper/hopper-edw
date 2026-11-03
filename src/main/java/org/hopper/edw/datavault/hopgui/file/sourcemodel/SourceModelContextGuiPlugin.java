@@ -577,7 +577,7 @@ public class SourceModelContextGuiPlugin {
   @GuiContextAction(
       id = "source-model-table-edit",
       parentId = HopGuiSourceTableContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
+      type = GuiActionType.Info,
       name = "i18n::HopGuiSourceModelGraph.Context.Table.Edit.Name",
       tooltip = "i18n::HopGuiSourceModelGraph.Context.Table.Edit.Tooltip",
       image = "ui/images/edit.svg",

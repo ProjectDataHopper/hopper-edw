@@ -430,7 +430,7 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
   }
 
   private void editDmTable(IDmTable table) {
-    if (table == null || !allowModelEdit()) {
+    if (table == null) {
       return;
     }
     byte[] beforeChange = captureUndoSnapshot();
@@ -442,7 +442,7 @@ public class HopGuiDimensionalModelGraph extends HopGuiModelGraphBase
             : new HopGuiDmTableDialog(
                     getShell(), table, model, variables, hopGui.getMetadataProvider())
                 .open();
-    if (accepted) {
+    if (accepted && canCommitModelEdit()) {
       commitDialogUndo(beforeChange);
       setChanged();
       redraw();

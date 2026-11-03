@@ -61,6 +61,7 @@ import org.hopper.edw.datavault.hopgui.file.dimensional.DmSourceSqlGuiSupport;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
 import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
 import org.hopper.edw.datavault.hopgui.help.HelpTopics;
+import org.hopper.edw.datavault.hopgui.security.EdwModelDialogSubjects;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultSourceQuerySupport;
@@ -214,6 +215,7 @@ public class HopGuiBvSourceQueryDialog {
         BaseMessages.getString(
             ModelDialogValidationSupport.class, "ModelTableDialog.Validate.Label"));
     wValidate.addListener(SWT.Selection, e -> validate());
+    EdwModelDialogSubjects.keepInspect(wValidate);
     Button wCancel = new Button(shell, SWT.PUSH);
     wCancel.setText(BaseMessages.getString(PKG, "System.Button.Cancel"));
     wCancel.addListener(SWT.Selection, e -> cancel());
@@ -225,6 +227,7 @@ public class HopGuiBvSourceQueryDialog {
     getData();
     refreshKindEnablement();
     BaseTransformDialog.setSize(shell, 720, 680);
+    EdwModelDialogSubjects.bindFileEdit(shell);
     BaseDialog.defaultShellHandling(shell, e -> ok(), e -> cancel());
     return ok;
   }
@@ -254,6 +257,7 @@ public class HopGuiBvSourceQueryDialog {
     fdPreview.top = new FormAttachment(0, margin);
     wPreview.setLayoutData(fdPreview);
     wPreview.addListener(SWT.Selection, e -> preview());
+    EdwModelDialogSubjects.keepPreview(wPreview);
 
     int sqlStyle = SWT.MULTI | SWT.LEFT | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL;
     if (EnvironmentUtils.getInstance().isWeb()) {

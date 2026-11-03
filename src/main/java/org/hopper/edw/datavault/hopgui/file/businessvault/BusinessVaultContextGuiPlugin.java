@@ -401,7 +401,7 @@ public class BusinessVaultContextGuiPlugin {
   @GuiContextAction(
       id = "bv-graph-edit-table",
       parentId = HopGuiBusinessVaultTableContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
+      type = GuiActionType.Info,
       name = "i18n::HopGuiBusinessVaultGraph.Context.EditTable.Name",
       tooltip = "i18n::HopGuiBusinessVaultGraph.Context.EditTable.Tooltip",
       image = "ui/images/edit.svg",

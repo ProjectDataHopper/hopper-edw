@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.Text;
 import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelDialogValidationSupport;
 import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
 import org.hopper.edw.datavault.hopgui.help.HelpTopics;
+import org.hopper.edw.datavault.hopgui.security.EdwModelDialogSubjects;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.BusinessVaultModel;
 import org.hopper.edw.datavault.metadata.businessvault.BvIdentityMap;
@@ -117,6 +118,7 @@ public class HopGuiBvIdentityMapDialog {
         BaseMessages.getString(
             ModelDialogValidationSupport.class, "ModelTableDialog.Validate.Label"));
     wValidate.addListener(SWT.Selection, e -> validate());
+    EdwModelDialogSubjects.keepInspect(wValidate);
     Button wCancel = new Button(shell, SWT.PUSH);
     wCancel.setText(BaseMessages.getString(PKG, "System.Button.Cancel"));
     wCancel.addListener(SWT.Selection, e -> cancel());
@@ -134,28 +136,39 @@ public class HopGuiBvIdentityMapDialog {
     Control previous = null;
     wName = text(fields, previous, "HopGuiBvIdentityMapDialog.Name.Label", middle, margin);
     EdwNamingWidgetSupport.enableAndLayout(
-        wName, variables, EdwNamingSchemeTypes.BV_IDENTITY_MAP, (org.eclipse.swt.layout.FormData)
-            wName.getLayoutData());
+        wName,
+        variables,
+        EdwNamingSchemeTypes.BV_IDENTITY_MAP,
+        (org.eclipse.swt.layout.FormData) wName.getLayoutData());
     previous = wName;
-    wTableName = text(fields, previous, "HopGuiBvIdentityMapDialog.TableName.Label", middle, margin);
+    wTableName =
+        text(fields, previous, "HopGuiBvIdentityMapDialog.TableName.Label", middle, margin);
     previous = wTableName;
     wDescription =
         text(fields, previous, "HopGuiBvIdentityMapDialog.Description.Label", middle, margin);
     previous = wDescription;
-    wParentHub = text(fields, previous, "HopGuiBvIdentityMapDialog.ParentHub.Label", middle, margin);
+    wParentHub =
+        text(fields, previous, "HopGuiBvIdentityMapDialog.ParentHub.Label", middle, margin);
     previous = wParentHub;
     wLink = text(fields, previous, "HopGuiBvIdentityMapDialog.Link.Label", middle, margin);
     previous = wLink;
     wMaster = text(fields, previous, "HopGuiBvIdentityMapDialog.Master.Label", middle, margin);
     previous = wMaster;
-    wDuplicate = text(fields, previous, "HopGuiBvIdentityMapDialog.Duplicate.Label", middle, margin);
+    wDuplicate =
+        text(fields, previous, "HopGuiBvIdentityMapDialog.Duplicate.Label", middle, margin);
     previous = wDuplicate;
-    wPreferred = text(fields, previous, "HopGuiBvIdentityMapDialog.Preferred.Label", middle, margin);
+    wPreferred =
+        text(fields, previous, "HopGuiBvIdentityMapDialog.Preferred.Label", middle, margin);
     previous = wPreferred;
     wMdm = text(fields, previous, "HopGuiBvIdentityMapDialog.Mdm.Label", middle, margin);
     previous = wMdm;
     wEffectivitySatellite =
-        text(fields, previous, "HopGuiBvIdentityMapDialog.EffectivitySatellite.Label", middle, margin);
+        text(
+            fields,
+            previous,
+            "HopGuiBvIdentityMapDialog.EffectivitySatellite.Label",
+            middle,
+            margin);
     previous = wEffectivitySatellite;
     wEffectivityFrom =
         text(fields, previous, "HopGuiBvIdentityMapDialog.EffectivityFrom.Label", middle, margin);
@@ -177,6 +190,7 @@ public class HopGuiBvIdentityMapDialog {
 
     getData();
     BaseTransformDialog.setSize(shell, 720, 640);
+    EdwModelDialogSubjects.bindFileEdit(shell);
     BaseDialog.defaultShellHandling(shell, e -> ok(), e -> cancel());
     return ok;
   }

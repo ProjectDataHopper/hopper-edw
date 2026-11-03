@@ -349,7 +349,7 @@ public class VaultContextGuiPlugin {
   @GuiContextAction(
       id = "vault-graph-edit-table",
       parentId = HopGuiVaultTableContext.CONTEXT_ID,
-      type = GuiActionType.Modify,
+      type = GuiActionType.Info,
       name = "Edit",
       tooltip = "Edit the properties of this table",
       image = "ui/images/edit.svg",

@@ -56,6 +56,7 @@ import org.hopper.edw.datavault.hopgui.file.modelgraph.ModelDialogValidationSupp
 import org.hopper.edw.datavault.hopgui.help.DialogHelpSupport;
 import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 import org.hopper.edw.datavault.hopgui.lineage.LineageTabSupport;
+import org.hopper.edw.datavault.hopgui.security.EdwModelDialogSubjects;
 import org.hopper.edw.datavault.lineage.DvModelLineageCollector;
 import org.hopper.edw.datavault.metadata.BusinessKey;
 import org.hopper.edw.datavault.metadata.DataVaultModel;
@@ -133,6 +134,7 @@ public class DvHubDialog {
         BaseMessages.getString(
             ModelDialogValidationSupport.class, "ModelTableDialog.Validate.Label"));
     wValidate.addListener(SWT.Selection, e -> validate());
+    EdwModelDialogSubjects.keepInspect(wValidate);
     Button wCancel = new Button(shell, SWT.PUSH);
     wCancel.setText(BaseMessages.getString(PKG, "System.Button.Cancel"));
     wCancel.addListener(SWT.Selection, e -> cancel());
@@ -201,6 +203,7 @@ public class DvHubDialog {
     customPipelinesTab.bindIntegrationMode(wIntegrationMode);
 
     BaseTransformDialog.setSize(shell, 700, 550);
+    EdwModelDialogSubjects.bindFileEdit(shell);
     BaseDialog.defaultShellHandling(shell, e -> ok(), e -> cancel());
 
     return ok;

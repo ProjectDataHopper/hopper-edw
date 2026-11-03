@@ -4,6 +4,14 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## [Unreleased]
 
+### Read-only table properties (issue #245)
+
+- A Hop Web `readonly` or `operator` user can open table properties in the source, Data Vault, Business Vault, and dimensional modelers. The dialog is read-only: OK is disabled and the model is not changed. Admin and user dialogs stay editable.
+
+### Retail ASN catalog seed
+
+- The seeded `asn-package-lines` catalog contract stores the pipeline card lengths and the `premodel-defaults` string length (2000). A fresh Hop Web initial load no longer fails the schema gate with `FIELD_TYPE_CHANGED` for blank expected lengths. Bootstrap refreshes the three model feeds from fixtures on each run.
+
 ## [1.0.0] — 2026-11-02
 
 Requires **Apache Hop 2.20.0** and **Java 21**.

@@ -1923,7 +1923,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
   }
 
   private void editTable(SourceTable table) {
-    if (table == null || !allowModelEdit()) {
+    if (table == null) {
       return;
     }
     byte[] beforeChange = captureUndoSnapshot();
@@ -1931,7 +1931,7 @@ public class HopGuiSourceModelGraph extends HopGuiModelGraphBase
         new HopGuiSourceTableDialog(
                 getShell(), table, model, variables, hopGui.getMetadataProvider())
             .open();
-    if (accepted) {
+    if (accepted && canCommitModelEdit()) {
       commitDialogUndo(beforeChange);
       setChanged();
       redraw();

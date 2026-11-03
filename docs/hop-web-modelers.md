@@ -114,6 +114,7 @@ Hop Web sessions use the signed-in user's Hop role. Desktop Hop, and Hop Web wit
 | Action | admin / user | operator | readonly |
 |---|---|---|---|
 | Open and view models, zoom, pan, check a model, coach, load durations, journey, docs, bus matrix, presentations | yes | yes | yes |
+| Open table properties in the source, Data Vault, Business Vault, and dimensional modelers. OK applies changes only when the role can edit files | yes | yes | yes |
 | Move, create, delete, or edit model objects; undo; generate vaults, pipelines, or project files; save `.hsm` `.hdv` `.hbv` `.hdm` `.hsl` `.hlv` | yes | no | no |
 | Export a diagram | yes | yes | no |
 | Run or stop a pipeline or workflow that is already in the project, including a warehouse update | yes | yes | no |
@@ -122,6 +123,8 @@ Hop Web sessions use the signed-in user's Hop role. Desktop Hop, and Hop Web wit
 | Edit Hop metadata (connections, EDW setup, quality rules) | yes | no | no |
 
 `operator` does not have Hop's `metadata.write` permission. Catalog record edits are the exception: that role may change record definitions and validate them. Generating a new update workflow is a file create, so `operator` runs a workflow that is already there. The source-model JDBC servlet stays on `run.execute`, so `readonly` cannot query it.
+
+Table property dialogs open for every role that can view a model. When the role cannot edit files, Hop disables OK and the input fields. Validate stays available. Preview, show differences, and preview SQL stay available only when the role can execute, so `operator` can preview and `readonly` cannot.
 
 ## Known limitations
 

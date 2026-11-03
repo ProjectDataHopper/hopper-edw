@@ -722,7 +722,7 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
   }
 
   private void editBvTable(IBvTable table) {
-    if (table == null || !allowModelEdit()) {
+    if (table == null) {
       return;
     }
     byte[] beforeChange = captureUndoSnapshot();
@@ -756,7 +756,7 @@ public class HopGuiBusinessVaultGraph extends HopGuiModelGraphBase
       accepted =
           new HopGuiBvTableDialog(getShell(), table, model, dataVaultModel, variables).open();
     }
-    if (accepted) {
+    if (accepted && canCommitModelEdit()) {
       commitDialogUndo(beforeChange);
       setChanged();
       redraw();
