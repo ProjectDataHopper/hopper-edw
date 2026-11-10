@@ -4,6 +4,16 @@ All notable changes to Data Hopper EDW (formerly hop-datavault) are documented i
 
 ## [Unreleased]
 
+## [1.1.0] — 2026-11-10
+
+Requires **Apache Hop 2.20.0** and **Java 21**.
+
+**Downloads:** [GitHub release zip](https://github.com/ProjectDataHopper/hopper-edw/releases/download/v1.1.0/hopper-edw-1.1.0.zip) · [Data Hopper Nexus](https://repository.data-hopper.com/repository/hop-community-plugins/org/hopper/hopper-edw/1.1.0/hopper-edw-1.1.0.zip) (`org.hopper:hopper-edw:1.1.0`)
+
+### Action dialogs
+
+- Double-clicking an EDW workflow action opens its dialog in Hop GUI. The dialog constructor is `(Shell, IAction, WorkflowMeta, IVariables)`, the signature Hop calls. The previous concrete-action constructor did not match the action instance, so every EDW action dialog failed to open.
+
 ### Read-only table properties (issue #245)
 
 - A Hop Web `readonly` or `operator` user can open table properties in the source, Data Vault, Business Vault, and dimensional modelers. The dialog is read-only: OK is disabled and the model is not changed. Admin and user dialogs stay editable.

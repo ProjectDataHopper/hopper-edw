@@ -23,7 +23,7 @@
 #   ./hop marketplace install hopper-edw
 #
 # catalogUrl is that list. A live Nexus zip search would surface every SNAPSHOT
-# build instead of release 1.0.0. browse must stay true or Hop skips the catalog.
+# build instead of release 1.1.0. browse must stay true or Hop skips the catalog.
 #
 # hop marketplace apply reads this same file as an install spec. That installs
 # the plugin and does not register the repository, so the Plugins tab stays empty.
@@ -55,13 +55,11 @@ description: >
   including Data Hopper EDW (source models, Data Vault 2.0, Business Vault,
   dimensional models, quality, and lineage).
 
-# Optional metadata (enriches live Nexus list; not a cache)
-# minHopVersion: only show when the running Hop is >= this version
-# version: pin of the published base version (Nexus resolves latest SNAPSHOT timestamp)
+# Same release as the catalog. Import stores this metadata with the repository.
 plugins:
   - groupId: org.hopper
     artifactId: hopper-edw
-    version: 1.0.0
+    version: 1.1.0
     minHopVersion: "2.20.0"
     name: Data Hopper EDW
     category: Community
