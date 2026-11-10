@@ -1,0 +1,1487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="../images/edw-logo.svg" type="image/svg+xml" />
+  <title>Hopper EDW: 25 Years of Open Source Data Warehousing — Apache Hop User Meetup</title>
+  <meta name="description" content="Apache Hop User Meetup Presentation: Celebrating 25 years of Kettle, PDI, and Apache Hop with Hopper EDW — the metadata-driven platform for Enterprise Data Warehousing." />
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    :root {
+      --bg-main: #f8fafc;
+      --bg-grid: #e2e8f0;
+      --slide-zoom: 1;
+    }
+    body {
+      background-color: var(--bg-main);
+      background-image: radial-gradient(var(--bg-grid) 1.25px, transparent 1.25px);
+      background-size: 28px 28px;
+      color: #0f172a;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      overflow: hidden;
+      user-select: none;
+    }
+    #slide-stage {
+      zoom: var(--slide-zoom);
+    }
+    .slide {
+      display: none;
+      opacity: 0;
+      transform: translateY(10px) scale(0.99);
+      transition: opacity 0.26s cubic-bezier(0.16, 1, 0.3, 1), transform 0.26s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .slide.active {
+      display: flex;
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    /* Crisp light-mode cards */
+    .card-light {
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(12px);
+      border: 1.5px solid #cbd5e1;
+      box-shadow: 0 10px 30px -8px rgba(15, 23, 42, 0.08), 0 4px 10px -4px rgba(15, 23, 42, 0.04);
+    }
+    .card-elevated {
+      background: #ffffff;
+      border: 2px solid #94a3b8;
+      box-shadow: 0 20px 45px -12px rgba(15, 23, 42, 0.14);
+    }
+    /* Animations */
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-7px); }
+    }
+    .animate-float {
+      animation: floatSlow 4s ease-in-out infinite;
+    }
+    @keyframes pulseRing {
+      0% { box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.45); }
+      70% { box-shadow: 0 0 0 16px rgba(2, 132, 199, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(2, 132, 199, 0); }
+    }
+    .pulse-ring-sky {
+      animation: pulseRing 2.2s infinite;
+    }
+    @keyframes dashFlow {
+      to { stroke-dashoffset: -40; }
+    }
+    .svg-flow-line {
+      stroke-dasharray: 8 6;
+      animation: dashFlow 1.4s linear infinite;
+    }
+    @keyframes spinSlow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .spin-slow {
+      animation: spinSlow 24s linear infinite;
+    }
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(0.92) translateY(8px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .slide.active .stagger-1 { animation: popIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both; }
+    .slide.active .stagger-2 { animation: popIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.14s both; }
+    .slide.active .stagger-3 { animation: popIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.23s both; }
+    .slide.active .stagger-4 { animation: popIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.32s both; }
+
+    /* Custom Scrollbar for Modals */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
+  </style>
+</head>
+<body class="h-screen w-screen flex flex-col justify-between selection:bg-sky-600 selection:text-white">
+
+  <!-- ========================================================= -->
+  <!-- TOP NAVIGATION BAR (Persistent Logos + Act Jump + Tools)  -->
+  <!-- ========================================================= -->
+  <header class="h-16 border-b-2 border-slate-200 px-5 sm:px-8 flex items-center justify-between bg-white/95 backdrop-blur z-30 shrink-0 shadow-sm">
+    <div class="flex items-center gap-3 sm:gap-5">
+      <!-- Persistent Small Hop + EDW Logos in Header -->
+      <div class="flex items-center gap-2.5 pr-3 border-r-2 border-slate-200">
+        <img src="../images/hop-logo.svg" alt="Apache Hop" class="w-8 h-8 rounded-md border border-slate-200 shadow-xs bg-white p-0.5" />
+        <span class="text-slate-400 font-black text-sm">+</span>
+        <img src="../images/edw-logo.svg" alt="Hopper EDW" class="w-8 h-8 rounded-md shadow-xs" />
+        <div class="hidden sm:flex flex-col leading-none ml-1">
+          <span class="font-black text-slate-900 text-sm tracking-tight">Hopper EDW</span>
+          <span class="text-[11px] font-bold text-sky-700">Apache Hop Meetup</span>
+        </div>
+      </div>
+
+      <!-- Act Jump Buttons -->
+      <div class="hidden xl:flex items-center gap-1.5">
+        <button onclick="jumpToAct(1)" id="act-btn-1" class="text-xs px-3 py-1.5 rounded-lg transition font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-100">1. 25 Years</button>
+        <button onclick="jumpToAct(2)" id="act-btn-2" class="text-xs px-3 py-1.5 rounded-lg transition font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-100">2. Mandelbrot EDW</button>
+        <button onclick="jumpToAct(3)" id="act-btn-3" class="text-xs px-3 py-1.5 rounded-lg transition font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-100">3. One Tool</button>
+        <button onclick="jumpToAct(4)" id="act-btn-4" class="text-xs px-3 py-1.5 rounded-lg transition font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-100">4. Quality &amp; Lineage</button>
+        <button onclick="jumpToAct(5)" id="act-btn-5" class="text-xs px-3 py-1.5 rounded-lg transition font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-100">5. Analytics &amp; Try It</button>
+      </div>
+    </div>
+
+    <!-- Right Controls: Pace Timer, Zoom, Notes, Grid, Fullscreen -->
+    <div class="flex items-center gap-2 sm:gap-3">
+      <!-- 22-Minute Talk Pace Timer -->
+      <div class="hidden md:flex items-center gap-2 bg-slate-100 border border-slate-300 rounded-xl px-3 py-1">
+        <span class="w-2 h-2 rounded-full bg-emerald-500" id="timer-dot"></span>
+        <span id="talk-timer" class="font-mono font-black text-sm text-slate-800">22:00</span>
+        <button onclick="toggleTalkTimer()" id="talk-timer-btn" class="text-xs font-bold px-2 py-0.5 rounded bg-sky-600 text-white hover:bg-sky-500 transition">Start</button>
+      </div>
+
+      <!-- Zoom Scale Controls -->
+      <div class="flex items-center bg-slate-100 border border-slate-300 rounded-xl p-0.5 text-xs text-slate-700">
+        <button onclick="adjustZoom(-0.1)" title="Zoom Out (-)" class="px-2 py-1 hover:bg-white rounded-lg font-black transition">−</button>
+        <button onclick="resetZoom()" id="zoom-label" title="Reset Zoom (0)" class="px-2 py-1 font-mono font-bold hover:bg-white rounded-lg">100%</button>
+        <button onclick="adjustZoom(0.1)" title="Zoom In (+)" class="px-2 py-1 hover:bg-white rounded-lg font-black transition">+</button>
+      </div>
+
+      <!-- Speaker Notes [P] -->
+      <button onclick="toggleNotes()" title="Toggle Speaker Notes (Key: P)" class="text-xs sm:text-sm px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-300 text-slate-800 hover:bg-slate-200 font-bold transition flex items-center gap-1.5">
+        <span>Notes [P]</span>
+      </button>
+
+      <!-- Grid Overview [G] -->
+      <button onclick="toggleGridOverview()" title="Slide Grid Overview (Key: G)" class="p-2 rounded-xl bg-slate-100 border border-slate-300 text-slate-800 hover:bg-slate-200 transition">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+      </button>
+
+      <!-- Fullscreen [F] -->
+      <button onclick="toggleFullscreen()" title="Fullscreen (Key: F)" class="p-2 rounded-xl bg-slate-100 border border-slate-300 text-slate-800 hover:bg-slate-200 transition">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ========================================================= -->
+  <!-- MAIN SLIDES STAGE                                         -->
+  <!-- ========================================================= -->
+  <main id="slide-stage" class="relative flex-1 w-full h-[calc(100vh-7.5rem)] overflow-hidden flex items-center justify-center p-4 sm:p-8 lg:p-10">
+
+    <!-- Persistent Floating Slide-Corner Watermark (Every Page) -->
+    <div class="fixed bottom-16 right-6 z-20 pointer-events-none flex items-center gap-2 bg-white/95 border-2 border-slate-200 px-3 py-1.5 rounded-full shadow-md">
+      <img src="../images/hop-logo.svg" alt="Apache Hop" class="w-5 h-5 object-contain" />
+      <span class="text-[11px] font-extrabold text-slate-400">×</span>
+      <img src="../images/edw-logo.svg" alt="Hopper EDW" class="w-5 h-5 object-contain rounded-xs" />
+      <span class="text-xs font-extrabold text-slate-700 tracking-tight">Apache Hop + Hopper EDW</span>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- SLIDE 01: TITLE SLIDE                                   -->
+    <!-- ======================================================= -->
+    <div class="slide active flex-col items-center justify-center text-center w-full h-full max-w-6xl" data-act="1" data-title="Hopper EDW — Celebrating 25 Years" data-notes="Welcome everyone to the Apache Hop user meetup! Today I want to show you Hopper EDW — the culmination of 25 years of open source development, and why Apache Hop is the ideal ecosystem to tame Enterprise Data Warehouse complexity.">
+      <div class="stagger-1 inline-flex items-center gap-3 px-6 py-2.5 rounded-full bg-sky-100 border-2 border-sky-300 text-sky-900 text-base sm:text-lg font-extrabold uppercase tracking-wider mb-6 shadow-xs">
+        <span>Apache Hop User Meetup • 25 Years of Open Source</span>
+      </div>
+
+      <div class="stagger-2 flex items-center justify-center gap-6 mb-6">
+        <div class="p-4 rounded-3xl bg-white border-2 border-slate-200 shadow-lg animate-float">
+          <img src="../images/hop-logo.svg" alt="Apache Hop Logo" class="w-20 h-20 sm:w-24 sm:h-24 object-contain" />
+        </div>
+        <span class="text-5xl sm:text-6xl font-black text-sky-600">+</span>
+        <div class="p-4 rounded-3xl bg-white border-2 border-slate-200 shadow-lg animate-float" style="animation-delay: 1s;">
+          <img src="../images/edw-logo.svg" alt="Hopper EDW Logo" class="w-20 h-20 sm:w-24 sm:h-24 object-contain rounded-xl" />
+        </div>
+      </div>
+
+      <h1 class="stagger-2 text-5xl sm:text-7xl lg:text-8xl font-black tracking-tight text-slate-900 leading-[1.05] mb-6">
+        Hopper <span class="text-sky-700">EDW</span>
+      </h1>
+
+      <p class="stagger-3 text-2xl sm:text-4xl font-bold text-slate-700 max-w-4xl leading-snug mb-8">
+        Celebrating <span class="text-slate-950 underline decoration-sky-500 decoration-4">25 Years</span> of Kettle, PDI &amp; Apache Hop:<br/>
+        Taming Enterprise Data Warehouse Complexity
+      </p>
+
+      <div class="stagger-4 flex flex-wrap items-center justify-center gap-4 text-lg sm:text-xl font-bold text-slate-700">
+        <span class="px-5 py-2.5 rounded-2xl bg-white border-2 border-slate-300 shadow-xs">Matt Casters</span>
+        <span class="px-5 py-2.5 rounded-2xl bg-emerald-50 border-2 border-emerald-300 text-emerald-900 shadow-xs">Apache License 2.0</span>
+        <span class="px-5 py-2.5 rounded-2xl bg-sky-50 border-2 border-sky-300 text-sky-900 font-mono shadow-xs">www.data-hopper.com</span>
+      </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- SLIDE 02: NAMING THINGS IS HARD!                        -->
+    <!-- ======================================================= -->
+    <div class="slide flex-col justify-center w-full h-full max-w-6xl" data-act="1" data-title="Do You Know How Hard It Is to Pick a Name?" data-notes="Before we dive in: Hopper EDW? A Minecraft reference? Maybe! Do you know how hard it is to come up with a name? Kettle couldn't be spelled, Pentaho couldn't be pronounced, and no, Hop isn't all-caps!">
+      <div class="stagger-1 mb-6">
+        <span class="px-4 py-1.5 rounded-full bg-amber-100 border border-amber-300 text-amber-900 font-extrabold text-sm uppercase tracking-wider">Icebreaker • 25 Years of Naming Struggles</span>
+        <h2 class="text-4xl sm:text-6xl font-black text-slate-900 mt-3">“Do you know how hard it is to come up with a name?”</h2>
+      </div>
+
+      <div class="stagger-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+        <div class="card-light p-6 rounded-3xl border-t-8 border-t-amber-500 flex flex-col justify-between">
+          <div>
+            <div class="text-sm font-black font-mono text-amber-700 uppercase mb-2">2001 • Act I</div>
+            <div class="text-3xl font-black text-slate-900 mb-3">Kettle</div>
+            <p class="text-xl text-slate-700 font-medium leading-relaxed">“Was Kettle any better? So many people couldn’t write it properly!”</p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-200 text-sm font-mono font-bold text-slate-500">KETL, K.E.T.T.E.L., Cattle, ... ☕</div>
+        </div>
+
+        <div class="card-light p-6 rounded-3xl border-t-8 border-t-red-500 flex flex-col justify-between">
+          <div>
+            <div class="text-sm font-black font-mono text-red-700 uppercase mb-2">2006 • Act II</div>
+            <div class="text-3xl font-black text-slate-900 mb-3">Pentaho</div>
+            <p class="text-xl text-slate-700 font-medium leading-relaxed">“Pentaho was something folks couldn’t pronounce for 15 years.”</p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-200 text-sm font-mono font-bold text-slate-500">Pen-TAH-ho? PEN-tuh-ho? 🤷</div>
+        </div>
+
+        <div class="card-light p-6 rounded-3xl border-t-8 border-t-sky-600 flex flex-col justify-between">
+          <div>
+            <div class="text-sm font-black font-mono text-sky-700 uppercase mb-2">2020 • Act III</div>
+            <div class="text-3xl font-black text-slate-900 mb-3">Apache Hop</div>
+            <p class="text-xl text-slate-700 font-medium leading-relaxed">“No, <span class="underline decoration-red-500 decoration-3">Hop</span> isn’t capitalized! It’s not HOP!” <span class="italic text-slate-500">&lt;sigh&gt;</span></p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-200 text-sm font-mono font-bold text-sky-700">Hop Orchestration Platform</div>
+        </div>
+
+        <div class="card-elevated p-6 rounded-3xl border-t-8 border-t-emerald-600 bg-emerald-50/40 flex flex-col justify-between">
+          <div>
+            <div class="text-sm font-black font-mono text-emerald-800 uppercase mb-2">2026 • Act IV</div>
+            <div class="text-3xl font-black text-slate-900 mb-3">Hopper EDW</div>
+            <p class="text-xl text-slate-800 font-semibold leading-relaxed">“A Minecraft reference? Maybe! Funneling everything cleanly into your EDW.”</p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-emerald-200 text-sm font-mono font-bold text-emerald-800">100% Apache License 2.0 🎁</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- SLIDE 03: FULL CIRCLE — WHY I STARTED KETTLE            -->
+    <!-- ======================================================= -->
+    <div class="slide flex-col justify-center w-full h-full max-w-6xl" data-act="1" data-title="Full Circle: Why I Started Kettle 25 Years Ago" data-notes="Building data warehouses was my job right before I joined Pentaho 20 years ago. That's why I started Kettle 25 years ago! Along the way my focus became wider data integration, but there is a special place in my heart for the Enterprise Data Warehouse.">
+      <div class="stagger-1 text-center mb-8">
+        <span class="px-4 py-1.5 rounded-full bg-sky-100 border border-sky-300 text-sky-900 font-extrabold text-sm uppercase tracking-wider">Coming Full Circle • 2001 → 2026</span>
+        <h2 class="text-4xl sm:text-6xl font-black text-slate-900 mt-3">Why I Started Building Kettle 25 Years Ago</h2>
+      </div>
+
+      <!-- Animated Timeline SVG / Cards -->
+      <div class="stagger-2 grid grid-cols-1 md:grid-cols-4 gap-6 items-stretch mb-8">
+        <div class="card-light p-6 rounded-3xl relative">
+          <div class="text-4xl font-black text-sky-600 font-mono mb-2">2001</div>
+          <div class="text-2xl font-black text-slate-900 mb-2">Building EDWs</div>
+          <p class="text-lg text-slate-700 font-medium">My day job before Pentaho: building Enterprise Data Warehouses from scratch. Kettle was born for EDW.</p>
+        </div>
+
+        <div class="card-light p-6 rounded-3xl relative">
+          <div class="text-4xl font-black text-indigo-600 font-mono mb-2">2006</div>
+          <div class="text-2xl font-black text-slate-900 mb-2">Pentaho (PDI)</div>
+          <p class="text-lg text-slate-700 font-medium">Joined Pentaho 20 years ago. Focus broadened to all of Data Integration, Big Data, Cloud &amp; ETL.</p>
+        </div>
+
+        <div class="card-light p-6 rounded-3xl relative">
+          <div class="text-4xl font-black text-amber-600 font-mono mb-2">2020</div>
+          <div class="text-2xl font-black text-slate-900 mb-2">Apache Hop</div>
+          <p class="text-lg text-slate-700 font-medium">Re-architected from the ground up: pure metadata-driven, pluggable, modern, Apache Top-Level Project.</p>
+        </div>
+
+        <div class="card-elevated p-6 rounded-3xl bg-sky-50/70 border-sky-500 relative pulse-ring-sky">
+          <div class="text-4xl font-black text-emerald-700 font-mono mb-2">2026</div>
+          <div class="text-2xl font-black text-slate-900 mb-2">Hopper EDW</div>
+          <p class="text-lg text-slate-800 font-bold">30+ years of EDW experience distilled into software — giving back to the community under APL 2.0.</p>
+        </div>
+      </div>
+
+      <div class="stagger-3 card-light p-6 rounded-3xl bg-sky-50 border-sky-300 text-center shadow-lg">
+        <p class="text-2xl sm:text-3xl font-bold text-slate-900">
+          “No matter how much I love Data Integration, there’s a <span class="text-sky-700 font-black underline decoration-sky-400">special place in my heart</span> for the Enterprise Data Warehouse.”
+        </p>
+      </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- SLIDE 04: DATA INTEGRATION vs. EDW                      -->
+    <!-- ======================================================= -->
+    <div class="slide flex-col justify-center w-full h-full max-w-6xl" data-act="1" data-title="Data Integration vs. Enterprise Data Warehousing" data-notes="Building an EDW is a specific, focused discipline inside the wider world of data integration. And I want to demonstrate why the Apache Hop ecosystem is the ideal place to manage that complexity.">
+      <div class="stagger-1 mb-6 text-center">
+        <span class="px-4 py-1.5 rounded-full bg-indigo-100 border border-indigo-300 text-indigo-900 font-extrabold text-sm uppercase tracking-wider">The Core Thesis</span>
+        <h2 class="text-4xl sm:text-6xl font-black text-slate-900 mt-3">A Focused Discipline in a Wider World</h2>
+      </div>
+
+      <div class="stagger-2 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <!-- Diagram: Concentric Circles -->
+        <div class="lg:col-span-6 flex items-center justify-center">
+          <svg viewBox="0 0 500 420" class="w-full max-w-lg drop-shadow-md">
+            <!-- Outer Circle: Data Integration -->
+            <circle cx="250" cy="210" r="195" fill="#e0f2fe" stroke="#0284c7" stroke-width="3" stroke-dasharray="10 6" />
+            <text x="250" y="55" text-anchor="middle" fill="#0369a1" font-size="19" font-weight="800">WIDER WORLD OF DATA INTEGRATION</text>
+            <text x="250" y="80" text-anchor="middle" fill="#0284c7" font-size="14" font-weight="600">APIs • Files • Streaming • App Sync • Migrations • Lakehouses</text>
+
+            <!-- Middle Circle: Apache Hop Ecosystem -->
+            <circle cx="250" cy="235" r="140" fill="#ffffff" stroke="#0f172a" stroke-width="3.5" />
+            <text x="250" y="135" text-anchor="middle" fill="#0f172a" font-size="18" font-weight="900">APACHE HOP ECOSYSTEM</text>
+            <text x="250" y="156" text-anchor="middle" fill="#475569" font-size="13" font-weight="700">Metadata • Pipelines • Workflows • GUI • VFS • Tests</text>
+
+            <!-- Inner Core: Hopper EDW -->
+            <circle cx="250" cy="270" r="88" fill="#0369a1" stroke="#38bdf8" stroke-width="4" />
+            <text x="250" y="255" text-anchor="middle" fill="#ffffff" font-size="22" font-weight="900">HOPPER EDW</text>
+            <text x="250" y="280" text-anchor="middle" fill="#bae6fd" font-size="13" font-weight="700">Sources • Data Vault</text>
+            <text x="250" y="298" text-anchor="middle" fill="#bae6fd" font-size="13" font-weight="700">Business Vault • Star Schema</text>
+            <text x="250" y="316" text-anchor="middle" fill="#7dd3fc" font-size="12" font-weight="800">Governance • Lineage • DQ</text>
+          </svg>
+        </div>
+
+        <!-- Key Points -->
+        <div class="lg:col-span-6 space-y-5">
+          <div class="card-light p-6 rounded-3xl border-l-8 border-l-sky-600">
+            <h3 class="text-2xl font-black text-slate-900 mb-1">Data Integration Moves Everything</h3>
+            <p class="text-xl text-slate-700 font-medium">Pipelines, workflows, cloud files, REST APIs, Kafka streams — Apache Hop already excels here.</p>
+          </div>
+          <div class="card-light p-6 rounded-3xl border-l-8 border-l-indigo-600">
+            <h3 class="text-2xl font-black text-slate-900 mb-1">EDW Has Relentless Architectural Rules</h3>
+            <p class="text-xl text-slate-700 font-medium">Historization, auditability, multi-source survivorship, conformed dimensions, schema drift &amp; lineage.</p>
+          </div>
+          <div class="card-elevated p-6 rounded-3xl border-l-8 border-l-emerald-600 bg-emerald-50/50">
+            <h3 class="text-2xl font-black text-emerald-950 mb-1">Why Apache Hop is the Ideal Home</h3>
+            <p class="text-xl text-slate-800 font-semibold">Hop’s metadata-first architecture + GUI pluggability lets us model the entire EDW lifecycle in one place.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- SLIDE 05: THE MANDELBROT EDW                            -->
+    <!-- ======================================================= -->
+    <div class="slide flex-col justify-center w-full h-full max-w-6xl" data-act="2" data-title="The Mandelbrot Effect in Enterprise Data Warehouses" data-notes="When you look long enough at a large and mature EDW architecture, it starts to look like a Mandelbrot fractal: wherever you zoom in, more complexity shows up!">
+      <div class="stagger-1 text-center mb-6">
+        <span class="px-4 py-1.5 rounded-full bg-purple-100 border border-purple-300 text-purple-900 font-extrabold text-sm uppercase tracking-wider">Act 2 • The Complexity Fractal</span>
+        <h2 class="text-4xl sm:text-6xl font-black text-slate-900 mt-3">The “Mandelbrot” Data Warehouse</h2>
+        <p class="text-2xl text-slate-600 font-semibold mt-2">Zoom in anywhere on a mature EDW — and another layer of complexity appears.</p>
+      </div>
+
+      <div class="stagger-2 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <!-- Animated Fractal Zoom Graphic -->
+        <div class="lg:col-span-5 flex justify-center">
+          <div class="card-elevated p-6 rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white w-full flex flex-col items-center">
+            <svg viewBox="0 0 320 260" class="w-full max-w-xs">
+              <defs>
+                <radialGradient id="mandelGrad" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="#38bdf8" />
+                  <stop offset="45%" stop-color="#6366f1" />
+                  <stop offset="80%" stop-color="#a855f7" />
+                  <stop offset="100%" stop-color="#0f172a" />
+                </radialGradient>
+              </defs>
+              <!-- Fractal-inspired nested geometric rings -->
+              <circle cx="160" cy="130" r="110" fill="url(#mandelGrad)" opacity="0.25" class="spin-slow" />
+              <polygon points="160,25 255,185 65,185" fill="none" stroke="#38bdf8" stroke-width="2.5" class="spin-slow" />
+              <polygon points="160,235 255,75 65,75" fill="none" stroke="#a855f7" stroke-width="2.5" class="spin-slow" />
+              <circle cx="160" cy="130" r="68" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-dasharray="6 4" />
+              <circle cx="160" cy="130" r="32" fill="#0284c7" stroke="#ffffff" stroke-width="3" />
+              <text x="160" y="135" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="900">ZOOM ∞</text>
+            </svg>
+            <div class="text-center mt-2">
+              <div class="text-lg font-black text-sky-300">10,000 ft: “4 Simple Boxes”</div>
+              <div class="text-sm font-mono text-slate-300">1 ft: 100 Edge Cases per Box</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Zoom Levels -->
+        <div class="lg:col-span-7 space-y-4">
+          <div class="card-light p-5 rounded-2xl flex items-center gap-5">
+            <span class="px-4 py-2 rounded-xl bg-amber-100 text-amber-900 font-mono font-black text-xl shrink-0">Zoom 1×</span>
+            <div>
+              <div class="text-2xl font-black text-slate-900">“Sources → Vault → Business → Star Schema”</div>
+              <div class="text-lg text-slate-600 font-medium">Looks super clean on a whiteboard! How hard can it be?</div>
+            </div>
+          </div>
+
+          <div class="card-light p-5 rounded-2xl flex items-center gap-5">
+            <span class="px-4 py-2 rounded-xl bg-sky-100 text-sky-900 font-mono font-black text-xl shrink-0">Zoom 10×</span>
+            <div>
+              <div class="text-2xl font-black text-slate-900">Driving Keys, Hash Collisions, Schema Drift</div>
+              <div class="text-lg text-slate-600 font-medium">Link satellites, dependent child keys, type alignment, DQ gates...</div>
+            </div>
+          </div>
+
+          <div class="card-light p-5 rounded-2xl flex items-center gap-5">
+            <span class="px-4 py-2 rounded-xl bg-purple-100 text-purple-900 font-mono font-black text-xl shrink-0">Zoom 100×</span>
+            <div>
+              <div class="text-2xl font-black text-slate-900">15-Year-Old SAS Snapshots &amp; Cut-over Dates</div>
+              <div class="text-lg text-slate-600 font-medium">Merging hundreds of millions of rows from 12 satellites into fast SCD2!</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- SLIDE 06: REALITY — THE FULL EDW ARCHITECTURE           -->
+    <!-- ======================================================= -->
+    <div class="slide flex-col justify-center w-full h-full max-w-6xl" data-act="2" data-title="What Reality Actually Looks Like (edw-overview.svg)" data-notes="While it's not actually as bad as a Mandelbrot set, it comes close! This is what a mature EDW architecture actually looks like in Hopper EDW. Click the diagram to enlarge.">
+      <div class="stagger-1 flex flex-col sm:flex-row sm:items-end justify-between mb-4">
+        <div>
+          <span class="px-3.5 py-1 rounded-full bg-sky-100 border border-sky-300 text-sky-900 font-extrabold text-xs uppercase tracking-wider">The Big Picture</span>
+          <h2 class="text-3xl sm:text-5xl font-black text-slate-900 mt-2">This Is What Reality Looks Like</h2>
+        </div>
+        <button onclick="openLightbox('../images/diagrams/edw-overview.svg', 'Hopper EDW Full Architecture Overview')" class="mt-2 sm:mt-0 px-4 py-2 rounded-xl bg-sky-600 text-white font-bold text-sm hover:bg-sky-500 transition shadow-xs">
+          🔍 Click Diagram to Zoom Fullscreen
+        </button>
+      </div>
+
+      <div class="stagger-2 card-elevated p-4 rounded-3xl bg-white flex-1 flex items-center justify-center overflow-hidden cursor-pointer" onclick="openLightbox('../images/diagrams/edw-overview.svg', 'Hopper EDW Full Architecture Overview')">
+        <img src="../images/diagrams/edw-overview.svg" alt="EDW Architecture Overview" class="max-h-[62vh] w-auto object-contain" />
+      </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- SLIDE 07: ZOOMING IN ON THE FAR LEFT — SOURCES          -->
+    <!-- ======================================================= -->
+    <div class="slide flex-col justify-center w-full h-full max-w-6xl" data-act="2" data-title="Zoom #1: Sources Aren't Just Sources" data-notes="Let's zoom in on the far left side: Sources. Sources aren't just sources! Their metadata needs to be harvested, validated, managed. Data types aligned. Data quality validated before loading.">
+      <div class="stagger-1 mb-6">
+        <span class="px-4 py-1.5 rounded-full bg-amber-100 border border-amber-300 text-amber-900 font-extrabold text-sm uppercase tracking-wider">Fractal Zoom #1 • Far Left of the Diagram</span>
+        <h2 class="text-4xl sm:text-6xl font-black text-slate-900 mt-3">“Sources Aren’t Just Sources.”</h2>
+      </div>
+
+      <div class="stagger-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-6">
+        <div class="card-light p-6 rounded-3xl border-l-8 border-l-amber-500">
+          <div class="text-2xl font-black text-slate-900 mb-2">1. Metadata Harvesting</div>
+          <p class="text-xl text-slate-700 font-medium">Schemas must be harvested, versioned over time, and compared against expected contracts.</p>
+        </div>
+
+        <div class="card-light p-6 rounded-3xl border-l-8 border-l-amber-500">
+          <div class="text-2xl font-black text-slate-900 mb-2">2. Type Alignment</div>
+          <p class="text-xl text-slate-700 font-medium">Data needs conversion. Data types must be aligned, standardized, and improved across engines.</p>
+        </div>
+
+        <div class="card-light p-6 rounded-3xl border-l-8 border-l-amber-500">
+          <div class="text-2xl font-black text-slate-900 mb-2">3. Pre-Load DQ Validation</div>
+          <p class="text-xl text-slate-700 font-medium">Validate structure &amp; data quality <span class="font-black underline">before</span> loading so bad data never pollutes the vault.</p>
+        </div>
+
+        <div class="card-light p-6 rounded-3xl border-l-8 border-l-sky-500">
+          <div class="text-2xl font-black text-slate-900 mb-2">4. Any Storage Format</div>
+          <p class="text-xl text-slate-700 font-medium">Relational DBs, CSV/Parquet files, Data Lakes, Apache Iceberg, Kafka topics, Hop Pipelines.</p>
+        </div>
+
+        <div class="card-light p-6 rounded-3xl border-l-8 border-l-sky-500">
+          <div class="text-2xl font-black text-slate-900 mb-2">5. PII &amp; Field Masking</div>
+          <p class="text-xl text-slate-700 font-medium">Protect sensitive columns right at the source model definition.</p>
+        </div>
+
+        <div class="card-elevated p-6 rounded-3xl bg-amber-50 border-amber-400 flex flex-col justify-center">
+          <div class="text-2xl font-black text-amber-950 mb-1">…And That’s Just the Far Left!</div>
+          <p class="text-lg text-amber-900 font-semibold">We haven’t even loaded a single Hub or Satellite yet.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- SLIDE 08: ZOOMING IN ON DATA VAULT 2.0                  -->
+    <!-- ======================================================= -->
+    <div class="slide flex-col justify-center w-full h-full max-w-6xl" data-act="2" data-title="Zoom #2: Data Vault — The Long Tail of Challenges" data-notes="At first Data Vault looks simple: Hubs, Satellites, Links. Fine! Then you hit the long tail of challenges: link satellites, driving keys, dependent child keys, compound keys, hash keys, performance, managing dozens of hubs and satellites. The list kept growing — and I built them all.">
+      <div class="stagger-1 mb-6">
+        <span class="px-4 py-1.5 rounded-full bg-sky-100 border border-sky-300 text-sky-900 font-extrabold text-sm uppercase tracking-wider">Fractal Zoom #2 • Raw Data Vault 2.0</span>
+        <h2 class="text-4xl sm:text-6xl font-black text-slate-900 mt-3">Data Vault: Simple Until It Isn’t</h2>
+      </div>
+
+      <div class="stagger-2 grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        <!-- Left: What the book says -->
+        <div class="lg:col-span-4 card-light p-7 rounded-3xl flex flex-col justify-between bg-slate-50">
+          <div>
+            <div class="text-sm font-black font-mono text-slate-500 uppercase mb-2">Day 1 Impression</div>
+            <h3 class="text-3xl font-black text-slate-900 mb-4">“Just 3 Things!”</h3>
+            <div class="space-y-3 text-xl font-bold">
+              <div class="p-3.5 rounded-2xl bg-sky-100 text-sky-900 border border-sky-300">🔵 Hubs (Business Keys)</div>
+              <div class="p-3.5 rounded-2xl bg-emerald-100 text-emerald-900 border border-emerald-300">🟢 Links (Relationships)</div>
+              <div class="p-3.5 rounded-2xl bg-amber-100 text-amber-900 border border-amber-300">🟡 Satellites (Context &amp; History)</div>
+            </div>
+          </div>
+          <p class="text-lg font-bold text-slate-600 mt-6">“Fine. How hard could it be?”</p>
+        </div>
+
+        <!-- Right: The Long Tail Built in Hopper EDW -->
+        <div class="lg:col-span-8 card-elevated p-7 rounded-3xl border-sky-500">
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-sm font-black font-mono text-sky-700 uppercase">Day 30 Reality • The Long Tail (All Built!)</span>
+            <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 font-extrabold text-xs">✓ Implemented in Hopper EDW</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-lg font-bold text-slate-800">
+            <div class="p-3.5 rounded-2xl bg-slate-100 border border-slate-300">⚡ Link Satellites &amp; Effectivity</div>
+            <div class="p-3.5 rounded-2xl bg-slate-100 border border-slate-300">🔑 Driving Keys &amp; End-Dating</div>
+            <div class="p-3.5 rounded-2xl bg-slate-100 border border-slate-300">🧬 Dependent Child Keys (DCK)</div>
+            <div class="p-3.5 rounded-2xl bg-slate-100 border border-slate-300">🧩 Compound Business Keys</div>
+            <div class="p-3.5 rounded-2xl bg-slate-100 border border-slate-300">#️⃣ Hash Keys of All Types (MD5/SHA)</div>
+            <div class="p-3.5 rounded-2xl bg-slate-100 border border-slate-300">🚀 Extreme Loading Performance (!)</div>
+            <div class="p-3.5 rounded-2xl bg-slate-100 border border-slate-300">🕸️ Multi-Hub &amp; Multi-Sat Scale</div>
+            <div class="p-3.5 rounded-2xl bg-slate-100 border border-slate-300">🛡️ Ghost / Unknown / Invalid Records</div>
+          </div>
+          <p class="mt-5 text-xl font-black text-sky-900">“The list just kept growing of things to build. <span class="underline decoration-emerald-500">But build them I did.</span>”</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- SLIDE 09: ZOOMING IN ON BUSINESS VAULT (THE HARDEST!)   -->
+    <!-- ======================================================= -->
+    <div class="slide flex-col justify-center w-full h-full max-w-6xl" data-act="2" data-title="Zoom #3: Business Vault — Creating Order from Chaos" data-notes="Thankfully, I hear you think, Business Vaults are easier! If anything, it's been the hardest part. It has to create order from the organized chaos of organizational memory. A 15-year-old SAS snapshot? Application cut-over dates across satellites? Wait long enough and that happens!">
+      <div class="stagger-1 mb-5">
+        <span class="px-4 py-1.5 rounded-full bg-purple-100 border border-purple-300 text-purple-900 font-extrabold text-sm uppercase tracking-wider">Fractal Zoom #3 • Business Vault</span>
+        <h2 class="text-4xl sm:text-6xl font-black text-slate-900 mt-2">“Thankfully Business Vaults Are Easier?” <span class="text-red-600">Nope!</span></h2>
+        <p class="text-2xl text-slate-700 font-bold mt-1">If anything, it’s the <span class="underline decoration-purple-600">hardest part</span>: creating order from organized chaos.</p>
+      </div>
+
+      <div class="stagger-2 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        <div class="lg:col-span-6 space-y-4">
+          <div class="card-light p-5 rounded-3xl border-l-8 border-l-purple-600">
+            <div class="text-2xl font-black text-slate-900">🕰️ 15-Year-Old SAS Snapshots</div>
+            <p class="text-lg text-slate-700 font-medium mt-1">Historical dumps living alongside modern real-time CDC streams in organizational memory.</p>
+          </div>
+          <div class="card-light p-5 rounded-3xl border-l-8 border-l-indigo-600">
+            <div class="text-2xl font-black text-slate-900">📅 App Versions &amp; Cut-Over Dates</div>
+            <p class="text-lg text-slate-700 font-medium mt-1">ERP v1 → ERP v2 → Cloud CRM landing in different satellites with strict cut-over calendars &amp; survivorship priorities.</p>
+          </div>
+          <div class="card-elevated p-5 rounded-3xl border-l-8 border-l-emerald-600 bg-emerald-50/60">
+            <div class="text-2xl font-black text-emerald-950">⚡ 100M+ Rows Across N Satellites → SCD2</div>
+            <p class="text-lg text-slate-800 font-semibold mt-1">Collecting hundreds of millions of rows from many satellites into a clean SCD2 table with high performance.</p>
+          </div>
+        </div>
+
+        <div class="lg:col-span-6 card-elevated p-4 rounded-3xl bg-white flex flex-col items-center cursor-pointer" onclick="openLightbox('../images/diagrams/bv-identity-cutover-survivorship.svg', 'Business Vault Identity Cut-Over & Survivorship Architecture')">
+          <img src="../images/diagrams/bv-identity-cutover-survivorship.svg" alt="Business Vault Cutover Survivorship" class="max-h-[46vh] w-auto object-contain" />
+          <span class="text-xs font-bold text-slate-500 mt-2">🔍 Click to inspect Business Vault Cut-Over &amp; Survivorship</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- SLIDE 10: ZOOMING IN ON DIMENSIONAL MODELING & HOP 2.20 -->
+    <!-- ======================================================= -->
+    <div class="slide flex-col justify-center w-full h-full max-w-6xl" data-act="2" data-title="Zoom #4: Dimensional Modeling & Upgrading Apache Hop" data-notes="After all that ordeal I could finally have fun with the dimensional modelers! Even Hop needed upgrades to stay up-to-date with the latest trends — Hop 2.19 and 2.20 received the bulk of those improvements.">
+      <div class="stagger-1 mb-6">
+        <span class="px-4 py-1.5 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-900 font-extrabold text-sm uppercase tracking-wider">Fractal Zoom #4 • Dimensional Modeler &amp; Hop Core</span>
+        <h2 class="text-4xl sm:text-6xl font-black text-slate-900 mt-3">Dimensional Fun &amp; Upgrading Apache Hop</h2>
+      </div>
+
+      <div class="stagger-2 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        <div class="lg:col-span-7 space-y-4">
+          <div class="card-light p-6 rounded-3xl border-l-8 border-l-emerald-600">
+            <h3 class="text-2xl font-black text-slate-900 mb-1">Star Schemas Done Right</h3>
+            <p class="text-xl text-slate-700 font-medium">Dimensions (Type 0/1/2, Date Dimensions, Conformed Bus Matrix) &amp; Fact Tables (Incremental, Full, Grain validation).</p>
+          </div>
+
+          <div class="card-elevated p-6 rounded-3xl border-l-8 border-l-sky-600 bg-sky-50/50">
+            <h3 class="text-2xl font-black text-sky-950 mb-1">Giving Back to Apache Hop 2.19 &amp; 2.20</h3>
+            <p class="text-xl text-slate-800 font-semibold">25 years of lessons meant even Hop Core needed upgrades for modern EDW workloads — bulk improvements shipped directly in <span class="font-mono font-black text-sky-700">Hop 2.19 &amp; 2.20</span>!</p>
+          </div>
+
+          <div class="card-light p-6 rounded-3xl border-l-8 border-l-amber-500">
+            <h3 class="text-2xl font-black text-slate-900 mb-1">Load Strategies &amp; Performance Telemetry</h3>
+            <p class="text-xl text-slate-700 font-medium">Visual duration metrics right on the model canvas so you see bottlenecks immediately.</p>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5 card-elevated p-4 rounded-3xl bg-white flex flex-col items-center cursor-pointer" onclick="openLightbox('../images/dimensional-model-source-load-strategy.png', 'Dimensional Model & Load Strategy in Hop GUI')">
+          <img src="../images/dimensional-model-source-load-strategy.png" alt="Dimensional Modeler" class="max-h-[48vh] w-auto object-contain rounded-xl" />
+          <span class="text-xs font-bold text-slate-500 mt-2">🔍 Click to enlarge Dimensional Modeler</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- SLIDE 11: THE BEST TOOL FOR THE JOB                     -->
+    <!-- ======================================================= -->
+    <div class="slide flex-col justify-center w-full h-full max-w-6xl" data-act="3" data-title="The Best Tool for Every Job" data-notes="What is the best tool for the job? For ETL it's Apache Hop. For lineage, Collibra or Marquez. For data handling, your relational DB. For storage, files, Iceberg, Kafka. For AI advice, the frontier model of the day. The list is long!">
+      <div class="stagger-1 text-center mb-6">
+        <span class="px-4 py-1.5 rounded-full bg-sky-100 border border-sky-300 text-sky-900 font-extrabold text-sm uppercase tracking-wider">Act 3 • Architectural Philosophy</span>
+        <h2 class="text-4xl sm:text-6xl font-black text-slate-900 mt-3">“The Best Tool for the Job”</h2>
+        <p class="text-2xl text-slate-600 font-semibold mt-1">In a modern data stack, every layer has a specialist champion:</p>
+      </div>
+
+      <div class="stagger-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div class="card-light p-6 rounded-3xl">
+          <div class="text-sm font-mono font-black text-sky-700 uppercase">ETL &amp; Orchestration</div>
+          <div class="text-3xl font-black text-slate-900 mt-1 mb-2">Apache Hop</div>
+          <p class="text-lg text-slate-700 font-medium">Visual pipelines, workflows, metadata injection &amp; runtime engines.</p>
+        </div>
+
+        <div class="card-light p-6 rounded-3xl">
+          <div class="text-sm font-mono font-black text-emerald-700 uppercase">Data Processing Engine</div>
+          <div class="text-3xl font-black text-slate-900 mt-1 mb-2">Your Relational DB</div>
+          <p class="text-lg text-slate-700 font-medium">PostgreSQL, SingleStore, SQL Server, MySQL, Snowflake...</p>
+        </div>
+
+        <div class="card-light p-6 rounded-3xl">
+          <div class="text-sm font-mono font-black text-amber-700 uppercase">Source Storage</div>
+          <div class="text-3xl font-black text-slate-900 mt-1 mb-2">Lake, Iceberg, Kafka</div>
+          <p class="text-lg text-slate-700 font-medium">Files, Parquet, Apache Iceberg tables, Kafka topics, CDC streams.</p>
+        </div>
+
+        <div class="card-light p-6 rounded-3xl">
+          <div class="text-sm font-mono font-black text-purple-700 uppercase">Enterprise Lineage</div>
+          <div class="text-3xl font-black text-slate-900 mt-1 mb-2">Collibra / Marquez</div>
+          <p class="text-lg text-slate-700 font-medium">OpenLineage-compatible governance &amp; enterprise catalog platforms.</p>
+        </div>
+
+        <div class="card-light p-6 rounded-3xl">
+          <div class="text-sm font-mono font-black text-indigo-700 uppercase">AI Co-Pilot</div>
+          <div class="text-3xl font-black text-slate-900 mt-1 mb-2">Model of the Day</div>
+          <p class="text-lg text-slate-700 font-medium">Advising on Data Vault modeling, SQL optimization &amp; tuning.</p>
+        </div>
+
+        <div class="card-elevated p-6 rounded-3xl bg-red-50 border-red-300">
+          <div class="text-sm font-mono font-black text-red-700 uppercase">The Problem</div>
+          <div class="text-3xl font-black text-red-950 mt-1 mb-2">Disconnected Silos!</div>
+          <p class="text-lg text-red-900 font-semibold">When they don’t work together, the EDW Manager, Modeler &amp; Engineer suffer.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- SLIDE 12: ONE TOOL TO RULE THEM ALL                     -->
+    <!-- ======================================================= -->
+    <div class="slide flex-col justify-center w-full h-full max-w-6xl" data-act="3" data-title="One Tool to Rule Them All — Orchestrating the Champions" data-notes="My conclusion: the best tool for the job is the tool that integrates all the best tools for the jobs and provides the architecture in which they all play a starring role. That is Hopper EDW.">
+      <div class="stagger-1 text-center mb-6">
+        <span class="px-4 py-1.5 rounded-full bg-amber-100 border border-amber-400 text-amber-950 font-extrabold text-sm uppercase tracking-wider">The Conclusion</span>
+        <h2 class="text-4xl sm:text-6xl font-black text-slate-900 mt-3">“One Tool to Rule Them All”</h2>
+        <p class="text-2xl text-slate-700 font-bold mt-2 max-w-4xl mx-auto">
+          The best tool is the one that <span class="text-sky-700 underline decoration-sky-500">integrates all the best tools</span> and gives every persona a starring role.
+        </p>
+      </div>
+
+      <!-- Hub-and-Spoke Diagram -->
+      <div class="stagger-2 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        <div class="lg:col-span-7 flex justify-center">
+          <svg viewBox="0 0 600 370" class="w-full max-w-xl">
+            <!-- Animated connector lines -->
+            <line x1="300" y1="185" x2="105" y2="65" stroke="#0284c7" stroke-width="3" class="svg-flow-line" />
+            <line x1="300" y1="185" x2="495" y2="65" stroke="#0284c7" stroke-width="3" class="svg-flow-line" />
+            <line x1="300" y1="185" x2="85" y2="185" stroke="#0284c7" stroke-width="3" class="svg-flow-line" />
+            <line x1="300" y1="185" x2="515" y2="185" stroke="#0284c7" stroke-width="3" class="svg-flow-line" />
+            <line x1="300" y1="185" x2="115" y2="305" stroke="#0284c7" stroke-width="3" class="svg-flow-line" />
+            <line x1="300" y1="185" x2="485" y2="305" stroke="#0284c7" stroke-width="3" class="svg-flow-line" />
+
+            <!-- Satellite Nodes -->
+            <g transform="translate(20, 30)">
+              <rect width="170" height="65" rx="14" fill="#ffffff" stroke="#0284c7" stroke-width="2.5" />
+              <text x="85" y="30" text-anchor="middle" fill="#0f172a" font-size="15" font-weight="900">Apache Hop ETL</text>
+              <text x="85" y="50" text-anchor="middle" fill="#475569" font-size="12" font-weight="700">Pipelines &amp; Workflows</text>
+            </g>
+            <g transform="translate(410, 30)">
+              <rect width="170" height="65" rx="14" fill="#ffffff" stroke="#7c3aed" stroke-width="2.5" />
+              <text x="85" y="30" text-anchor="middle" fill="#0f172a" font-size="15" font-weight="900">Collibra / Marquez</text>
+              <text x="85" y="50" text-anchor="middle" fill="#475569" font-size="12" font-weight="700">Two-Way OpenLineage</text>
+            </g>
+            <g transform="translate(10, 152)">
+              <rect width="160" height="65" rx="14" fill="#ffffff" stroke="#d97706" stroke-width="2.5" />
+              <text x="80" y="30" text-anchor="middle" fill="#0f172a" font-size="15" font-weight="900">Iceberg / Kafka</text>
+              <text x="80" y="50" text-anchor="middle" fill="#475569" font-size="12" font-weight="700">Lakes, Files &amp; Streams</text>
+            </g>
+            <g transform="translate(430, 152)">
+              <rect width="160" height="65" rx="14" fill="#ffffff" stroke="#059669" stroke-width="2.5" />
+              <text x="80" y="30" text-anchor="middle" fill="#0f172a" font-size="15" font-weight="900">Relational DBs</text>
+              <text x="80" y="50" text-anchor="middle" fill="#475569" font-size="12" font-weight="700">PG • MySQL • S2 • MSSQL</text>
+            </g>
+            <g transform="translate(25, 275)">
+              <rect width="175" height="65" rx="14" fill="#ffffff" stroke="#4f46e5" stroke-width="2.5" />
+              <text x="87" y="30" text-anchor="middle" fill="#0f172a" font-size="15" font-weight="900">AI Advisor + MCP</text>
+              <text x="87" y="50" text-anchor="middle" fill="#475569" font-size="12" font-weight="700">Modeling &amp; Tuning AI</text>
+            </g>
+            <g transform="translate(400, 275)">
+              <rect width="175" height="65" rx="14" fill="#ffffff" stroke="#0d9488" stroke-width="2.5" />
+              <text x="87" y="30" text-anchor="middle" fill="#0f172a" font-size="15" font-weight="900">Calcite JDBC &amp; Lean</text>
+              <text x="87" y="50" text-anchor="middle" fill="#475569" font-size="12" font-weight="700">PII Masking &amp; Reporting</text>
+            </g>
+
+            <!-- Center Hub -->
+            <circle cx="300" cy="185" r="76" fill="#0369a1" stroke="#f59e0b" stroke-width="5" />
+            <text x="300" y="175" text-anchor="middle" fill="#ffffff" font-size="21" font-weight="900">HOPPER EDW</text>
+            <text x="300" y="198" text-anchor="middle" fill="#bae6fd" font-size="12" font-weight="800">UNIFIED METADATA</text>
+            <text x="300" y="214" text-anchor="middle" fill="#fde68a" font-size="11" font-weight="800">IN APACHE HOP GUI</text>
+          </svg>
+        </div>
+
+        <div class="lg:col-span-5 space-y-4">
+          <div class="card-light p-5 rounded-3xl border-l-8 border-l-sky-600">
+            <div class="text-xl font-black text-slate-900">👔 For the EDW Manager</div>
+            <p class="text-lg text-slate-700 font-medium">Full transparency, bus matrix, governance, operational dashboards &amp; auto-generated docs.</p>
+          </div>
+          <div class="card-light p-5 rounded-3xl border-l-8 border-l-purple-600">
+            <div class="text-xl font-black text-slate-900">📐 For the Data Vault Modeler</div>
+            <p class="text-lg text-slate-700 font-medium">Visual modelers for Sources, Raw Vault, Business Vault &amp; Dimensional with AI assistance.</p>
+          </div>
+          <div class="card-light p-5 rounded-3xl border-l-8 border-l-emerald-600">
+            <div class="text-xl font-black text-slate-900">🛠️ For the Data Engineer</div>
+            <p class="text-lg text-slate-700 font-medium">Zero hand-coded boilerplate: runtime SQL &amp; Hop workflows generated on the fly.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- SLIDE 13: 100% METADATA DRIVEN & GUI-BACKED             -->
+    <!-- ======================================================= -->
+    <div class="slide flex-col justify-center w-full h-full max-w-6xl" data-act="3" data-title="Metadata-Driven: 4 Visual Modelers, Zero Boilerplate" data-notes="One thing I kept from Kettle, PDI, and Hop is that everything must be metadata-driven. The 4 models are pure metadata stored in files that open right in the Hop GUI. Everything possible is accessible through a UI, and runtime execution is generated on the fly.">
+      <div class="stagger-1 text-center mb-6">
+        <span class="px-4 py-1.5 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-900 font-extrabold text-sm uppercase tracking-wider">Core Design Principle</span>
+        <h2 class="text-4xl sm:text-6xl font-black text-slate-900 mt-3">100% Metadata-Driven &amp; GUI-First</h2>
+      </div>
+
+      <!-- 4 Modelers Pipeline -->
+      <div class="stagger-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+        <div class="card-elevated p-6 rounded-3xl border-t-8 border-t-amber-500">
+          <div class="text-xs font-mono font-black text-amber-700 uppercase">Modeler 01</div>
+          <div class="text-2xl font-black text-slate-900 mt-1 mb-2">Source Modeler</div>
+          <p class="text-lg text-slate-700 font-medium">Resource Definition Groups, harvesting, type mapping, DQ rules, masking.</p>
+        </div>
+
+        <div class="card-elevated p-6 rounded-3xl border-t-8 border-t-sky-600">
+          <div class="text-xs font-mono font-black text-sky-700 uppercase">Modeler 02</div>
+          <div class="text-2xl font-black text-slate-900 mt-1 mb-2">Data Vault Modeler</div>
+          <p class="text-lg text-slate-700 font-medium">Hubs, Links, Satellites, DCKs, Driving Keys, Hash keys, Auto-generator.</p>
+        </div>
+
+        <div class="card-elevated p-6 rounded-3xl border-t-8 border-t-purple-600">
+          <div class="text-xs font-mono font-black text-purple-700 uppercase">Modeler 03</div>
+          <div class="text-2xl font-black text-slate-900 mt-1 mb-2">Business Vault</div>
+          <p class="text-lg text-slate-700 font-medium">PIT tables, Bridges, Multi-Sat SCD2 survivorships, SQL views &amp; dbt import.</p>
+        </div>
+
+        <div class="card-elevated p-6 rounded-3xl border-t-8 border-t-emerald-600">
+          <div class="text-xs font-mono font-black text-emerald-700 uppercase">Modeler 04</div>
+          <div class="text-2xl font-black text-slate-900 mt-1 mb-2">Dimensional Modeler</div>
+          <p class="text-lg text-slate-700 font-medium">Conformed Dimensions, Facts, Date Dimension generator, Bus Matrix.</p>
+        </div>
+      </div>
+
+      <!-- Principle Banner -->
+      <div class="stagger-3 grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="card-light p-5 rounded-2xl bg-sky-50 border-sky-300 flex items-center gap-4">
+          <span class="text-4xl">🖥️</span>
+          <div>
+            <div class="text-xl font-black text-slate-900">Everything Has a GUI in Hop</div>
+            <p class="text-lg text-slate-700 font-medium">Pure metadata files (<code class="font-mono text-sky-800 bg-white px-1.5 rounded">.json</code>) versioned in Git, edited visually in Hop GUI &amp; Hop Web.</p>
+          </div>
+        </div>
+        <div class="card-light p-5 rounded-2xl bg-emerald-50 border-emerald-300 flex items-center gap-4">
+          <span class="text-4xl">⚡</span>
+          <div>
+            <div class="text-xl font-black text-slate-900">Generated On-The-Fly at Runtime</div>
+            <p class="text-lg text-slate-700 font-medium">No fragile static code mountains to maintain — DDL, SQL &amp; pipelines generate dynamically when needed.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- SLIDE 14: 5-MINUTE LIVE DEMO IN HOP GUI                 -->
+    <!-- ======================================================= -->
+    <div class="slide flex-col justify-center w-full h-full max-w-6xl" data-act="3" data-title="Live Demo: 5-Minute Tour of Retail Example in Hop GUI" data-notes="Let's jump into the Hop GUI for a quick 5-minute live walkthrough of the retail-example! First we'll tour the 4 modelers (Source, Data Vault, Business Vault, Dimensional + Bus Matrix). Then we'll switch through the perspectives: Data Catalog, EDW Journey, Integrated Documentation, AI Advisor session, and finally the OPS Analytics Dimensional Model.">
+      <div class="stagger-1 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div>
+          <span class="px-4 py-1.5 rounded-full bg-emerald-100 border border-emerald-400 text-emerald-950 font-extrabold text-sm uppercase tracking-wider inline-flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-600 animate-ping"></span>
+            Live Demo • 5-Minute Hop GUI Walkthrough
+          </span>
+          <h2 class="text-4xl sm:text-6xl font-black text-slate-900 mt-2">Seeing Is Believing: <code class="font-mono text-sky-700 text-3xl sm:text-5xl">retail-example</code></h2>
+        </div>
+
+        <!-- Interactive 5-Min Demo Countdown Widget -->
+        <div class="card-elevated px-5 py-3 rounded-2xl bg-slate-900 text-white flex items-center gap-4 shrink-0">
+          <div>
+            <div class="text-[11px] font-mono uppercase tracking-wider text-sky-300 font-bold">Live Demo Timer</div>
+            <div id="demo-clock" class="text-2xl sm:text-3xl font-mono font-black text-white">05:00</div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="toggleDemoTimer()" id="demo-timer-btn" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-sm transition">Start</button>
+            <button onclick="resetDemoTimer()" class="px-2.5 py-1.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold text-xs transition">Reset</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Part 1: The 4 Models + Bus Matrix -->
+      <div class="stagger-2 mb-5">
+        <div class="text-xs font-mono font-black uppercase tracking-wider text-slate-500 mb-2.5">Part 1 • The 4 Metadata Models &amp; Bus Matrix</div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="card-light p-4 rounded-2xl border-l-6 border-l-amber-500">
+            <div class="text-xs font-mono font-black text-amber-700">STOP 01</div>
+            <div class="text-xl font-black text-slate-900 mt-0.5">Source Model</div>
+            <p class="text-base text-slate-700 font-medium mt-1">Harvested schemas, type mappings &amp; DQ rules.</p>
+          </div>
+
+          <div class="card-light p-4 rounded-2xl border-l-6 border-l-sky-600">
+            <div class="text-xs font-mono font-black text-sky-700">STOP 02</div>
+            <div class="text-xl font-black text-slate-900 mt-0.5">Data Vault Model</div>
+            <p class="text-base text-slate-700 font-medium mt-1">Hubs, Links, Satellites &amp; live duration metrics.</p>
+          </div>
+
+          <div class="card-light p-4 rounded-2xl border-l-6 border-l-purple-600">
+            <div class="text-xs font-mono font-black text-purple-700">STOP 03</div>
+            <div class="text-xl font-black text-slate-900 mt-0.5">Business Vault</div>
+            <p class="text-base text-slate-700 font-medium mt-1">Multi-satellite SCD2, survivorship &amp; PIT/Bridges.</p>
+          </div>
+
+          <div class="card-elevated p-4 rounded-2xl border-l-6 border-l-emerald-600 bg-emerald-50/50">
+            <div class="text-xs font-mono font-black text-emerald-800">STOP 04</div>
+            <div class="text-xl font-black text-slate-900 mt-0.5">Dimensional + Bus Matrix</div>
+            <p class="text-base text-slate-800 font-semibold mt-1">Star schema facts, conformed dims &amp; Enterprise Bus Matrix.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Part 2: The 5 Integrated Perspectives & Finale -->
+      <div class="stagger-3">
+        <div class="text-xs font-mono font-black uppercase tracking-wider text-slate-500 mb-2.5">Part 2 • Perspectives, AI Co-Pilot &amp; DWH-for-Your-DWH</div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div class="card-light p-4 rounded-2xl border-t-4 border-t-sky-500">
+            <div class="text-xs font-mono font-black text-sky-700">STOP 05</div>
+            <div class="text-lg font-black text-slate-900 mt-1">📚 Data Catalog</div>
+            <p class="text-sm text-slate-700 font-medium mt-1">Browse all data assets, schemas, lineage &amp; quality state.</p>
+          </div>
+
+          <div class="card-light p-4 rounded-2xl border-t-4 border-t-indigo-500">
+            <div class="text-xs font-mono font-black text-indigo-700">STOP 06</div>
+            <div class="text-lg font-black text-slate-900 mt-1">🧭 EDW Journey</div>
+            <p class="text-sm text-slate-700 font-medium mt-1">Interactive architecture map + live run dashboard.</p>
+          </div>
+
+          <div class="card-light p-4 rounded-2xl border-t-4 border-t-teal-500">
+            <div class="text-xs font-mono font-black text-teal-700">STOP 07</div>
+            <div class="text-lg font-black text-slate-900 mt-1">📖 Integrated Docs</div>
+            <p class="text-sm text-slate-700 font-medium mt-1">Built-in EDW documentation right inside Hop GUI.</p>
+          </div>
+
+          <div class="card-light p-4 rounded-2xl border-t-4 border-t-purple-500">
+            <div class="text-xs font-mono font-black text-purple-700">STOP 08</div>
+            <div class="text-lg font-black text-slate-900 mt-1">🤖 AI Advisor</div>
+            <p class="text-sm text-slate-700 font-medium mt-1">Example advisory session on models &amp; tuning.</p>
+          </div>
+
+          <div class="card-elevated p-4 rounded-2xl border-t-4 border-t-amber-500 bg-amber-50/60">
+            <div class="text-xs font-mono font-black text-amber-800">STOP 09 • FINALE</div>
+            <div class="text-lg font-black text-slate-900 mt-1">📊 OPS Analytics DM</div>
+            <p class="text-sm text-slate-800 font-semibold mt-1">The Dimensional Model of our own DWH operations!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- SLIDE 15: MODEL FRIENDLY — AI ADVISOR & MCP SERVER      -->
+    <!-- ======================================================= -->
+    <div class="slide flex-col justify-center w-full h-full max-w-6xl" data-act="3" data-title="Model Friendly: Pluggable AI Advisor + MCP Server" data-notes="Hopper EDW is 'Model Friendly' in two ways: it supports the Hop GUI pluggable AI Advisor for modeling, lineage, and performance tuning, AND it ships with an MCP Server that teaches your code assistant how to contribute!">
+      <div class="stagger-1 mb-6">
+        <span class="px-4 py-1.5 rounded-full bg-indigo-100 border border-indigo-300 text-indigo-900 font-extrabold text-sm uppercase tracking-wider">AI-Native Architecture</span>
+        <h2 class="text-4xl sm:text-6xl font-black text-slate-900 mt-3">“Model Friendly” — In Both Senses!</h2>
+      </div>
+
+      <div class="stagger-2 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        <div class="lg:col-span-6 space-y-5">
+          <div class="card-elevated p-6 rounded-3xl border-l-8 border-l-indigo-600">
+            <div class="text-xs font-mono font-black text-indigo-700 uppercase mb-1">1. In-GUI Intelligence</div>
+            <h3 class="text-2xl sm:text-3xl font-black text-slate-900 mb-2">Hop GUI Pluggable AI Advisor</h3>
+            <ul class="space-y-2 text-lg sm:text-xl text-slate-700 font-medium">
+              <li>• Suggests complete Data Vault models from Sources</li>
+              <li>• Interactive proposal review &amp; one-click apply</li>
+              <li>• Performance tuning &amp; parallelism advice</li>
+              <li>• Answers questions across all 4 modelers &amp; lineage</li>
+            </ul>
+          </div>
+
+          <div class="card-elevated p-6 rounded-3xl border-l-8 border-l-emerald-600 bg-emerald-50/40">
+            <div class="text-xs font-mono font-black text-emerald-800 uppercase mb-1">2. Open-Source Contributor Multiplier</div>
+            <h3 class="text-2xl sm:text-3xl font-black text-slate-900 mb-2">Built-in MCP Server</h3>
+            <p class="text-lg sm:text-xl text-slate-800 font-medium">
+              Want to contribute or build models faster? Hopper EDW includes an <span class="font-black text-emerald-900">MCP Server</span> that teaches your coding assistant everything it needs to know. <span class="underline">All contributions welcome!</span>
+            </p>
+          </div>
+        </div>
+
+        <div class="lg:col-span-6 card-elevated p-4 rounded-3xl bg-white flex flex-col items-center cursor-pointer" onclick="openLightbox('../images/ai-advisor-suggest-dv-model-using-sources-4-proposals-list.png', 'Hop GUI Pluggable AI Advisor — Interactive Modeling Proposals')">
+          <img src="../images/ai-advisor-suggest-dv-model-using-sources-4-proposals-list.png" alt="AI Advisor Proposals" class="max-h-[50vh] w-auto object-contain rounded-xl" />
+          <span class="text-xs font-bold text-slate-500 mt-2">🔍 Click to enlarge AI Advisor Interactive Proposal Review</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- SLIDE 15: DOCUMENTATION THAT ACTUALLY SHIPS FIRST!      -->
+    <!-- ======================================================= -->
+    <div class="slide flex-col justify-center w-full h-full max-w-6xl" data-act="3" data-title="Documentation: Everything Included Out of the Box" data-notes="Usually documentation is something that lags behind, but I'm happy to report you get everything included: in-GUI EDW button, Component Explorer, Training Modules, YouTube Video Series, Getting Started guides, and auto-generated project documentation!">
+      <div class="stagger-1 text-center mb-6">
+        <span class="px-4 py-1.5 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-900 font-extrabold text-sm uppercase tracking-wider">No More “Docs Coming Soon”</span>
+        <h2 class="text-4xl sm:text-6xl font-black text-slate-900 mt-3">Documentation: Everything Included!</h2>
+      </div>
+
+      <div class="stagger-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div class="card-light p-6 rounded-3xl border-t-4 border-t-sky-600">
+          <div class="text-3xl mb-2">🔘</div>
+          <div class="text-2xl font-black text-slate-900 mb-1">In-GUI “EDW” Button</div>
+          <p class="text-lg text-slate-700 font-medium">Instant context-sensitive documentation right at the top toolbar of the Hop GUI.</p>
+        </div>
+
+        <div class="card-light p-6 rounded-3xl border-t-4 border-t-indigo-600">
+          <div class="text-3xl mb-2">🗺️</div>
+          <div class="text-2xl font-black text-slate-900 mb-1">Component Explorer</div>
+          <p class="text-lg text-slate-700 font-medium">Interactive visual map explaining every single architectural component and how they connect.</p>
+        </div>
+
+        <div class="card-light p-6 rounded-3xl border-t-4 border-t-purple-600">
+          <div class="text-3xl mb-2">🎓</div>
+          <div class="text-2xl font-black text-slate-900 mb-1">Training Modules</div>
+          <p class="text-lg text-slate-700 font-medium">Structured hands-on training modules to onboard teams onto Data Vault &amp; Hopper EDW.</p>
+        </div>
+
+        <div class="card-light p-6 rounded-3xl border-t-4 border-t-red-600">
+          <div class="text-3xl mb-2">▶️</div>
+          <div class="text-2xl font-black text-slate-900 mb-1">YouTube Video Series</div>
+          <p class="text-lg text-slate-700 font-medium">Complete <span class="italic font-semibold">“Introduction to Hopper EDW”</span> video walkthrough series.</p>
+        </div>
+
+        <div class="card-light p-6 rounded-3xl border-t-4 border-t-amber-600">
+          <div class="text-3xl mb-2">🚀</div>
+          <div class="text-2xl font-black text-slate-900 mb-1">Getting Started Guides</div>
+          <p class="text-lg text-slate-700 font-medium">Step-by-step guides for Linux, macOS, Windows, Retail &amp; AdventureWorks.</p>
+        </div>
+
+        <div class="card-elevated p-6 rounded-3xl border-t-4 border-t-emerald-600 bg-emerald-50/50">
+          <div class="text-3xl mb-2">📄</div>
+          <div class="text-2xl font-black text-emerald-950 mb-1">Project Doc Generator</div>
+          <p class="text-lg text-slate-800 font-semibold">One click generates complete documentation &amp; Draw.io diagrams for <span class="underline">your own</span> EDW project!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- SLIDE 16: THE EDW JOURNEY DASHBOARD IN HOP GUI          -->
+    <!-- ======================================================= -->
+    <div class="slide flex-col justify-center w-full h-full max-w-6xl" data-act="3" data-title="The EDW Journey: Clickable Architecture Dashboard" data-notes="And there's a documentation crossover right inside the Hop GUI: the EDW Journey perspective, where you can click on every part of the architecture to see its live state in a dashboard!">
+      <div class="stagger-1 flex flex-col sm:flex-row sm:items-end justify-between mb-4">
+        <div>
+          <span class="px-3.5 py-1 rounded-full bg-sky-100 border border-sky-300 text-sky-900 font-extrabold text-xs uppercase tracking-wider">Architecture Meets Live Operations</span>
+          <h2 class="text-3xl sm:text-5xl font-black text-slate-900 mt-2">The EDW Journey in Hop GUI</h2>
+          <p class="text-xl text-slate-700 font-semibold">Click any stage of the architecture diagram to inspect live run state &amp; metrics.</p>
+        </div>
+        <button onclick="openLightbox('../images/edw-journey-run-selection.png', 'The EDW Journey in Hop GUI — Live Interactive Dashboard')" class="mt-2 sm:mt-0 px-4 py-2 rounded-xl bg-sky-600 text-white font-bold text-sm hover:bg-sky-500 transition">
+          🔍 Enlarge Screenshot
+        </button>
+      </div>
+
+      <div class="stagger-2 card-elevated p-3 rounded-3xl bg-white flex-1 flex items-center justify-center overflow-hidden cursor-pointer" onclick="openLightbox('../images/edw-journey-run-selection.png', 'The EDW Journey in Hop GUI — Live Interactive Dashboard')">
+        <img src="../images/edw-journey-run-selection.png" alt="EDW Journey Run Selection in Hop GUI" class="max-h-[60vh] w-auto object-contain rounded-2xl" />
+      </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- SLIDE 17: QUALITY & TRANSPARENCY — VALIDATION GATES     -->
+    <!-- ======================================================= -->
+    <div class="slide flex-col justify-center w-full h-full max-w-6xl" data-act="4" data-title="Quality & Transparency: Stop Chasing Logs for 8 Hours" data-notes="When many systems talk to each other, quality and transparency are everything. I built Schema and DQ validation gates BEFORE and AFTER loading. This prevents weird runtime errors that have you chasing logs for the next 8 hours!">
+      <div class="stagger-1 mb-5">
+        <span class="px-4 py-1.5 rounded-full bg-red-100 border border-red-300 text-red-900 font-extrabold text-sm uppercase tracking-wider">Act 4 • Quality &amp; Transparency</span>
+        <h2 class="text-4xl sm:text-6xl font-black text-slate-900 mt-2">Stop Chasing Logs for 8 Hours</h2>
+        <p class="text-2xl text-slate-700 font-bold mt-1">Schema &amp; Data Quality Validation Gates <span class="text-sky-700 underline">before and after</span> loading.</p>
+      </div>
+
+      <div class="stagger-2 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        <div class="lg:col-span-6 space-y-4">
+          <div class="card-light p-6 rounded-3xl border-l-8 border-l-red-500">
+            <div class="text-2xl font-black text-slate-900 mb-1">🚫 Block Bad Schema &amp; Bad Data Early</div>
+            <p class="text-xl text-slate-700 font-medium">Never load wrong formats or broken schemas into your Data Vault only to fail halfway through a batch.</p>
+          </div>
+
+          <div class="card-light p-6 rounded-3xl border-l-8 border-l-amber-500">
+            <div class="text-2xl font-black text-slate-900 mb-1">📋 Clear Validation Reports</div>
+            <p class="text-xl text-slate-700 font-medium">Hopper EDW lines up every discrepancy found across tables, columns, data types, and DQ thresholds.</p>
+          </div>
+
+          <div class="card-elevated p-6 rounded-3xl border-l-8 border-l-emerald-600 bg-emerald-50/60">
+            <div class="text-2xl font-black text-emerald-950 mb-1">🛠️ Automated Remediation Workflows!</div>
+            <p class="text-xl text-slate-800 font-semibold">Validation doesn’t just complain — it <span class="underline">proposes solutions</span> and generates complete SQL remediation workflows for your DTAP environments!</p>
+          </div>
+        </div>
+
+        <div class="lg:col-span-6 card-elevated p-4 rounded-3xl bg-white flex flex-col items-center cursor-pointer" onclick="openLightbox('../images/resource-definition-group-validation-block-issue-details-and-proposals.png', 'Schema & DQ Validation Gate with Automated Remediation Proposals')">
+          <img src="../images/resource-definition-group-validation-block-issue-details-and-proposals.png" alt="Validation Gate and Remediation Proposals" class="max-h-[48vh] w-auto object-contain rounded-xl" />
+          <span class="text-xs font-bold text-slate-500 mt-2">🔍 Click to inspect Validation Issues &amp; Proposed DTAP Remediation</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- SLIDE 18: TWO-WAY LINEAGE & HOP LINEAGE VIEW            -->
+    <!-- ======================================================= -->
+    <div class="slide flex-col justify-center w-full h-full max-w-6xl" data-act="4" data-title="Two-Way Lineage: Integrated Right Inside Hop GUI" data-notes="Lineage can be sent to any OpenLineage platform like Collibra or Marquez. Writing to those is great for other people — but Hopper EDW reads lineage BACK into the Hop Lineage View where data engineers actually work!">
+      <div class="stagger-1 flex flex-col sm:flex-row sm:items-end justify-between mb-4">
+        <div>
+          <span class="px-3.5 py-1 rounded-full bg-purple-100 border border-purple-300 text-purple-900 font-extrabold text-xs uppercase tracking-wider">Round-Trip OpenLineage</span>
+          <h2 class="text-3xl sm:text-5xl font-black text-slate-900 mt-2">Lineage Where Engineers Actually Work</h2>
+          <p class="text-xl text-slate-700 font-semibold">Export to Collibra &amp; Marquez — <span class="text-purple-800 font-black underline">AND read it back</span> into the Hop Lineage View &amp; Data Catalog!</p>
+        </div>
+        <button onclick="openLightbox('../images/lineage-view-with-information-pane.png', 'Hop Lineage View with Integrated Model Navigation & Data Catalog')" class="mt-2 sm:mt-0 px-4 py-2 rounded-xl bg-purple-700 text-white font-bold text-sm hover:bg-purple-600 transition shrink-0">
+          🔍 Enlarge Lineage View
+        </button>
+      </div>
+
+      <div class="stagger-2 grid grid-cols-1 lg:grid-cols-12 gap-5 items-center">
+        <div class="lg:col-span-8 card-elevated p-3 rounded-3xl bg-white flex items-center justify-center cursor-pointer" onclick="openLightbox('../images/lineage-view-with-information-pane.png', 'Hop Lineage View with Integrated Model Navigation & Data Catalog')">
+          <img src="../images/lineage-view-with-information-pane.png" alt="Hop Lineage View with Information Pane" class="max-h-[54vh] w-auto object-contain rounded-xl" />
+        </div>
+
+        <div class="lg:col-span-4 space-y-4">
+          <div class="card-light p-5 rounded-2xl border-l-6 border-l-purple-600">
+            <div class="text-xl font-black text-slate-900">Every Table Has a Lineage Tab</div>
+            <p class="text-base text-slate-700 font-medium mt-1">Trace every field back to its exact source column inside any modeler dialog.</p>
+          </div>
+          <div class="card-light p-5 rounded-2xl border-l-6 border-l-sky-600">
+            <div class="text-xl font-black text-slate-900">Jump Straight to Models</div>
+            <p class="text-base text-slate-700 font-medium mt-1">Right-click any node in Hop Lineage View to open the responsible model, inspect generated data, or jump to the Data Catalog.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- SLIDE 19: OPERATIONAL ANALYTICS — A DWH FOR YOUR DWH!   -->
+    <!-- ======================================================= -->
+    <div class="slide flex-col justify-center w-full h-full max-w-6xl" data-act="4" data-title="Operational Analytics: Build a DWH... for Your DWH!" data-notes="And because we eat our own dog food: you can build a Data Warehouse... for your Data Warehouse! Operational Analytics takes all the OPS telemetry (load timings, workflow overviews, DQ history, schema harvests) and generates a complete Source Model, Raw Vault, Business Vault, 12-Fact Star Schema, Semantic Layer, and load workflows in one click — because it's the right thing to do!">
+      <div class="stagger-1 flex flex-col sm:flex-row sm:items-end justify-between mb-5">
+        <div>
+          <span class="px-4 py-1.5 rounded-full bg-amber-100 border border-amber-300 text-amber-900 font-extrabold text-sm uppercase tracking-wider">Act 4 • Eating Our Own Dog Food</span>
+          <h2 class="text-4xl sm:text-6xl font-black text-slate-900 mt-2">Build a DWH… <span class="text-sky-700">for Your DWH!</span></h2>
+          <p class="text-2xl text-slate-700 font-bold mt-1">Operational Analytics — <span class="italic text-slate-900 underline decoration-amber-500">because it’s the right thing to do.</span></p>
+        </div>
+        <button onclick="openLightbox('../images/create-operational-analytics-dialog.png', 'Create Operational Analytics Dialog — A Complete DWH of Your DWH')" class="mt-2 sm:mt-0 px-4 py-2 rounded-xl bg-sky-600 text-white font-bold text-sm hover:bg-sky-500 transition shrink-0">
+          🔍 Enlarge Dialog
+        </button>
+      </div>
+
+      <div class="stagger-2 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        <!-- Left: What it does & generates -->
+        <div class="lg:col-span-7 space-y-4">
+          <div class="card-light p-5 rounded-3xl border-l-8 border-l-amber-500">
+            <div class="text-xl sm:text-2xl font-black text-slate-900 mb-1">📊 16 Operational Telemetry Tables</div>
+            <p class="text-lg text-slate-700 font-medium">Hopper already logs <span class="font-bold text-slate-900">load timings, workflow overviews, DQ findings &amp; schema-harvest history</span> into the <code class="font-mono text-amber-800 bg-amber-50 px-1.5 rounded">OPS</code> database.</p>
+          </div>
+
+          <div class="card-elevated p-5 rounded-3xl border-l-8 border-l-sky-600 bg-sky-50/50">
+            <div class="text-xl sm:text-2xl font-black text-sky-950 mb-2">⚡ One Click Generates a Full Stack</div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-sm sm:text-base font-bold text-slate-800">
+              <div class="p-2.5 rounded-xl bg-white border border-sky-200">1️⃣ Source Model (<code class="font-mono text-xs">.hsm</code>)</div>
+              <div class="p-2.5 rounded-xl bg-white border border-sky-200">2️⃣ Raw Data Vault (<code class="font-mono text-xs">dv/</code>)</div>
+              <div class="p-2.5 rounded-xl bg-white border border-sky-200">3️⃣ Business Vault (<code class="font-mono text-xs">.hbv</code>)</div>
+              <div class="p-2.5 rounded-xl bg-white border border-sky-200">4️⃣ 12 Facts + Dims (<code class="font-mono text-xs">dm/</code>)</div>
+              <div class="p-2.5 rounded-xl bg-white border border-sky-200">5️⃣ Semantic Layer (<code class="font-mono text-xs">.hsl</code>)</div>
+              <div class="p-2.5 rounded-xl bg-white border border-sky-200">6️⃣ Initial &amp; Incr Workflows</div>
+            </div>
+          </div>
+
+          <div class="card-light p-4 rounded-2xl border-l-8 border-l-emerald-600 flex items-center justify-between">
+            <div>
+              <div class="text-lg font-black text-slate-900">Ready for Bus Matrix &amp; Presentation Engine</div>
+              <p class="text-base text-slate-700 font-medium">Analyze pipeline durations, model trends &amp; DQ severity over time like any business domain.</p>
+            </div>
+            <span class="hidden sm:inline-block px-3 py-1 rounded-lg bg-emerald-100 text-emerald-900 font-mono font-bold text-xs shrink-0 ml-3">ops-analytics</span>
+          </div>
+        </div>
+
+        <!-- Right: Screenshot of Create Operational Analytics dialog -->
+        <div class="lg:col-span-5 card-elevated p-4 rounded-3xl bg-white flex flex-col items-center cursor-pointer" onclick="openLightbox('../images/create-operational-analytics-dialog.png', 'Create Operational Analytics Dialog — A Complete DWH of Your DWH')">
+          <img src="../images/create-operational-analytics-dialog.png" alt="Create Operational Analytics Dialog" class="max-h-[48vh] w-auto object-contain rounded-xl border border-slate-200" />
+          <span class="text-xs font-bold text-slate-500 mt-2">🔍 Click to inspect Create Operational Analytics Dialog</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- SLIDE 20: REPORTING & ANALYTICS (CALCITE JDBC + LEAN)   -->
+    <!-- ======================================================= -->
+    <div class="slide flex-col justify-center w-full h-full max-w-6xl" data-act="5" data-title="Reporting, Calcite Thin JDBC Driver & PII Masking" data-notes="Along with this project I resurrected Lean (with Bart Maertens) as hopper-presentation-engine for server-side SVG/PDF rendering. Plus a thin-client Apache Calcite JDBC driver to query federated sources AND mask PII in dimensional models!">
+      <div class="stagger-1 mb-5">
+        <span class="px-4 py-1.5 rounded-full bg-teal-100 border border-teal-300 text-teal-900 font-extrabold text-sm uppercase tracking-wider">Act 5 • Reporting &amp; Semantic Layer</span>
+        <h2 class="text-4xl sm:text-6xl font-black text-slate-900 mt-2">Reporting, Federated SQL &amp; PII Masking</h2>
+      </div>
+
+      <div class="stagger-2 grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+        <!-- Card 1: Hopper Presentation Engine (Lean) -->
+        <div class="card-light p-6 rounded-3xl border-t-8 border-t-sky-600 flex flex-col justify-between">
+          <div>
+            <span class="px-3 py-1 rounded-full bg-sky-100 text-sky-900 font-mono font-bold text-xs">Lean Resurrected!</span>
+            <h3 class="text-2xl sm:text-3xl font-black text-slate-900 mt-3 mb-2">Hopper Presentation Engine</h3>
+            <p class="text-lg text-slate-700 font-medium leading-relaxed">
+              Initiated by <span class="font-bold text-slate-900">Bart Maertens &amp; Matt Casters</span> as Lean — now rebranded as <code class="font-mono text-sky-800">hopper-presentation-engine</code>.
+            </p>
+            <p class="text-lg text-slate-700 font-medium mt-2">
+              Server-side rendering delivering <span class="font-bold text-slate-900">pixel-perfect SVGs and PDFs</span>.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-200 font-mono text-sm font-bold text-sky-700">
+            🌐 presentation.data-hopper.com
+          </div>
+        </div>
+
+        <!-- Card 2: Thin Client JDBC for Source Models -->
+        <div class="card-light p-6 rounded-3xl border-t-8 border-t-amber-500 flex flex-col justify-between">
+          <div>
+            <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-900 font-mono font-bold text-xs">Powered by Apache Calcite</span>
+            <h3 class="text-2xl sm:text-3xl font-black text-slate-900 mt-3 mb-2">Federated Thin JDBC Driver</h3>
+            <p class="text-lg text-slate-700 font-medium leading-relaxed">
+              Want to run standard SQL across a Source Model where <span class="font-bold text-slate-900">not all sources are databases</span> (files, pipelines, different DB engines)?
+            </p>
+            <p class="text-lg text-slate-700 font-medium mt-2">
+              Connect DBeaver or any BI tool straight to Hop via our thin JDBC driver!
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-200 font-mono text-sm font-bold text-amber-800">
+            jdbc:hopper://... (Thanks Julian Hyde!)
+          </div>
+        </div>
+
+        <!-- Card 3: Dimensional PII Masking -->
+        <div class="card-elevated p-6 rounded-3xl border-t-8 border-t-emerald-600 bg-emerald-50/40 flex flex-col justify-between cursor-pointer" onclick="openLightbox('../images/dimensional-model-service-masked-d-customer-query.png', 'Dynamic PII Masking via Hopper Thin JDBC Driver & Apache Calcite')">
+          <div>
+            <span class="px-3 py-1 rounded-full bg-emerald-200 text-emerald-950 font-mono font-bold text-xs">Zero-Trust Analytics</span>
+            <h3 class="text-2xl sm:text-3xl font-black text-slate-900 mt-3 mb-2">Automatic PII Masking</h3>
+            <p class="text-lg text-slate-800 font-semibold leading-relaxed">
+              Specify masking rules directly on Dimensions &amp; Facts in the Dimensional Modeler — the JDBC driver masks PII on the fly from prying eyes!
+            </p>
+            <img src="../images/dimensional-model-service-masked-d-customer-query.png" alt="Masked Customer Query" class="mt-3 rounded-xl border border-emerald-300 max-h-28 w-full object-cover" />
+          </div>
+          <div class="mt-3 pt-2 border-t border-emerald-200 text-xs font-bold text-emerald-900">
+            🔍 Click to view Masked SQL Query Result
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- SLIDE 21: SAMPLES, INTEGRATION TESTS & CALL TO ACTION   -->
+    <!-- ======================================================= -->
+    <div class="slide flex-col justify-center w-full h-full max-w-6xl" data-act="5" data-title="Samples, Integration Tests & Try It Now!" data-notes="Hopper EDW ships with 2 complete sample projects (retail-example and AdventureWorks) and integration tests for MySQL, Postgres, SingleStore, and MS SQL Server (Snowflake started — I just need an account!). Thank you all for 25 amazing years!">
+      <div class="stagger-1 text-center mb-5">
+        <span class="px-4 py-1.5 rounded-full bg-sky-100 border border-sky-300 text-sky-900 font-extrabold text-sm uppercase tracking-wider">Ready Today • Apache License 2.0</span>
+        <h2 class="text-4xl sm:text-6xl font-black text-slate-900 mt-2">Samples, Tests &amp; Try It Live!</h2>
+      </div>
+
+      <div class="stagger-2 grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <!-- Samples -->
+        <div class="card-light p-6 rounded-3xl border-l-8 border-l-sky-600">
+          <div class="text-sm font-mono font-black text-sky-700 uppercase mb-1">2 Complete Reference Projects</div>
+          <h3 class="text-2xl sm:text-3xl font-black text-slate-900 mb-3">Learn by Example</h3>
+          <div class="space-y-2.5 text-xl font-bold text-slate-800">
+            <div class="p-3 rounded-2xl bg-sky-50 border border-sky-200">🛍️ <code class="font-mono text-sky-900">retail-example</code> — Full end-to-end EDW</div>
+            <div class="p-3 rounded-2xl bg-indigo-50 border border-indigo-200">🚲 <code class="font-mono text-indigo-900">AdventureWorks</code> — Multi-domain enterprise model</div>
+          </div>
+        </div>
+
+        <!-- Integration Tests -->
+        <div class="card-light p-6 rounded-3xl border-l-8 border-l-emerald-600">
+          <div class="text-sm font-mono font-black text-emerald-700 uppercase mb-1">Battle-Tested Engines</div>
+          <h3 class="text-2xl sm:text-3xl font-black text-slate-900 mb-3">Automated Integration Tests</h3>
+          <div class="grid grid-cols-2 gap-2.5 text-lg font-bold text-slate-800">
+            <div class="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200">✅ PostgreSQL</div>
+            <div class="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200">✅ MySQL</div>
+            <div class="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200">✅ SingleStore</div>
+            <div class="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200">✅ MS SQL Server</div>
+          </div>
+          <p class="text-base font-semibold text-slate-600 mt-3">❄️ <span class="italic">Snowflake work started — I just lack an account ;-)</span></p>
+        </div>
+      </div>
+
+      <!-- Big Call To Action Footer Box -->
+      <div class="stagger-3 card-elevated p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-sky-900 via-slate-900 to-indigo-950 text-white text-center">
+        <h3 class="text-2xl sm:text-4xl font-black mb-4">Thank You for 25 Wonderful Years! ❤️</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
+          <div class="p-4 rounded-2xl bg-white/10 border border-white/20">
+            <div class="text-xs font-mono uppercase text-sky-300 font-bold">GitHub Repository (APL 2.0)</div>
+            <div class="text-base sm:text-lg font-mono font-black text-white mt-1 break-all">github.com/ProjectDataHopper/hopper-edw</div>
+          </div>
+          <div class="p-4 rounded-2xl bg-white/10 border border-white/20">
+            <div class="text-xs font-mono uppercase text-emerald-300 font-bold">Try Live in Your Browser</div>
+            <div class="text-base sm:text-lg font-mono font-black text-white mt-1">hop-web.data-hopper.com</div>
+          </div>
+          <div class="p-4 rounded-2xl bg-white/10 border border-white/20">
+            <div class="text-xs font-mono uppercase text-amber-300 font-bold">Docs, Videos &amp; Presentation Engine</div>
+            <div class="text-base sm:text-lg font-mono font-black text-white mt-1">www.data-hopper.com</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ========================================================= -->
+  <!-- BOTTOM FOOTER / PROGRESS BAR                              -->
+  <!-- ========================================================= -->
+  <footer class="h-14 border-t-2 border-slate-200 px-6 sm:px-10 flex items-center justify-between bg-white/95 backdrop-blur z-30 shrink-0">
+    <div class="flex items-center gap-3">
+      <button onclick="prevSlide()" title="Previous Slide (Left Arrow)" class="p-2 rounded-xl bg-slate-100 border border-slate-300 text-slate-700 hover:bg-slate-200 transition">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+      </button>
+      <button onclick="nextSlide()" title="Next Slide (Right Arrow / Space)" class="p-2 rounded-xl bg-sky-600 text-white hover:bg-sky-500 transition shadow-xs">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+      </button>
+      <span id="slide-title-display" class="hidden md:inline text-sm font-extrabold text-slate-700 max-w-lg truncate ml-2">Title</span>
+    </div>
+
+    <!-- Center Progress Bar -->
+    <div class="flex items-center gap-4">
+      <div class="w-44 sm:w-80 bg-slate-200 rounded-full h-2.5 overflow-hidden">
+        <div id="slide-progress-bar" class="bg-gradient-to-r from-sky-600 to-emerald-500 h-2.5 rounded-full transition-all duration-300" style="width: 5%"></div>
+      </div>
+      <span id="slide-counter" class="text-sm font-mono font-black text-slate-800 min-w-[65px] text-right">01 / 20</span>
+    </div>
+  </footer>
+
+  <!-- ========================================================= -->
+  <!-- SPEAKER NOTES DRAWER [Key: P]                             -->
+  <!-- ========================================================= -->
+  <div id="notes-drawer" class="fixed bottom-16 left-6 max-w-xl w-full p-6 rounded-3xl bg-white border-2 border-sky-500 shadow-2xl z-40 hidden">
+    <div class="flex items-center justify-between border-b border-slate-200 pb-3 mb-3">
+      <span class="text-sm font-black text-sky-700 uppercase tracking-wider">🎙️ Speaker Notes (20–25 Min Pace)</span>
+      <button onclick="toggleNotes()" class="text-slate-500 hover:text-slate-900 text-sm font-bold">✕ Close [P]</button>
+    </div>
+    <div id="notes-content" class="text-base sm:text-lg text-slate-800 font-medium leading-relaxed">
+      Loading speaker notes...
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- LIGHTBOX MODAL FOR DIAGRAMS & SCREENSHOTS                 -->
+  <!-- ========================================================= -->
+  <div id="lightbox-modal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-50 hidden flex-col items-center justify-center p-4" onclick="closeLightbox()">
+    <div class="w-full max-w-7xl flex items-center justify-between pb-3 text-white" onclick="event.stopPropagation()">
+      <span id="lightbox-caption" class="text-lg font-extrabold truncate text-sky-300">Diagram</span>
+      <button onclick="closeLightbox()" class="px-4 py-1.5 rounded-xl bg-white text-slate-900 hover:bg-slate-100 text-sm font-extrabold shadow">Close [Esc]</button>
+    </div>
+    <div class="max-w-7xl max-h-[86vh] w-full flex items-center justify-center overflow-auto p-4 bg-white rounded-3xl border-2 border-slate-300 shadow-2xl" onclick="event.stopPropagation()">
+      <img id="lightbox-img" src="" alt="Enlarged view" class="max-h-[80vh] max-w-full object-contain rounded-xl" />
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- SLIDE GRID OVERVIEW MODAL [Key: G]                        -->
+  <!-- ========================================================= -->
+  <div id="grid-modal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-50 hidden flex-col p-6 sm:p-10 overflow-y-auto">
+    <div class="flex items-center justify-between pb-4 border-b border-white/20 mb-6">
+      <h3 class="text-2xl font-black text-white">Slide Overview (Click any slide to jump)</h3>
+      <button onclick="toggleGridOverview()" class="px-4 py-2 rounded-xl bg-white text-slate-900 font-extrabold text-sm">Close [Esc]</button>
+    </div>
+    <div id="grid-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- PRESENTATION ENGINE SCRIPT                                -->
+  <!-- ========================================================= -->
+  <script>
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    let currentSlide = 0;
+    let zoomLevel = 1.0;
+    let talkSeconds = 22 * 60; // 22 minutes target (right in the 20-25 min sweet spot)
+    let talkTimerInterval = null;
+
+    function adjustZoom(delta) {
+      zoomLevel = Math.max(0.7, Math.min(1.5, Math.round((zoomLevel + delta) * 10) / 10));
+      document.documentElement.style.setProperty('--slide-zoom', zoomLevel);
+      document.getElementById('zoom-label').textContent = `${Math.round(zoomLevel * 100)}%`;
+    }
+
+    function resetZoom() {
+      zoomLevel = 1.0;
+      document.documentElement.style.setProperty('--slide-zoom', zoomLevel);
+      document.getElementById('zoom-label').textContent = '100%';
+    }
+
+    function updateSlide() {
+      slides.forEach((s, idx) => s.classList.toggle('active', idx === currentSlide));
+      const current = slides[currentSlide];
+      const act = current.getAttribute('data-act');
+      const title = current.getAttribute('data-title') || `Slide ${currentSlide + 1}`;
+      const notes = current.getAttribute('data-notes') || '';
+
+      document.getElementById('slide-counter').textContent = `${String(currentSlide + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`;
+      document.getElementById('slide-title-display').textContent = title;
+      document.getElementById('slide-progress-bar').style.width = `${((currentSlide + 1) / slides.length) * 100}%`;
+      document.getElementById('notes-content').textContent = notes;
+
+      [1, 2, 3, 4, 5].forEach(a => {
+        const btn = document.getElementById(`act-btn-${a}`);
+        if (btn) {
+          if (String(a) === act) {
+            btn.className = "text-xs px-3 py-1.5 rounded-lg transition font-black bg-sky-600 text-white shadow-xs";
+          } else {
+            btn.className = "text-xs px-3 py-1.5 rounded-lg transition font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-100";
+          }
+        }
+      });
+    }
+
+    function nextSlide() {
+      if (currentSlide < slides.length - 1) {
+        currentSlide++;
+        updateSlide();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        currentSlide--;
+        updateSlide();
+      }
+    }
+
+    function jumpToSlide(idx) {
+      if (idx >= 0 && idx < slides.length) {
+        currentSlide = idx;
+        updateSlide();
+        closeGridOverview();
+      }
+    }
+
+    function jumpToAct(actNum) {
+      const idx = slides.findIndex(s => s.getAttribute('data-act') === String(actNum));
+      if (idx !== -1) jumpToSlide(idx);
+    }
+
+    function toggleNotes() {
+      document.getElementById('notes-drawer').classList.toggle('hidden');
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+
+    function openLightbox(src, caption) {
+      document.getElementById('lightbox-img').src = src;
+      document.getElementById('lightbox-caption').textContent = caption;
+      const modal = document.getElementById('lightbox-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeLightbox() {
+      const modal = document.getElementById('lightbox-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function toggleGridOverview() {
+      const modal = document.getElementById('grid-modal');
+      if (modal.classList.contains('hidden')) {
+        const container = document.getElementById('grid-container');
+        container.innerHTML = '';
+        slides.forEach((s, idx) => {
+          const title = s.getAttribute('data-title') || `Slide ${idx + 1}`;
+          const act = s.getAttribute('data-act');
+          const card = document.createElement('div');
+          const isCurrent = idx === currentSlide;
+          card.className = `p-4 rounded-2xl border-2 text-left cursor-pointer transition ${
+            isCurrent ? 'bg-sky-50 border-sky-500 ring-2 ring-sky-400 shadow-lg' : 'bg-white border-slate-200 hover:border-sky-400'
+          }`;
+          card.onclick = () => jumpToSlide(idx);
+          card.innerHTML = `
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-mono font-black text-sky-700">#${String(idx + 1).padStart(2, '0')}</span>
+              <span class="text-[11px] px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-mono font-bold">Act ${act}</span>
+            </div>
+            <div class="text-sm font-extrabold text-slate-900 line-clamp-2">${title}</div>
+          `;
+          container.appendChild(card);
+        });
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      } else {
+        closeGridOverview();
+      }
+    }
+
+    function closeGridOverview() {
+      const modal = document.getElementById('grid-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function toggleTalkTimer() {
+      const btn = document.getElementById('talk-timer-btn');
+      if (talkTimerInterval) {
+        clearInterval(talkTimerInterval);
+        talkTimerInterval = null;
+        btn.textContent = 'Resume';
+      } else {
+        btn.textContent = 'Pause';
+        talkTimerInterval = setInterval(() => {
+          if (talkSeconds > 0) {
+            talkSeconds--;
+            const m = String(Math.floor(talkSeconds / 60)).padStart(2, '0');
+            const s = String(talkSeconds % 60).padStart(2, '0');
+            document.getElementById('talk-timer').textContent = `${m}:${s}`;
+          }
+        }, 1000);
+      }
+    }
+
+    let demoSeconds = 5 * 60;
+    let demoTimerInterval = null;
+
+    function toggleDemoTimer() {
+      const btn = document.getElementById('demo-timer-btn');
+      if (demoTimerInterval) {
+        clearInterval(demoTimerInterval);
+        demoTimerInterval = null;
+        btn.textContent = 'Resume';
+      } else {
+        btn.textContent = 'Pause';
+        demoTimerInterval = setInterval(() => {
+          if (demoSeconds > 0) {
+            demoSeconds--;
+            const m = String(Math.floor(demoSeconds / 60)).padStart(2, '0');
+            const s = String(demoSeconds % 60).padStart(2, '0');
+            document.getElementById('demo-clock').textContent = `${m}:${s}`;
+          }
+        }, 1000);
+      }
+    }
+
+    function resetDemoTimer() {
+      if (demoTimerInterval) {
+        clearInterval(demoTimerInterval);
+        demoTimerInterval = null;
+      }
+      demoSeconds = 5 * 60;
+      document.getElementById('demo-clock').textContent = '05:00';
+      document.getElementById('demo-timer-btn').textContent = 'Start';
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp' || e.key === 'Backspace') {
+        e.preventDefault();
+        prevSlide();
+      } else if (e.key === 'p' || e.key === 'P') {
+        e.preventDefault();
+        toggleNotes();
+      } else if (e.key === 'f' || e.key === 'F') {
+        e.preventDefault();
+        toggleFullscreen();
+      } else if (e.key === 'g' || e.key === 'G') {
+        e.preventDefault();
+        toggleGridOverview();
+      } else if (e.key === '+' || e.key === '=') {
+        adjustZoom(0.1);
+      } else if (e.key === '-' || e.key === '_') {
+        adjustZoom(-0.1);
+      } else if (e.key === '0') {
+        resetZoom();
+      } else if (e.key === 'Escape') {
+        closeLightbox();
+        closeGridOverview();
+      } else if (e.key === 'Home') {
+        jumpToSlide(0);
+      } else if (e.key === 'End') {
+        jumpToSlide(slides.length - 1);
+      }
+    });
+
+    updateSlide();
+  </script>
+</body>
+</html>
