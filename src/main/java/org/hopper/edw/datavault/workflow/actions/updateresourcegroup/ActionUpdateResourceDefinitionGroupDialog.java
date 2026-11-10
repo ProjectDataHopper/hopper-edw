@@ -50,16 +50,13 @@ public class ActionUpdateResourceDefinitionGroupDialog extends ActionDialog {
 
   private static final Class<?> PKG = ActionUpdateResourceDefinitionGroup.class;
 
-  private final ActionUpdateResourceDefinitionGroup action;
+  private final IAction action;
   private boolean cancelled = true;
   private GuiCompositeWidgets widgets;
   private final Map<String, Composite> tabComposites = new LinkedHashMap<>();
 
   public ActionUpdateResourceDefinitionGroupDialog(
-      Shell parent,
-      ActionUpdateResourceDefinitionGroup action,
-      WorkflowMeta workflowMeta,
-      IVariables variables) {
+      Shell parent, IAction action, WorkflowMeta workflowMeta, IVariables variables) {
     super(parent, workflowMeta, variables);
     this.action = action;
     if (Utils.isEmpty(action.getName())) {

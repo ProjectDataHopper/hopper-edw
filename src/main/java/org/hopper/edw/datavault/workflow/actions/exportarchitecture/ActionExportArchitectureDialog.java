@@ -47,16 +47,13 @@ public class ActionExportArchitectureDialog extends ActionDialog {
 
   private static final Class<?> PKG = ActionExportArchitecture.class;
 
-  private final ActionExportArchitecture action;
+  private final IAction action;
   private boolean cancelled = true;
   private GuiCompositeWidgets widgets;
   private Composite wSettingsComp;
 
   public ActionExportArchitectureDialog(
-      Shell parent,
-      ActionExportArchitecture action,
-      WorkflowMeta workflowMeta,
-      IVariables variables) {
+      Shell parent, IAction action, WorkflowMeta workflowMeta, IVariables variables) {
     super(parent, workflowMeta, variables);
     this.action = action;
     if (Utils.isEmpty(action.getName())) {

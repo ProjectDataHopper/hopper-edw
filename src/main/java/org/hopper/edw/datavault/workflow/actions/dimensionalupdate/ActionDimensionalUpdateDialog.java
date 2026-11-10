@@ -44,17 +44,14 @@ import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 public class ActionDimensionalUpdateDialog extends ActionDialog {
   private static final Class<?> PKG = ActionDimensionalUpdate.class;
 
-  private final ActionDimensionalUpdate action;
+  private final IAction action;
   private boolean cancelled = true;
   private GuiCompositeWidgets widgets;
   private Composite wModelTabComp;
   private Composite wDdlTabComp;
 
   public ActionDimensionalUpdateDialog(
-      Shell parent,
-      ActionDimensionalUpdate action,
-      WorkflowMeta workflowMeta,
-      IVariables variables) {
+      Shell parent, IAction action, WorkflowMeta workflowMeta, IVariables variables) {
     super(parent, workflowMeta, variables);
     this.action = action;
 

@@ -38,16 +38,13 @@ public class ActionHarvestSourceMetadataDialog extends ActionDialog {
 
   private static final Class<?> PKG = ActionHarvestSourceMetadata.class;
 
-  private final ActionHarvestSourceMetadata action;
+  private final IAction action;
   private boolean cancelled = true;
   private GuiCompositeWidgets widgets;
   private Composite wSettingsComp;
 
   public ActionHarvestSourceMetadataDialog(
-      Shell parent,
-      ActionHarvestSourceMetadata action,
-      WorkflowMeta workflowMeta,
-      IVariables variables) {
+      Shell parent, IAction action, WorkflowMeta workflowMeta, IVariables variables) {
     super(parent, workflowMeta, variables);
     this.action = action;
     if (Utils.isEmpty(action.getName())) {

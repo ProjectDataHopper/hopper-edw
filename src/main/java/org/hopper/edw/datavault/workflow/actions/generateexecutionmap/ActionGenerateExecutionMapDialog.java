@@ -46,17 +46,14 @@ public class ActionGenerateExecutionMapDialog extends ActionDialog {
 
   private static final Class<?> PKG = ActionGenerateExecutionMap.class;
 
-  private final ActionGenerateExecutionMap action;
+  private final IAction action;
   private boolean cancelled = true;
   private GuiCompositeWidgets widgets;
   private Composite wSourceTabComp;
   private Composite wCrawlTabComp;
 
   public ActionGenerateExecutionMapDialog(
-      Shell parent,
-      ActionGenerateExecutionMap action,
-      WorkflowMeta workflowMeta,
-      IVariables variables) {
+      Shell parent, IAction action, WorkflowMeta workflowMeta, IVariables variables) {
     super(parent, workflowMeta, variables);
     this.action = action;
     if (Utils.isEmpty(action.getName())) {

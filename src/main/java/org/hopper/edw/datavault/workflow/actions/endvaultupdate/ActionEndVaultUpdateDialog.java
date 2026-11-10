@@ -38,13 +38,13 @@ public class ActionEndVaultUpdateDialog extends ActionDialog {
 
   private static final Class<?> PKG = ActionEndVaultUpdate.class;
 
-  private final ActionEndVaultUpdate action;
+  private final IAction action;
   private boolean cancelled = true;
   private GuiCompositeWidgets widgets;
   private Composite wSettingsComp;
 
   public ActionEndVaultUpdateDialog(
-      Shell parent, ActionEndVaultUpdate action, WorkflowMeta workflowMeta, IVariables variables) {
+      Shell parent, IAction action, WorkflowMeta workflowMeta, IVariables variables) {
     super(parent, workflowMeta, variables);
     this.action = action;
     if (Utils.isEmpty(action.getName())) {

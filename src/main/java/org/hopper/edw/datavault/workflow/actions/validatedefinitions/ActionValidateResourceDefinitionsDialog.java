@@ -52,16 +52,13 @@ public class ActionValidateResourceDefinitionsDialog extends ActionDialog {
 
   private static final Class<?> PKG = ActionValidateResourceDefinitions.class;
 
-  private final ActionValidateResourceDefinitions action;
+  private final IAction action;
   private boolean cancelled = true;
   private GuiCompositeWidgets widgets;
   private Composite wSettingsComp;
 
   public ActionValidateResourceDefinitionsDialog(
-      Shell parent,
-      ActionValidateResourceDefinitions action,
-      WorkflowMeta workflowMeta,
-      IVariables variables) {
+      Shell parent, IAction action, WorkflowMeta workflowMeta, IVariables variables) {
     super(parent, workflowMeta, variables);
     this.action = action;
     if (Utils.isEmpty(action.getName())) {
@@ -272,7 +269,15 @@ public class ActionValidateResourceDefinitionsDialog extends ActionDialog {
       }
 
       List<String> tags =
-          action.listCatalogVersionTags(metadataProvider, LogChannel.UI, listVariables);
+          (List<String>)
+              action
+                  .getClass()
+                  .getMethod(
+                      "listCatalogVersionTags",
+                      IHopMetadataProvider.class,
+                      org.apache.hop.core.logging.ILogChannel.class,
+                      IVariables.class)
+                  .invoke(action, metadataProvider, LogChannel.UI, listVariables);
       String[] items = tags.toArray(new String[0]);
       widgets.setComboValues(ActionValidateResourceDefinitions.WIDGET_ID_TARGET_VERSION, items);
       widgets.setComboValues(ActionValidateResourceDefinitions.WIDGET_ID_BASELINE_VERSION, items);

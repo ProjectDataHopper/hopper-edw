@@ -38,16 +38,13 @@ public class ActionEvaluateQualityGateDialog extends ActionDialog {
 
   private static final Class<?> PKG = ActionEvaluateQualityGate.class;
 
-  private final ActionEvaluateQualityGate action;
+  private final IAction action;
   private boolean cancelled = true;
   private GuiCompositeWidgets widgets;
   private Composite wSettingsComp;
 
   public ActionEvaluateQualityGateDialog(
-      Shell parent,
-      ActionEvaluateQualityGate action,
-      WorkflowMeta workflowMeta,
-      IVariables variables) {
+      Shell parent, IAction action, WorkflowMeta workflowMeta, IVariables variables) {
     super(parent, workflowMeta, variables);
     this.action = action;
     if (Utils.isEmpty(action.getName())) {

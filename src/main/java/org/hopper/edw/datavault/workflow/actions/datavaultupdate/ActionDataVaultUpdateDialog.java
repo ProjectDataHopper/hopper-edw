@@ -44,7 +44,7 @@ import org.hopper.edw.datavault.hopgui.help.HelpTopics;
 public class ActionDataVaultUpdateDialog extends ActionDialog {
   private static final Class<?> PKG = ActionDataVaultUpdate.class;
 
-  private final ActionDataVaultUpdate action;
+  private final IAction action;
   private boolean cancelled = true;
   private GuiCompositeWidgets widgets;
   private Composite wModelTabComp;
@@ -52,7 +52,7 @@ public class ActionDataVaultUpdateDialog extends ActionDialog {
   private Composite wSourceTabComp;
 
   public ActionDataVaultUpdateDialog(
-      Shell parent, ActionDataVaultUpdate action, WorkflowMeta workflowMeta, IVariables variables) {
+      Shell parent, IAction action, WorkflowMeta workflowMeta, IVariables variables) {
     super(parent, workflowMeta, variables);
     this.action = action;
 
